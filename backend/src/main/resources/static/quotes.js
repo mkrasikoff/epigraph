@@ -47,10 +47,12 @@ function getQodIndexById(id) {
  */
 function renderQod(qodOrIdx) {
     if (!quotes.length) {
-        document.getElementById('qod-text').textContent = t('qodEmptyText');
+        const emptyText = t('qodEmptyText');
+        document.getElementById('qod-text').textContent = emptyText;
         document.getElementById('qod-author').textContent = '';
         document.getElementById('qod-source').textContent = '';
         document.getElementById('qod-progress').textContent = '';
+        applyQodAdaptiveSize(emptyText);
         setQodActionsDisabled(true);
         return;
     }
