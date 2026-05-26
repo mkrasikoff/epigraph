@@ -157,7 +157,14 @@
             <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
         </div>
         <div class="auth-field">
-            <label for="auth-password">Пароль</label>
+            <div class="auth-field-header">
+                <label for="auth-password">Пароль</label>
+                <button id="auth-forgot-btn"
+                        class="auth-forgot-link"
+                        onclick="showForgotPasswordForm()">
+                    Забыли пароль?
+                </button>
+            </div>
             <input type="password" id="auth-password" placeholder="Ваш пароль" autocomplete="current-password">
         </div>
 
@@ -167,16 +174,6 @@
         </p>
 
         <p class="auth-error" id="auth-error"></p>
-
-        <p style="text-align:right;margin-top:calc(-1*var(--space-2));margin-bottom:var(--space-1)">
-            <button id="auth-forgot-btn"
-                    onclick="showForgotPasswordForm()"
-                    style="font-size:var(--text-xs);color:var(--color-text-muted);background:none;border:none;cursor:pointer;padding:0"
-                    onmouseover="this.style.color='var(--color-text)'"
-                    onmouseout="this.style.color='var(--color-text-muted)'">
-                Забыли пароль?
-            </button>
-        </p>
 
         <button class="btn-primary" id="auth-submit-btn" onclick="authSubmit()">Войти</button>
 
