@@ -475,8 +475,7 @@ body.no-scroll {
     line-height: 1.5;
     color: var(--color-text);
     margin-bottom: var(--space-6);
-    /* Убираем фиксированный --text-quote, размер ставится динамически через JS */
-    transition: font-size 200ms ease;
+    /* Font size is set synchronously by JS before layout measurement — no transition needed */
 }
 
 .qod-author {
