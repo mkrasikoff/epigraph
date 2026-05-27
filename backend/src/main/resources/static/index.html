@@ -1112,11 +1112,16 @@
                         if (heightChanged) card.style.height = newHeight + 'px';
 
                         setTimeout(() => {
-                            card.style.transition = '';
+                            // Remove transition before clearing inline styles
+                            // to prevent the CSS width transition from re-triggering
+                            card.style.transition = 'none';
                             card.style.transform = '';
                             card.style.opacity = '';
                             card.style.height = '';
-                            isAnimating = false;
+                            requestAnimationFrame(() => {
+                                card.style.transition = '';
+                                isAnimating = false;
+                            });
                         }, 540);
                     });
                 });
