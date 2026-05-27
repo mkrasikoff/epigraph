@@ -228,10 +228,13 @@ function randomQuote() {
                 if (heightChanged) card.style.height = newHeight + 'px';
 
                 setTimeout(() => {
-                    card.style.transition = '';
+                    card.style.transition = 'none';
                     card.style.opacity = '';
                     card.style.transform = '';
                     card.style.height = '';
+                    requestAnimationFrame(() => {
+                        card.style.transition = '';
+                    });
                 }, 460);
             });
         });
