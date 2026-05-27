@@ -1080,17 +1080,21 @@
                 card.style.transform = `translateX(${-direction * 60}px) translateY(20px)`;
                 card.style.opacity = '0';
 
-                // Update content (renderQod sets text opacity animation internally)
-                // Compute next index (same logic as randomQuote, without triggering card animation)
+                // Compute next index without triggering card animation
                 let nextIdx;
                 do {
                     nextIdx = Math.floor(Math.random() * quotes.length);
                 } while (nextIdx === currentQodIndex && quotes.length > 1);
-                renderQod(nextIdx);
 
-                // Measure new natural height after content update
+                // Release height freeze, update content, then measure new size
                 const prevHeight = parseFloat(card.style.height);
                 card.style.height = 'auto';
+
+                renderQod(nextIdx);
+
+                // Force reflow so browser computes dimensions after text + font + width class update
+                void card.offsetHeight;
+
                 const newHeight = card.offsetHeight;
                 const heightChanged = Math.abs(newHeight - prevHeight) > 4;
                 if (heightChanged) card.style.height = prevHeight + 'px';

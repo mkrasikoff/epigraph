@@ -76,27 +76,21 @@ function renderQod(qodOrIdx) {
     const now = new Date();
     const dateStr = now.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'});
     document.getElementById('qod-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
     const textEl = document.getElementById('qod-text');
-    textEl.style.opacity = '0';
-    textEl.style.transform = 'translateY(6px)';
 
-    setTimeout(() => {
-        textEl.textContent = q.text;
-        applyQodAdaptiveSize(q.text);
-        document.getElementById('qod-author').textContent = q.author || '';
-        document.getElementById('qod-source').textContent = q.source || '';
-        textEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        textEl.style.opacity = '1';
-        textEl.style.transform = 'translateY(0)';
-        updateFavQodButton();
+    // Update content synchronously so callers can measure the new card height immediately
+    textEl.textContent = q.text;
+    applyQodAdaptiveSize(q.text);
+    document.getElementById('qod-author').textContent = q.author || '';
+    document.getElementById('qod-source').textContent = q.source || '';
+    updateFavQodButton();
 
-        document.fonts.ready.then(() => {
-            const section = document.querySelector('.qod-section');
-            const fits = section.getBoundingClientRect().height <= (window.innerHeight - 57) + 2;
-            document.body.classList.toggle('no-scroll', fits);
-        });
-
-    }, QOD_ANIMATION_DEBOUNCE_MS);
+    document.fonts.ready.then(() => {
+        const section = document.querySelector('.qod-section');
+        const fits = section.getBoundingClientRect().height <= (window.innerHeight - 57) + 2;
+        document.body.classList.toggle('no-scroll', fits);
+    });
 
     document.getElementById('qod-progress').textContent = isGuest ? '' : t('qodProgress', {current: idx + 1, total: quotes.length});
 }
@@ -201,22 +195,34 @@ function randomQuote() {
     card.style.transform = 'translateY(-12px) scale(0.98)';
 
     setTimeout(() => {
-        // Phase 2: snap to repositioned state, update content
+        // Phase 2: card is invisible — now safely update content and measure
         card.style.transition = 'none';
-        card.style.transform = 'translateY(12px) scale(0.98)';
+        card.style.transform = 'translateY(14px) scale(0.97)';
+        card.style.opacity = '0';
+        card.style.height = 'auto'; // release freeze temporarily
 
+        // Update content synchronously (renderQod no longer has its own animation)
         renderQod(idx);
 
-        // Measure new height after content update
-        card.style.height = 'auto';
-        const newHeight = card.offsetHeight;
-        card.style.height = prevHeight + 'px';
+        // Force reflow so browser computes new dimensions with new text + font size + width class
+        void card.offsetHeight;
 
-        // Phase 3: slide in from below
+        const newHeight = card.offsetHeight;
+        const heightChanged = Math.abs(newHeight - prevHeight) > 4;
+
+        // Lock to prevHeight so we can animate the transition
+        if (heightChanged) card.style.height = prevHeight + 'px';
+
+        // Phase 3: single coordinated entry — card slides up, fades in, height expands simultaneously
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                const heightChanged = Math.abs(newHeight - prevHeight) > 4;
-                card.style.transition = `opacity 350ms ease-out, transform 400ms cubic-bezier(0.16, 1, 0.3, 1)${heightChanged ? ', height 400ms cubic-bezier(0.16, 1, 0.3, 1)' : ''}`;
+                const transitions = [
+                    'opacity 380ms ease-out',
+                    'transform 440ms cubic-bezier(0.16, 1, 0.3, 1)',
+                ];
+                if (heightChanged) transitions.push('height 440ms cubic-bezier(0.16, 1, 0.3, 1)');
+
+                card.style.transition = transitions.join(', ');
                 card.style.opacity = '1';
                 card.style.transform = '';
                 if (heightChanged) card.style.height = newHeight + 'px';
@@ -226,7 +232,7 @@ function randomQuote() {
                     card.style.opacity = '';
                     card.style.transform = '';
                     card.style.height = '';
-                }, 420);
+                }, 460);
             });
         });
     }, 190);
