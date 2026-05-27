@@ -186,12 +186,50 @@ function randomQuote() {
     if (!quotes.length) return;
 
     let idx;
-
     do {
         idx = Math.floor(Math.random() * quotes.length);
     } while (idx === currentQodIndex && quotes.length > 1);
 
-    renderQod(idx);
+    const card = document.querySelector('.qod-card');
+    if (!card) { renderQod(idx); return; }
+
+    // Phase 1: collapse card upward
+    const prevHeight = card.offsetHeight;
+    card.style.height = prevHeight + 'px';
+    card.style.transition = 'opacity 180ms ease-in, transform 180ms ease-in';
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(-12px) scale(0.98)';
+
+    setTimeout(() => {
+        // Phase 2: snap to repositioned state, update content
+        card.style.transition = 'none';
+        card.style.transform = 'translateY(12px) scale(0.98)';
+
+        renderQod(idx);
+
+        // Measure new height after content update
+        card.style.height = 'auto';
+        const newHeight = card.offsetHeight;
+        card.style.height = prevHeight + 'px';
+
+        // Phase 3: slide in from below
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const heightChanged = Math.abs(newHeight - prevHeight) > 4;
+                card.style.transition = `opacity 350ms ease-out, transform 400ms cubic-bezier(0.16, 1, 0.3, 1)${heightChanged ? ', height 400ms cubic-bezier(0.16, 1, 0.3, 1)' : ''}`;
+                card.style.opacity = '1';
+                card.style.transform = '';
+                if (heightChanged) card.style.height = newHeight + 'px';
+
+                setTimeout(() => {
+                    card.style.transition = '';
+                    card.style.opacity = '';
+                    card.style.transform = '';
+                    card.style.height = '';
+                }, 420);
+            });
+        });
+    }, 190);
 }
 
 /**
@@ -284,7 +322,7 @@ function renderList() {
     const rankMap = new Map(sortedByAdd.map((q, i) => [q.id, i + 1]));
 
     grid.innerHTML = filteredQuotes.map((q) => `
-        <article class="quote-card">
+        <article class="quote-card" style="animation-delay: ${Math.min(index * 40, 300)}ms">
           <span class="quote-card-num">${rankMap.get(q.id) ?? '—'}</span>
           <div class="quote-card-text-wrap">
             <p class="quote-card-text">${escHtml(q.text)}</p>

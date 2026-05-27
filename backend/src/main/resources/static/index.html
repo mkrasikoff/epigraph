@@ -1075,57 +1075,47 @@
             overlayR.style.opacity = 0;
 
             setTimeout(() => {
-                // Phase 2: reposition off-screen
+                // Phase 2: reposition — come in from opposite side, slightly below
                 card.style.transition = 'none';
-                card.style.transform = `translateX(${-direction * 80}px) translateY(16px)`;
+                card.style.transform = `translateX(${-direction * 60}px) translateY(20px)`;
                 card.style.opacity = '0';
-                // Height is still frozen from Phase 1
 
-                // Update content
-                randomQuote();
+                // Update content (renderQod sets text opacity animation internally)
+                // Compute next index (same logic as randomQuote, without triggering card animation)
+                let nextIdx;
+                do {
+                    nextIdx = Math.floor(Math.random() * quotes.length);
+                } while (nextIdx === currentQodIndex && quotes.length > 1);
+                renderQod(nextIdx);
 
                 // Measure new natural height after content update
                 const prevHeight = parseFloat(card.style.height);
                 card.style.height = 'auto';
                 const newHeight = card.offsetHeight;
+                const heightChanged = Math.abs(newHeight - prevHeight) > 4;
+                if (heightChanged) card.style.height = prevHeight + 'px';
+                else card.style.height = '';
 
-                if (Math.abs(newHeight - prevHeight) > 4) {
-                    // Heights differ — animate from old to new during card entry
-                    card.style.height = prevHeight + 'px';
+                requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            card.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease-out, height 450ms cubic-bezier(0.16, 1, 0.3, 1)';
-                            card.style.transform = '';
-                            card.style.opacity = '1';
-                            card.style.height = newHeight + 'px';
+                        card.style.transition = [
+                            'transform 520ms cubic-bezier(0.16, 1, 0.3, 1)',
+                            'opacity 380ms ease-out',
+                            heightChanged ? 'height 460ms cubic-bezier(0.16, 1, 0.3, 1)' : ''
+                        ].filter(Boolean).join(', ');
+                        card.style.transform = '';
+                        card.style.opacity = '1';
+                        if (heightChanged) card.style.height = newHeight + 'px';
 
-                            setTimeout(() => {
-                                card.style.transition = '';
-                                card.style.transform = '';
-                                card.style.opacity = '';
-                                card.style.height = ''; // release to auto
-                                isAnimating = false;
-                            }, 520);
-                        });
-                    });
-                } else {
-                    // Same height — no resize animation needed
-                    card.style.height = '';
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            card.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease-out';
+                        setTimeout(() => {
+                            card.style.transition = '';
                             card.style.transform = '';
-                            card.style.opacity = '1';
-
-                            setTimeout(() => {
-                                card.style.transition = '';
-                                card.style.transform = '';
-                                card.style.opacity = '';
-                                isAnimating = false;
-                            }, 520);
-                        });
+                            card.style.opacity = '';
+                            card.style.height = '';
+                            isAnimating = false;
+                        }, 540);
                     });
-                }
+                });
             }, 310);
         }
 
