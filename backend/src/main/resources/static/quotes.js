@@ -330,7 +330,7 @@ function renderList() {
     const sortedByAdd = [...quotes].sort((a, b) => (a.id || 0) - (b.id || 0));
     const rankMap = new Map(sortedByAdd.map((q, i) => [q.id, i + 1]));
 
-    grid.innerHTML = filteredQuotes.map((q) => `
+    grid.innerHTML = filteredQuotes.map((q, index) => `
         <article class="quote-card" style="animation-delay: ${Math.min(index * 40, 300)}ms">
           <span class="quote-card-num">${rankMap.get(q.id) ?? '—'}</span>
           <div class="quote-card-text-wrap">
