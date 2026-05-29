@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "4.0.5"
 	id("io.spring.dependency-management") version "1.1.7"
+	jacoco
 }
 
 tasks.bootJar {
@@ -55,4 +56,25 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	finalizedBy(tasks.jacocoTestReport)
+}
+
+// JaCoCo: генерация XML-отчёта для CI
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
+// JaCoCo: минимальный порог покрытия (сейчас 30%, растёт по мере добавления тестов)
+tasks.jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = "0.10".toBigDecimal()
+			}
+		}
+	}
 }
