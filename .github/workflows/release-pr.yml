@@ -1,5 +1,7 @@
 name: Create Release PR
 
+run-name: Create Release PR v${{ inputs.version }}
+
 on:
   workflow_dispatch:
     inputs:
