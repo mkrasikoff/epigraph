@@ -1,0 +1,159 @@
+package com.mkrasikoff.epigraph.service;
+
+import com.mkrasikoff.epigraph.model.User;
+import com.mkrasikoff.epigraph.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock private UserRepository userRepository;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private JwtService jwtService;
+    @Mock private EmailService emailService;
+
+    @InjectMocks
+    private UserService userService;
+
+    private static final Long USER_ID = 1L;
+    private static final String BASE_URL = "https://epigraph.app";
+
+    private User buildUser(Long id, String email, boolean verified) {
+        User u = new User();
+        u.setId(id);
+        u.setEmail(email);
+        u.setPassword("encoded");
+        u.setProvider("local");
+        u.setEmailVerified(verified);
+        return u;
+    }
+
+    @Test
+    @DisplayName("deleteAccount: calls repository deleteById")
+    void deleteAccount_callsRepository() {
+        userService.deleteAccount(USER_ID);
+
+        verify(userRepository).deleteById(USER_ID);
+    }
+    
+    @Test
+    @DisplayName("changePassword: encodes password and saves user")
+    void changePassword_encodesAndSaves() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("newpass")).thenReturn("encoded_new");
+
+        userService.changePassword(USER_ID, "newpass");
+
+        assertThat(user.getPassword()).isEqualTo("encoded_new");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("changePassword: sets provider to local after password change")
+    void changePassword_setsProviderToLocal() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        user.setProvider("google");
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(any())).thenReturn("encoded");
+
+        userService.changePassword(USER_ID, "newpass");
+
+        assertThat(user.getProvider()).isEqualTo("local");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("changePassword: throws when user not found")
+    void changePassword_throws_whenUserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.changePassword(99L, "newpass"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("не найден");
+    }
+
+    // -------------------------------------------------------------------------
+    // initiatePasswordReset
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("initiatePasswordReset: sends reset link for verified user")
+    void initiatePasswordReset_sendsLink_forVerifiedUser() {
+        ReflectionTestUtils.setField(userService, "baseUrl", BASE_URL);
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findByEmail("user@mail.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateResetToken(USER_ID)).thenReturn("reset-token");
+
+        userService.initiatePasswordReset("user@mail.com");
+
+        verify(emailService).sendPasswordResetLink(
+                eq("user@mail.com"),
+                eq(BASE_URL + "/?reset=reset-token")
+        );
+    }
+
+    @Test
+    @DisplayName("initiatePasswordReset: does nothing for unverified user")
+    void initiatePasswordReset_doesNothing_forUnverifiedUser() {
+        User user = buildUser(USER_ID, "user@mail.com", false);
+        when(userRepository.findByEmail("user@mail.com")).thenReturn(Optional.of(user));
+
+        userService.initiatePasswordReset("user@mail.com");
+
+        verify(emailService, never()).sendPasswordResetLink(any(), any());
+        verify(jwtService, never()).generateResetToken(any());
+    }
+
+    @Test
+    @DisplayName("initiatePasswordReset: does nothing for unknown email")
+    void initiatePasswordReset_doesNothing_forUnknownEmail() {
+        when(userRepository.findByEmail("ghost@mail.com")).thenReturn(Optional.empty());
+
+        userService.initiatePasswordReset("ghost@mail.com");
+
+        verify(emailService, never()).sendPasswordResetLink(any(), any());
+    }
+
+    // -------------------------------------------------------------------------
+    // getEmailByUserId
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("getEmailByUserId: returns email for existing user")
+    void getEmailByUserId_returnsEmail() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        String email = userService.getEmailByUserId(USER_ID);
+
+        assertThat(email).isEqualTo("user@mail.com");
+    }
+
+    @Test
+    @DisplayName("getEmailByUserId: throws when user not found")
+    void getEmailByUserId_throws_whenUserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.getEmailByUserId(99L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("не найден");
+    }
+}
