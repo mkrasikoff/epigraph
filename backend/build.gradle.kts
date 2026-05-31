@@ -59,7 +59,7 @@ tasks.withType<Test> {
 	finalizedBy(tasks.jacocoTestReport)
 }
 
-// JaCoCo: генерация XML-отчёта для CI
+// JaCoCo: XML-report for CI
 tasks.jacocoTestReport {
 	dependsOn(tasks.test)
 	reports {
@@ -68,12 +68,12 @@ tasks.jacocoTestReport {
 	}
 }
 
-// JaCoCo: минимальный порог покрытия (сейчас 30%, растёт по мере добавления тестов)
+// JaCoCo: coverage
 tasks.jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = "0.10".toBigDecimal()
+				minimum = "0.30".toBigDecimal()
 			}
 		}
 	}
