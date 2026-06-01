@@ -16,11 +16,39 @@ Your quotes are stored in a database and never lost between sessions.
 
 ```
 epigraph/
-├── backend/          — Spring Boot + Gradle (REST API + frontend static resources)
+├── backend/
+│ ├── src/
+│ │ └── main/
+│ │ ├── java/com/mkrasikoff/epigraph/
+│ │ │ ├── config/ — Security, JWT filter, OAuth2, Scheduler, MDC logging
+│ │ │ ├── controller/ — AuthController, QuoteController, UserController, PushController
+│ │ │ ├── dto/ — Data Transfer Objects
+│ │ │ ├── exception/ — Exception handlers
+│ │ │ ├── model/ — Quote, User, PushSubscription, EmailVerification
+│ │ │ ├── repository/ — JPA repositories
+│ │ │ ├── service/ — AuthService, QuoteService, UserService, EmailService, JwtService, PushNotificationService
+│ │ │ └── EpigraphBackendApplication.java
+│ │ └── resources/
+│ │ ├── static/ — Frontend (index.html, styles.css, quotes.js, auth.js, api.js, ui.js, tags.js, i18n.js, notifications.js, sw.js)
+│ │ ├── db/ — Flyway migrations
+│ │ ├── application.yaml
+│ │ ├── application-local.yaml
+│ │ └── application-prod.yaml
+│ └── build.gradle.kts
 ├── README.md
 ├── RELEASE_POLICY.md
 └── .gitignore
 ```
+
+### Tech stack
+
+| Layer         | Stack                                              |
+|---------------|----------------------------------------------------|
+| Backend       | Java 21, Spring Boot, Spring Security, JWT, OAuth2 |
+| Frontend      | Vanilla JS, HTML/CSS (served as Spring static)     |
+| Database      | PostgreSQL + Flyway (migrations)                   |
+| Notifications | Web Push (VAPID)                                   |
+| Deployment    | Railway                                            |
 
 ### Requirements
 
@@ -29,6 +57,8 @@ epigraph/
 | Java       | 21+                             |
 | Gradle     | 8.14 (via wrapper, `./gradlew`) |
 | PostgreSQL | 14+                             |
+
+---
 
 ### Local development
 
@@ -61,12 +91,14 @@ curl http://localhost:8080/api/quotes
 
 ### Configuration
 
-#### Local (`application-local.properties`)
+#### Local (`application-local.yaml`)
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/epigraph
-spring.datasource.username=postgres
-spring.datasource.password=postgres
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/epigraph
+    username: postgres
+    password: postgres
 ```
 
 > This file is in `.gitignore` and is never committed.
@@ -86,15 +118,33 @@ spring.datasource.password=postgres
 
 Base URL: `http://localhost:8080/api`
 
-| Method   | Path           | Description           |
-|----------|----------------|-----------------------|
-| `GET`    | `/quotes`      | Get user quotes       |
-| `POST`   | `/quotes`      | Add a quote           |
-| `PUT`    | `/quotes/{id}` | Update a quote        |
-| `DELETE` | `/quotes/{id}` | Delete a single quote |
-| `DELETE` | `/quotes`      | Delete user quotes    |
+#### Quotes
 
-#### Quote format (JSON)
+| Method   | Path             | Description           |
+|----------|------------------|-----------------------|
+| `GET`    | `/quotes`        | Get user quotes       |
+| `POST`   | `/quotes`        | Add a quote           |
+| `PUT`    | `/quotes/{id}`   | Update a quote        |
+| `DELETE` | `/quotes/{id}`   | Delete a single quote |
+| `DELETE` | `/quotes`        | Delete all quotes     |
+
+#### Authentication
+
+| Method | Path                           | Description                 |
+|--------|--------------------------------|-----------------------------|
+| `POST` | `/auth/register`               | Register a new account      |
+| `POST` | `/auth/login`                  | Sign in with email/password |
+| `GET`  | `/oauth2/authorization/google` | Sign in with Google         |
+
+#### User
+
+| Method   | Path       | Description              |
+|----------|------------|--------------------------|
+| `GET`    | `/user/me` | Get current user profile |
+| `PUT`    | `/user/me` | Update profile           |
+| `DELETE` | `/user/me` | Delete account           |
+
+#### Quote object (JSON)
 
 ```json
 {
