@@ -167,20 +167,29 @@ async function loadBanner() {
         const msg = data.message?.trim();
         if (!msg) return;
 
+        // Don't show again if dismissed in this session
+        const dismissed = sessionStorage.getItem('banner-dismissed');
+        if (dismissed === msg) return;
+
         const banner = document.getElementById('announcement-banner');
         const text   = document.getElementById('announcement-banner-text');
         if (!banner || !text) return;
 
         text.textContent = msg;
         banner.style.display = 'flex';
-    } catch (e) {
-        // Banner is non-critical — silently ignore errors
-    }
+    } catch (e) {}
 }
 
 function dismissBanner() {
     const banner = document.getElementById('announcement-banner');
+    const text   = document.getElementById('announcement-banner-text');
     if (!banner) return;
+
+    // Remember this specific message was dismissed
+    if (text?.textContent) {
+        sessionStorage.setItem('banner-dismissed', text.textContent);
+    }
+
     banner.style.transition = 'opacity 200ms ease, transform 200ms ease';
     banner.style.opacity = '0';
     banner.style.transform = 'translateY(-6px)';

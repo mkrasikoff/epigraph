@@ -31,6 +31,10 @@ spring:
 app:
   base-url: http://localhost:8080
 
+  # Notification banner message
+  banner:
+    message: "В настоящий момент часть функционала недоступна. Ведутся технические работы."
+
   # Jwt Service
   jwt:
     secret: dGhpcy1pcy1hLXZlcnktc2VjcmV0LWtleS1mb3ItZXBpZ3JhcGgtYXBw
