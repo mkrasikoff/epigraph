@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/user/reset-password").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/api/banner").permitAll()
                         .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.png", "/*.ico").permitAll()
                         .requestMatchers("/manifest.json", "/api/push/vapid-public-key").permitAll()
                         .anyRequest().authenticated()

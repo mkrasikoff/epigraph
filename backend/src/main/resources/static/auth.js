@@ -158,6 +158,35 @@ async function loadAppVersion() {
     }
 }
 
+// ── Banner ──────────────────────────────────────────────────────────
+async function loadBanner() {
+    try {
+        const res = await fetch('/api/banner');
+        if (!res.ok) return;
+        const data = await res.json();
+        const msg = data.message?.trim();
+        if (!msg) return;
+
+        const banner = document.getElementById('announcement-banner');
+        const text   = document.getElementById('announcement-banner-text');
+        if (!banner || !text) return;
+
+        text.textContent = msg;
+        banner.style.display = 'flex';
+    } catch (e) {
+        // Banner is non-critical — silently ignore errors
+    }
+}
+
+function dismissBanner() {
+    const banner = document.getElementById('announcement-banner');
+    if (!banner) return;
+    banner.style.transition = 'opacity 200ms ease, transform 200ms ease';
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateY(-6px)';
+    setTimeout(() => banner.style.display = 'none', 210);
+}
+
 // =============================================================================
 // QUOTE OF THE DAY LOADER
 // Fetches QoD from the backend and caches the result in sessionStorage
