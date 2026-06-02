@@ -31,6 +31,10 @@ spring:
 app:
   base-url: https://epigraph.me
 
+  # Notification banner message
+  banner:
+    message: ${BANNER_MESSAGE:}
+
   # Email Verification
   mail:
     from: ${MAIL_FROM}
