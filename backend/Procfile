@@ -1,1 +1,1 @@
-web: java -jar build/libs/app.jar --spring.profiles.active=prod
+web: java -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -jar build/libs/app.jar --spring.profiles.active=prod
