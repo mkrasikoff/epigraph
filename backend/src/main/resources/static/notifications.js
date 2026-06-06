@@ -4,6 +4,7 @@
 // Requires: VAPID keys on backend, HTTPS, and browser Notification permission.
 // iOS: only works when app is installed via Safari → Share → "На экран «Домой»".
 // =============================================================================
+
 /**
  * Converts a base64url VAPID public key string to a Uint8Array
  * required by pushManager.subscribe().
@@ -153,7 +154,7 @@ async function handleNotifToggle(enabled) {
     }
 
     const intervalHours = parseInt(
-        document.getElementById('notif-interval-select')?.value || '24', 10
+        document.querySelector('#notif-interval-menu .sort-menu-item.active')?.dataset.value || '24', 10
     );
 
     if (enabled) {
