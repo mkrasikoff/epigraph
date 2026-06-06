@@ -81,7 +81,7 @@ async function loadData() {
             tags: q.tags ? q.tags.split(',').filter(Boolean) : []
         }));
     } catch (e) {
-        console.error('Ошибка загрузки:', e);
+        console.error('Load error:', e);
         quotes = [];
     }
 }
