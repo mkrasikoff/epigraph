@@ -63,7 +63,7 @@ function updateThemeColorMeta(mode) {
 // =============================================================================
 /**
  * Switches the currently active view and tab, and triggers per-view rendering.
- * For quests block everyting except qod
+ * For guests block everything except qod
  * @param {string} id - View identifier ('qod', 'list', 'add', 'settings').
  */
 function switchView(id) {
