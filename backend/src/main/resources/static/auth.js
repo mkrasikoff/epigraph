@@ -730,22 +730,16 @@ async function submitForgotPassword() {
 }
 
 /**
- * Checks for a password-reset token in the URL query string.
- * If found, navigates to Settings and opens the change-password modal.
- * Called during app init, after the user is authenticated via the reset token.
+ * Returns the shared HTML body for the change-/reset-password modal:
+ * a "new password" field, a "confirm password" field, and an inline error <p>.
+ * Used by both showChangePasswordModal() (settings) and the reset-token flow.
+ *
+ * Field ids: #cp-new, #cp-confirm, #cp-error.
+ *
+ * @returns {string} HTML markup for use as the body of showModal().
  */
-async function handleResetTokenFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const resetToken = params.get('reset');
-    if (!resetToken) return false;
-
-    // Clean up the URL immediately
-    window.history.replaceState({}, document.title, window.location.hash || '/');
-
-    // Show a modal to collect the new password, then POST to /api/user/reset-password
-    showModal(
-        t('changePasswordTitle'),
-        `<div class="auth-field" style="margin-bottom:var(--space-3)">
+function passwordFormBody() {
+    return `<div class="auth-field" style="margin-bottom:var(--space-3)">
              <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
                  ${t('changePasswordNew')}
              </label>
@@ -764,7 +758,26 @@ async function handleResetTokenFromUrl() {
                     autocomplete="new-password">
          </div>
          <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
-         color:var(--color-toast-error-text);min-height:1.2em"></p>`,
+         color:var(--color-toast-error-text);min-height:1.2em"></p>`;
+}
+
+/**
+ * Checks for a password-reset token in the URL query string.
+ * If found, navigates to Settings and opens the change-password modal.
+ * Called during app init, after the user is authenticated via the reset token.
+ */
+async function handleResetTokenFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const resetToken = params.get('reset');
+    if (!resetToken) return false;
+
+    // Clean up the URL immediately
+    window.history.replaceState({}, document.title, window.location.hash || '/');
+
+    // Show a modal to collect the new password, then POST to /api/user/reset-password
+    showModal(
+        t('changePasswordTitle'),
+        passwordFormBody(),
         [
             {
                 label: t('changePasswordSubmit'),
