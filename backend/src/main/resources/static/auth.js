@@ -632,9 +632,12 @@ function showForgotPasswordForm() {
     // Inject the forgot-password panel
     const panel = document.createElement('div');
     panel.id = 'auth-forgot-panel';
+    panel.style.display = 'flex';
+    panel.style.flexDirection = 'column';
+    panel.style.gap = 'var(--space-5)';
     panel.innerHTML = `
         <button onclick="hideForgotPasswordForm()"
-                style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);background:none;border:none;cursor:pointer;padding:0;margin-bottom:var(--space-4)"
+                style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);background:none;border:none;cursor:pointer;padding:0;"
                 onmouseover="this.style.color='var(--color-text)'"
                 onmouseout="this.style.color='var(--color-text-muted)'">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -642,7 +645,7 @@ function showForgotPasswordForm() {
             </svg>
             ${t('forgotPasswordBack')}
         </button>
-        <div style="margin-bottom:var(--space-5)">
+        <div>
             <h2 style="font-size:var(--text-lg);font-weight:600;margin-bottom:var(--space-1)">${t('forgotPasswordTitle')}</h2>
             <p style="font-size:var(--text-sm);color:var(--color-text-muted)">${t('forgotPasswordDesc')}</p>
         </div>
@@ -764,7 +767,7 @@ async function handleResetTokenFromUrl() {
                     autocomplete="new-password">
          </div>
          <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
-         color:var(--color-toast-error-text);min-height:1.2em"></p>`,
+         color:#c0392b;min-height:1.2em"></p>`,
         [
             {
                 label: t('changePasswordSubmit'),
@@ -774,6 +777,24 @@ async function handleResetTokenFromUrl() {
             }
         ]
     );
+
+    // Disable submit until user starts typing a new password
+    const cpSubmitBtn = document.getElementById('cp-submit-btn');
+    const cpNewInput = document.getElementById('cp-new');
+
+    if (cpSubmitBtn) {
+        cpSubmitBtn.disabled = true;
+        cpSubmitBtn.classList.add('btn-disabled-empty');
+    }
+
+    cpNewInput?.addEventListener('input', () => {
+        const filled = cpNewInput.value.length > 0;
+
+        if (!cpSubmitBtn) return;
+
+        cpSubmitBtn.disabled = !filled;
+        cpSubmitBtn.classList.toggle('btn-disabled-empty', !filled);
+    });
 
     return true;
 }
