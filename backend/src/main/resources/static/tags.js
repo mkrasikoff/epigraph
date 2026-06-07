@@ -8,7 +8,101 @@
  * Exposes global state:
  * - currentTags {Array} — pending tags for the add-quote form
  * - editTags {Array} — pending tags for the currently open edit modal
+ *
+ * Internal:
+ * - renderTagEditor({ wrapId, tags, onRemove, removeFnName, showInput,
+ *     onAddClick, focusOnInput }) {fn} — shared factory that renders the chip list
+ *   plus either the inline input or the "+" add button into a wrap element. Both
+ *   renderTags() and renderEditTags() are thin wrappers over this.
  */
+
+// =============================================================================
+// SHARED TAG EDITOR FACTORY
+// =============================================================================
+/**
+ * Renders the tag chips + add-button (or inline input) into a wrap element.
+ * Shared by both the add-quote form and the edit modal.
+ *
+ * @param {Object} opts
+ * @param {string}   opts.wrapId        - id of the container element to render into.
+ * @param {string[]} opts.tags          - the tag array to render and mutate.
+ * @param {string}   opts.removeFnName  - global fn name used in the chip remove
+ *                                         button's inline onclick (e.g. 'removeTag').
+ * @param {boolean}  [opts.showInput]   - render the inline input instead of the + button.
+ * @param {Function} opts.onAddClick    - click handler for the "+" add button.
+ * @param {boolean}  [opts.focusOnInput] - focus the inline input after appending it.
+ * @returns {HTMLInputElement|null} the created input element when showInput is true,
+ *                                  else null (callers may focus it themselves).
+ */
+function renderTagEditor(opts) {
+    const { wrapId, tags, removeFnName, showInput, onAddClick, focusOnInput } = opts;
+
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return null;
+
+    wrap.innerHTML = '';
+
+    tags.forEach(tag => {
+        const chip = document.createElement('span');
+        chip.className = 'tag';
+        chip.innerHTML = `${escHtml(tag)}<button type="button" onclick="${removeFnName}('${escHtml(tag)}')" aria-label="${t('ariaTagRemove')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+        wrap.appendChild(chip);
+    });
+
+    if (showInput) {
+        const input = document.createElement('input');
+
+        input.type = 'text';
+        input.className = 'form-input tag-input';
+        input.placeholder = t('placeholderTagInput');
+        input.maxLength = 50;
+
+        const commit = () => {
+            const val = input.value.trim();
+
+            if (val && !tags.includes(val)) tags.push(val);
+
+            input.removeEventListener('blur', input._blurHandler);
+            rerender();
+        };
+
+        function rerender() {
+            renderTagEditor({ ...opts, showInput: false });
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                input.removeEventListener('blur', input._blurHandler);
+                commit();
+            } else if (e.key === 'Escape') {
+                input.removeEventListener('blur', input._blurHandler);
+                rerender();
+            }
+        });
+
+        input._blurHandler = () => commit();
+        input.addEventListener('blur', input._blurHandler);
+        wrap.appendChild(input);
+
+        if (focusOnInput) input.focus();
+
+        return input;
+    }
+
+    const btn = document.createElement('button');
+
+    btn.type = 'button';
+    btn.className = 'tag-add-btn';
+    btn.setAttribute('aria-label', t('ariaTagAdd'));
+    btn.title = t('ariaTagAdd');
+    btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> ${t('tagAddButtonLabel')}`;
+    btn.addEventListener('click', onAddClick);
+
+    wrap.appendChild(btn);
+
+    return null;
+}
 
 // =============================================================================
 // TAGS — ADD FORM
@@ -60,51 +154,14 @@ function removeTag(tag) {
  * @param {boolean} [showInput=false] - If true, renders the inline input instead of the + button.
  */
 function renderTags(showInput) {
-    const wrap = document.getElementById('tags-wrap');
-    if (!wrap) return;
-    wrap.innerHTML = '';
-
-    currentTags.forEach(tag => {
-        const chip = document.createElement('span');
-        chip.className = 'tag';
-        chip.innerHTML = `${escHtml(tag)}<button type="button" onclick="removeTag('${escHtml(tag)}')" aria-label="${t('ariaTagRemove')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
-        wrap.appendChild(chip);
+    renderTagEditor({
+        wrapId: 'tags-wrap',
+        tags: currentTags,
+        removeFnName: 'removeTag',
+        showInput,
+        onAddClick: () => showTagInput(),
+        focusOnInput: false
     });
-
-    if (showInput) {
-        const input = document.createElement('input');
-
-        input.type = 'text';
-        input.className = 'form-input tag-input';
-        input.placeholder = t('placeholderTagInput');
-        input.maxLength = 50;
-
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                input.removeEventListener('blur', input._blurHandler);
-                commitTagInput(input);
-            } else if (e.key === 'Escape') {
-                input.removeEventListener('blur', input._blurHandler);
-                renderTags();
-            }
-        });
-
-        input._blurHandler = () => commitTagInput(input);
-        input.addEventListener('blur', input._blurHandler);
-        wrap.appendChild(input);
-    } else {
-        const btn = document.createElement('button');
-
-        btn.type = 'button';
-        btn.className = 'tag-add-btn';
-        btn.setAttribute('aria-label', t('ariaTagAdd'));
-        btn.title = t('ariaTagAdd');
-        btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> ${t('tagAddButtonLabel')}`;
-        btn.addEventListener('click', () => showTagInput());
-
-        wrap.appendChild(btn);
-    }
 }
 
 // =============================================================================
@@ -127,60 +184,12 @@ function removeEditTag(tag) {
  * @param {boolean} [showInput=false] - If true, renders the inline input instead of the + button.
  */
 function renderEditTags(showInput) {
-    const wrap = document.getElementById('edit-tags-wrap');
-
-    if (!wrap) return;
-
-    wrap.innerHTML = '';
-
-    editTags.forEach(tag => {
-        const chip = document.createElement('span');
-        chip.className = 'tag';
-        chip.innerHTML = `${escHtml(tag)}<button type="button" onclick="removeEditTag('${escHtml(tag)}')" aria-label="${t('ariaTagRemove')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
-        wrap.appendChild(chip);
+    renderTagEditor({
+        wrapId: 'edit-tags-wrap',
+        tags: editTags,
+        removeFnName: 'removeEditTag',
+        showInput,
+        onAddClick: () => renderEditTags(true),
+        focusOnInput: true
     });
-
-    if (showInput) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'form-input tag-input';
-        input.placeholder = t('placeholderTagInput');
-        input.maxLength = 50;
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                input.removeEventListener('blur', input._blurHandler);
-                const val = input.value.trim();
-
-                if (val && !editTags.includes(val)) editTags.push(val);
-
-                renderEditTags();
-            } else if (e.key === 'Escape') {
-                input.removeEventListener('blur', input._blurHandler);
-                renderEditTags();
-            }
-        });
-        input._blurHandler = () => {
-            const val = input.value.trim();
-
-            if (val && !editTags.includes(val)) editTags.push(val);
-
-            renderEditTags();
-        };
-
-        input.addEventListener('blur', input._blurHandler);
-        wrap.appendChild(input);
-        input.focus();
-    } else {
-        const btn = document.createElement('button');
-
-        btn.type = 'button';
-        btn.className = 'tag-add-btn';
-        btn.setAttribute('aria-label', t('ariaTagAdd'));
-        btn.title = t('ariaTagAdd');
-        btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> ${t('tagAddButtonLabel')}`;
-        btn.addEventListener('click', () => renderEditTags(true));
-
-        wrap.appendChild(btn);
-    }
 }
