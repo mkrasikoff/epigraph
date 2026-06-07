@@ -1052,26 +1052,7 @@ async function deleteAccount() {
 function showChangePasswordModal() {
     showModal(
         t('changePasswordTitle'),
-        `<div class="auth-field" style="margin-bottom:var(--space-3)">
-             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
-                 ${t('changePasswordNew')}
-             </label>
-             <input id="cp-new" type="password" class="modal-confirm-input"
-                    style="margin-top:var(--space-1)"
-                    placeholder="${t('changePasswordNewPlaceholder')}"
-                    autocomplete="new-password">
-         </div>
-         <div class="auth-field" style="margin-bottom:0">
-             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
-                 ${t('changePasswordConfirm')}
-             </label>
-             <input id="cp-confirm" type="password" class="modal-confirm-input"
-                    style="margin-top:var(--space-1)"
-                    placeholder="${t('changePasswordConfirmPlaceholder')}"
-                    autocomplete="new-password">
-         </div>
-         <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
-         color:var(--color-toast-error-text);min-height:1.2em"></p>`,
+        passwordFormBody(),
         [
             {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
             {
