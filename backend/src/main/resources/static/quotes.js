@@ -1063,6 +1063,23 @@ function showChangePasswordModal() {
             }
         ]
     );
+
+    // Disable submit until user starts typing a new password
+    const cpSubmitBtn = document.getElementById('cp-submit-btn');
+    const cpNewInput = document.getElementById('cp-new');
+
+    if (cpSubmitBtn) {
+        cpSubmitBtn.disabled = true;
+        cpSubmitBtn.classList.add('btn-disabled-empty');
+    }
+
+    cpNewInput?.addEventListener('input', () => {
+        const filled = cpNewInput.value.length > 0;
+
+        if (!cpSubmitBtn) return;
+        cpSubmitBtn.disabled = !filled;
+        cpSubmitBtn.classList.toggle('btn-disabled-empty', !filled);
+    });
 }
 
 /**
