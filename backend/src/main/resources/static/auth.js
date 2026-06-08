@@ -781,20 +781,22 @@ async function handleResetTokenFromUrl() {
     // Disable submit until user starts typing a new password
     const cpSubmitBtn = document.getElementById('cp-submit-btn');
     const cpNewInput = document.getElementById('cp-new');
+    const cpConfirmInput = document.getElementById('cp-confirm');
 
     if (cpSubmitBtn) {
         cpSubmitBtn.disabled = true;
         cpSubmitBtn.classList.add('btn-disabled-empty');
     }
 
-    cpNewInput?.addEventListener('input', () => {
-        const filled = cpNewInput.value.length > 0;
-
+    const updateSubmitState = () => {
+        const filled = cpNewInput.value.length > 0 && cpConfirmInput.value.length > 0;
         if (!cpSubmitBtn) return;
-
         cpSubmitBtn.disabled = !filled;
         cpSubmitBtn.classList.toggle('btn-disabled-empty', !filled);
-    });
+    };
+
+    cpNewInput?.addEventListener('input', updateSubmitState);
+    cpConfirmInput?.addEventListener('input', updateSubmitState);
 
     return true;
 }
