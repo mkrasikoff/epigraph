@@ -60,3 +60,16 @@ function tagsFromCsv(str) {
 function tagsToCsv(arr) {
     return (arr || []).join(',');
 }
+
+// =============================================================================
+// VALIDATION PATTERNS
+// =============================================================================
+
+// Strict email — alphanumeric + allowed special chars; used by the login/register form.
+const EMAIL_REGEX_STRICT = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+// Loose email — any non-whitespace/non-@ chars; used by register, forgot, and reset flows.
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+// Password: ≥8 chars, ≥1 Latin or Cyrillic letter, ≥1 digit. No upper-bound cap.
+const PASSWORD_REGEX = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d).{8,}$/;
