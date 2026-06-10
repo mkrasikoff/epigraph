@@ -78,7 +78,7 @@ async function loadData() {
         const rawQuotes = await Api.getAll();
         quotes = rawQuotes.map(q => ({
             ...q,
-            tags: q.tags ? q.tags.split(',').filter(Boolean) : []
+            tags: tagsFromCsv(q.tags)
         }));
     } catch (e) {
         console.error('Load error:', e);
