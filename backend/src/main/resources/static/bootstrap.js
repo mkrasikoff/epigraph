@@ -86,7 +86,7 @@
             return;
         }
         const rawQuotes = await res.json();
-        quotes = rawQuotes.map(q => ({...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : []}));
+        quotes = rawQuotes.map(q => ({...q, tags: tagsFromCsv(q.tags)}));
         hideGuestMode();
 
         // Navigate to the section matching the URL hash (or default to QoD)

@@ -36,3 +36,27 @@ let currentFilter = 'all';
 let currentQodIndex = -1;
 let editingId = null;
 let currentSort = 'date_desc'; // default sort
+
+// =============================================================================
+// TAG SERIALIZATION HELPERS
+// Shared between api.js, bootstrap.js, and quotes.js — must live in state.js
+// to guarantee load order before all consumers.
+// =============================================================================
+
+/**
+ * Splits a comma-separated tag string from the backend into a clean array.
+ * @param {string} [str]
+ * @returns {string[]}
+ */
+function tagsFromCsv(str) {
+    return str ? str.split(',').filter(Boolean) : [];
+}
+
+/**
+ * Joins a tag array back into the comma-separated string the API expects.
+ * @param {string[]} [arr]
+ * @returns {string}
+ */
+function tagsToCsv(arr) {
+    return (arr || []).join(',');
+}
