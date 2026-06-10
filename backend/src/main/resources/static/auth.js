@@ -327,8 +327,7 @@ async function authSubmit() {
         return;
     }
 
-    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
+    if (!EMAIL_REGEX_STRICT.test(email)) {
         errorEl.textContent = t('authErrorInvalidEmail');
         return;
     }
@@ -404,15 +403,12 @@ async function authSubmitRegister() {
     const password = document.getElementById('auth-password-reg')?.value || '';
     const errorEl = document.getElementById('auth-error-reg');
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    const passwordRegex = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d).{8,}$/;
-
-    if (!emailRegex.test(email)) {
+    if (!EMAIL_REGEX.test(email)) {
         if (errorEl) errorEl.textContent = t('authErrorInvalidEmailDot');
         return;
     }
 
-    if (!passwordRegex.test(password)) {
+    if (!PASSWORD_REGEX.test(password)) {
         if (errorEl) errorEl.textContent = t('authErrorPasswordPattern');
         return;
     }
@@ -699,8 +695,7 @@ async function submitForgotPassword() {
     const btn = document.getElementById('forgot-submit-btn');
     const email = emailInput?.value.trim();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    if (!emailRegex.test(email)) {
+    if (!EMAIL_REGEX.test(email)) {
         errorEl.textContent = t('authErrorInvalidEmail');
         return;
     }
@@ -816,8 +811,7 @@ async function submitPasswordReset(resetToken) {
         return;
     }
 
-    const passwordRegex = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d).{8,}$/;
-    if (!passwordRegex.test(newPw)) {
+    if (!PASSWORD_REGEX.test(newPw)) {
         if (errorEl) errorEl.textContent = t('authErrorPasswordPattern');
         return;
     }
