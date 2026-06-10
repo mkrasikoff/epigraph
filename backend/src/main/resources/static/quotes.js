@@ -269,7 +269,7 @@ async function favQod() {
     q.fav = !q.fav;
 
     try {
-        await Api.update(q.id, {...q, tags: (q.tags || []).join(',')});
+        await Api.update(q.id, {...q, tags: tagsToCsv(q.tags)});
         updateFavQodButton();
     } catch (e) {
         q.fav = !q.fav;
@@ -567,7 +567,7 @@ async function addQuote(e) {
         text,
         author: document.getElementById('q-author').value.trim(),
         source: document.getElementById('q-source').value.trim(),
-        tags: currentTags.join(','),
+        tags: tagsToCsv(currentTags),
         fav: false,
         added: Date.now()
     };
@@ -627,7 +627,7 @@ async function toggleFav(id) {
     q.fav = !q.fav;
 
     try {
-        await Api.update(id, {...q, tags: (q.tags || []).join(',')});
+        await Api.update(id, {...q, tags: tagsToCsv(q.tags)});
 
         const btn = document.querySelector(`.card-btn.fav[onclick="toggleFav(${id})"]`);
         if (btn) {
@@ -786,7 +786,7 @@ async function saveEditQuote() {
         text,
         author: document.getElementById('edit-author')?.value.trim() || '',
         source: document.getElementById('edit-source')?.value.trim() || '',
-        tags: tags.join(',')
+        tags: tagsToCsv(tags)
     };
 
     try {
@@ -865,7 +865,7 @@ async function importJSON(e) {
                 text: item.text,
                 author: item.author || '',
                 source: item.source || '',
-                tags: Array.isArray(item.tags) ? item.tags.join(',') : (item.tags || ''),
+                tags: Array.isArray(item.tags) ? tagsToCsv(item.tags) : (item.tags || ''),
                 fav: false,
                 added: Date.now()
             };
