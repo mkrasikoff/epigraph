@@ -2242,3 +2242,87 @@ body.no-scroll {
     color: var(--color-text);
     background: color-mix(in oklab, var(--color-gold) 16%, var(--color-surface-offset));
 }
+
+/* =============================================================================
+   UTILITY CLASSES — extracted from inline styles in auth.js and quotes.js
+   ============================================================================= */
+
+/* Spinner icon inside submit buttons */
+.btn-spinner-icon {
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+/* "Back" button in auth panels (verify-code, forgot-password) */
+.auth-back-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+}
+
+.auth-back-btn:hover {
+    color: var(--color-text);
+}
+
+/* Modifier: verify-code screen back button needs extra spacing */
+.auth-back-btn--inset {
+    margin-bottom: var(--space-1);
+    align-self: flex-start;
+}
+
+/* Verify-code input field */
+.verify-code-input {
+    letter-spacing: 0.3em;
+    font-size: var(--text-lg);
+    text-align: center;
+    padding-left: 0.3em;
+}
+
+/* Auth panel title (forgot-password heading) */
+.auth-panel-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+}
+
+/* Auth panel description text */
+.auth-panel-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+}
+
+/* Change-password form field modifiers */
+.auth-field--spaced {
+    margin-bottom: var(--space-3);
+}
+
+.auth-field--flush {
+    margin-bottom: 0;
+}
+
+/* Change-password inputs — tighter top margin than .modal-confirm-input default */
+.cp-input {
+    margin-top: var(--space-1);
+}
+
+/* Change-password error text */
+.cp-error {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: #c0392b;
+    min-height: 1.2em;
+}
+
+/* Confirm-modal hint text (delete-all, delete-account) */
+.modal-confirm-hint {
+    margin-top: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+}
