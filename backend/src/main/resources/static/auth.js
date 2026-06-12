@@ -352,7 +352,7 @@ async function authSubmit() {
     }
 
     btn.disabled = true;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.7s linear infinite;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-spinner-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
 
     const endpoint = authMode === 'login' ? '/login' : '/register';
 
@@ -423,7 +423,7 @@ async function authSubmitRegister() {
     const btn = document.getElementById('auth-submit-btn-reg');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.7s linear infinite;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-spinner-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
     }
 
     try {
@@ -473,10 +473,7 @@ function showVerifyScreen(email) {
     if (!container) return;
 
     container.innerHTML = `
-        <button onclick="showRegisterForm()"
-                style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);background:none;border:none;cursor:pointer;padding:0;margin-bottom:var(--space-1);align-self:flex-start"
-                onmouseover="this.style.color='var(--color-text)'"
-                onmouseout="this.style.color='var(--color-text-muted)'">
+        <button onclick="showRegisterForm()" type="button" class="auth-back-btn auth-back-btn--inset">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
@@ -491,13 +488,13 @@ function showVerifyScreen(email) {
             <input id="verify-code-input" class="auth-input" type="text"
                    inputmode="numeric" maxlength="6" placeholder="000000"
                    autocomplete="one-time-code"
-                   style="letter-spacing: 0.3em; font-size: var(--text-lg); text-align: center; padding-left: 0.3em;">
+                   class="form-input verify-code-input">
         </div>
         <p class="auth-error" id="verify-error"></p>
         <button class="btn-primary" id="verify-submit-btn" onclick="submitVerifyCode('${email}')">
             ${t('verifySubmit')}
         </button>
-        <p class="auth-switch" style="text-align:center">
+        <p class="auth-switch">
             <span>${t('verifyResendHint')}</span>
             <button onclick="resendVerifyCode('${email}')">${t('verifyResendLink')}</button>
         </p>
@@ -702,7 +699,7 @@ async function submitForgotPassword() {
 
     errorEl.textContent = '';
     btn.disabled = true;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.7s linear infinite;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-spinner-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
 
     try {
         // Always returns 202 regardless of whether email exists — no enumeration
