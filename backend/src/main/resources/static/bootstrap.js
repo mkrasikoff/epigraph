@@ -28,6 +28,7 @@
  * - SORT_LABELS      {Object}  — defined in quotes.js
  * - randomQuote()    {fn}      — defined in quotes.js
  * - initNotifications()       {fn}  — defined in notifications.js
+ * - applyI18n()               {fn}  — defined in i18n.js
  */
 
 // =============================================================================
@@ -35,6 +36,15 @@
 // Application bootstrap — loads data then renders the initial QoD view.
 // =============================================================================
 (async () => {
+    // Localize all static markup (data-i18n* attributes) before anything renders
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => applyI18n(), {once: true});
+    } else {
+        applyI18n();
+    }
+
+    loadBanner();
+
     loadBanner();
 
     // If Google OAuth — token inside query-param
