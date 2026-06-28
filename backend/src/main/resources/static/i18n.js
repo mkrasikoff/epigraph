@@ -226,3 +226,31 @@ function t(key, variables) {
 
     return string;
 }
+
+
+/**
+ * Walks the DOM and applies translations to every element carrying an i18n
+ * attribute. Runs once on startup and again whenever the language changes.
+ *
+ * Supported attributes:
+ *   data-i18n="key"             → el.textContent
+ *   data-i18n-placeholder="key" → el.placeholder
+ *   data-i18n-aria="key"        → el.setAttribute('aria-label', ...)
+ *   data-i18n-title="key"       → el.setAttribute('title', ...)
+ *
+ * @param {ParentNode} [root=document] - Subtree to scan (defaults to the whole document).
+ */
+function applyI18n(root = document) {
+    root.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.dataset.i18n);
+    });
+    root.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.placeholder = t(el.dataset.i18nPlaceholder);
+    });
+    root.querySelectorAll('[data-i18n-aria]').forEach(el => {
+        el.setAttribute('aria-label', t(el.dataset.i18nAria));
+    });
+    root.querySelectorAll('[data-i18n-title]').forEach(el => {
+        el.setAttribute('title', t(el.dataset.i18nTitle));
+    });
+}
