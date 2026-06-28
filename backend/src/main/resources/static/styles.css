@@ -3,16 +3,16 @@
 // CSS custom properties for colors, typography, spacing, shadows, and layout.
 // ============================================================================= */
 :root, [data-theme="light"] {
-    --color-bg: #f5f2ec;
-    --color-surface: #faf8f4;
-    --color-surface-2: #fffefb;
-    --color-surface-offset: #ede9e1;
-    --color-surface-dynamic: #e5e0d7;
-    --color-divider: #d8d3c9;
-    --color-border: #cdc7bb;
-    --color-text: #2a2420;
-    --color-text-muted: #7a7068;
-    --color-text-faint: #b0a89e;
+    --color-bg: #e8e0d0;
+    --color-surface: #f5efe3;
+    --color-surface-2: #f9f4eb;
+    --color-surface-offset: #ddd5c4;
+    --color-surface-dynamic: #d4cab8;
+    --color-divider: #bdb5a6;
+    --color-border: #ada493;
+    --color-text: #1e1a14;
+    --color-text-muted: #6a6055;
+    --color-text-faint: #9a9086;
     --color-text-inverse: #faf8f4;
     --color-primary: #8b5e3c;
     --color-primary-hover: #6e4a2d;
@@ -47,9 +47,9 @@
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
     --radius-full: 9999px;
-    --shadow-sm: 0 1px 3px oklch(0.2 0.02 50 / 0.06);
-    --shadow-md: 0 4px 16px oklch(0.2 0.02 50 / 0.09);
-    --shadow-lg: 0 12px 40px oklch(0.2 0.02 50 / 0.13);
+    --shadow-sm: 0 1px 4px oklch(0.2 0.04 50 / 0.10);
+    --shadow-md: 0 4px 20px oklch(0.2 0.04 50 / 0.14);
+    --shadow-lg: 0 12px 44px oklch(0.2 0.04 50 / 0.18);
     --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     --content-narrow: 640px;
     --content-default: 960px;
