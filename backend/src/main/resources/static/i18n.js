@@ -53,20 +53,13 @@ const TRANSLATIONS = {
         changePasswordTitle:              'Сменить пароль',
         changePasswordSettingsDesc:       'Установить или изменить пароль для входа по email.',
         changePasswordButton:             'Сменить пароль',
-        changePasswordCurrent:            'Текущий пароль',
         changePasswordNew:                'Новый пароль',
         changePasswordConfirm:            'Подтвердите новый пароль',
-        changePasswordCurrentPlaceholder: 'Ваш текущий пароль',
         changePasswordNewPlaceholder:     'Минимум 8 символов',
         changePasswordConfirmPlaceholder: 'Повторите новый пароль',
         changePasswordSubmit:             'Сохранить',
         changePasswordSuccess:            'Пароль успешно изменён',
         changePasswordErrorMismatch:      'Пароли не совпадают',
-        changePasswordErrorWrong:         'Неверный текущий пароль',
-        changePasswordErrorSame:          'Новый пароль совпадает с текущим',
-        changePasswordSetTitle:           'Установить пароль',
-        changePasswordSetDesc:            'Добавьте пароль для входа через email в дополнение к Google.',
-        changePasswordSetSubmit:          'Установить пароль',
 
         // ── Forgot password ──────────────────────────────────────────────────────
         forgotPasswordLink:               'Забыли пароль?',
@@ -74,10 +67,8 @@ const TRANSLATIONS = {
         forgotPasswordDesc:               'Введите email — мы пришлём ссылку для смены пароля.',
         forgotPasswordEmailLabel:         'Email',
         forgotPasswordSubmit:             'Отправить ссылку',
-        forgotPasswordSuccess:            'Ссылка отправлена. Проверьте почту.',
         forgotPasswordSuccessHint:        'Если аккаунт с этим email существует, письмо придёт в течение минуты.',
         forgotPasswordBack:               'Назад к входу',
-        forgotPasswordErrorNotFound:      'Аккаунт с таким email не найден',
 
         // ── Navigation ────────────────────────────────────────────────────────
         navToday:                       'На сегодня',
