@@ -70,21 +70,21 @@
         <!-- Login branding header — visible in login mode -->
         <div class="auth-login-header" id="auth-login-header">
             <div class="auth-login-header-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                     <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
                 </svg>
                 Epigraph
             </div>
-            <p class="auth-login-tagline">Ваши цитаты. Каждый день.</p>
+            <p class="auth-login-tagline" data-i18n="authTagline">
+                Ваши цитаты. Каждый день.
+            </p>
         </div>
 
         <!-- Register two-column layout — visible in register mode only -->
         <div class="auth-register-panel" id="auth-register-panel">
             <div class="auth-register-panel-logo">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                     <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
                 </svg>
@@ -92,110 +92,146 @@
             </div>
             <div class="auth-register-panel-quotes">
                 <div class="auth-register-panel-quote">
-                    <p>Не важно, как медленно ты идёшь, главное — не останавливаться.</p>
-                    <cite>— Конфуций</cite>
+                    <p>
+                        Не важно, как медленно ты идёшь, главное — не останавливаться.
+                    </p>
+                    <cite>
+                        — Конфуций
+                    </cite>
                 </div>
                 <div class="auth-register-panel-quote">
-                    <p>Жизнь — это то, что происходит, пока ты строишь другие планы.</p>
-                    <cite>— Джон Леннон</cite>
+                    <p>
+                        Жизнь — это то, что происходит, пока ты строишь другие планы.
+                    </p>
+                    <cite>
+                        — Джон Леннон
+                    </cite>
                 </div>
                 <div class="auth-register-panel-quote">
-                    <p>Начало — это половина всего.</p>
-                    <cite>— Аристотель</cite>
+                    <p>
+                        Начало — это половина всего.
+                    </p>
+                    <cite>
+                        — Аристотель
+                    </cite>
                 </div>
             </div>
-            <p class="auth-register-panel-tagline">Ваши цитаты. Каждый день.</p>
+            <p class="auth-register-panel-tagline" data-i18n="authTagline">
+                Ваши цитаты. Каждый день.
+            </p>
         </div>
 
         <div class="auth-register-form-col" id="auth-register-form-col">
             <div class="auth-register-top">
-                <h2 class="auth-register-heading">Создайте аккаунт</h2>
-                <p class="auth-register-sub">Это бесплатно. Навсегда.</p>
+                <h2 class="auth-register-heading" data-i18n="authRegisterHeading">
+                    Создайте аккаунт
+                </h2>
+                <p class="auth-register-sub" data-i18n="authRegisterSub">
+                    Это бесплатно. Навсегда.
+                </p>
             </div>
             <div class="auth-field">
-                <label for="auth-email-reg">Email</label>
+                <label for="auth-email-reg" data-i18n="authEmailLabel">
+                    Email
+                </label>
                 <input type="email" id="auth-email-reg" placeholder="you@example.com" autocomplete="email">
             </div>
             <div class="auth-field">
-                <label for="auth-password-reg">Пароль</label>
-                <input type="password" id="auth-password-reg" placeholder="Минимум 8 символов"
-                       autocomplete="new-password">
+                <label for="auth-password-reg" data-i18n="authPasswordLabel">
+                    Пароль
+                </label>
+                <input type="password" id="auth-password-reg" placeholder="Минимум 8 символов" data-i18n-placeholder="authPlaceholderPasswordRegister" autocomplete="new-password">
             </div>
-            <p id="auth-password-hint-reg"
-               style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-3))">
+            <p id="auth-password-hint-reg" data-i18n="authPasswordHint" style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-3))">
                 Минимум 8 символов, хотя бы одна буква и одна цифра.
             </p>
             <p class="auth-error" id="auth-error-reg"></p>
-            <button class="btn-primary" id="auth-submit-btn-reg" onclick="authSubmitRegister()">Зарегистрироваться
+            <button class="btn-primary" id="auth-submit-btn-reg" data-i18n="authSubmitRegister" onclick="authSubmitRegister()">
+                Зарегистрироваться
             </button>
-            <div class="auth-divider">или</div>
+            <div class="auth-divider" data-i18n="authDivider">
+                или
+            </div>
             <button class="btn-google" onclick="loginWithGoogle()">
                 <svg width="18" height="18" viewBox="0 0 48 48">
-                    <path fill="#EA4335"
-                          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4"
-                          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05"
-                          d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853"
-                          d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                 </svg>
-                Войти через Google
+                <span data-i18n="authGoogleButton">
+                    Войти через Google
+                </span>
             </button>
             <p class="auth-switch" style="text-align:center">
-                <span>Уже есть аккаунт?</span>
-                <button onclick="toggleAuthMode()">Войти</button>
+                <span data-i18n="authSwitchToLogin">
+                    Уже есть аккаунт?
+                </span>
+                <button data-i18n="authSwitchBtnLogin" onclick="toggleAuthMode()">
+                    Войти
+                </button>
             </p>
         </div>
 
         <!-- Shown in login mode only -->
-        <h1 class="auth-title" id="auth-title-logo" style="display:none">Epigraph</h1>
-        <p class="auth-subtitle" id="auth-subtitle">Войдите, чтобы продолжить</p>
+        <h1 class="auth-title" id="auth-title-logo" style="display:none">
+            Epigraph
+        </h1>
+        <p class="auth-subtitle" id="auth-subtitle" data-i18n="authSubtitle">
+            Войдите, чтобы продолжить
+        </p>
 
         <div class="auth-field">
-            <label for="auth-email">Email</label>
-            <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+            <label for="auth-email" data-i18n="authEmailLabel">
+                Email
+            </label>
+            <input type="email" id="auth-email" placeholder="you@example.com" data-i18n-placeholder="authPlaceholderEmail" autocomplete="email">
         </div>
         <div class="auth-field">
             <div class="auth-field-header">
-                <label for="auth-password">Пароль</label>
-                <button id="auth-forgot-btn"
-                        class="auth-forgot-link"
-                        onclick="showForgotPasswordForm()">
+                <label for="auth-password" data-i18n="authPasswordLabel">
+                    Пароль
+                </label>
+                <button id="auth-forgot-btn" class="auth-forgot-link" onclick="showForgotPasswordForm()" data-i18n="forgotPasswordLink">
                     Забыли пароль?
                 </button>
             </div>
-            <input type="password" id="auth-password" placeholder="Ваш пароль" autocomplete="current-password">
+            <input type="password" id="auth-password" placeholder="Ваш пароль" data-i18n-placeholder="authPlaceholderPasswordLogin" autocomplete="current-password">
         </div>
 
-        <p id="auth-password-hint"
-           style="display:none;font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-2))">
+        <p id="auth-password-hint" data-i18n="authPasswordHint" style="display:none;font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-2))">
             Минимум 8 символов, хотя бы одна буква и одна цифра.
         </p>
 
         <p class="auth-error" id="auth-error"></p>
 
-        <button class="btn-primary" id="auth-submit-btn" onclick="authSubmit()">Войти</button>
+        <button class="btn-primary" id="auth-submit-btn" data-i18n="authSubmitLogin" onclick="authSubmit()">
+            Войти
+        </button>
 
-        <div class="auth-divider">или</div>
+        <div class="auth-divider" data-i18n="authDivider">
+            или
+        </div>
 
         <button class="btn-google" onclick="loginWithGoogle()">
             <svg width="18" height="18" viewBox="0 0 48 48">
-                <path fill="#EA4335"
-                      d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4"
-                      d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05"
-                      d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853"
-                      d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             </svg>
-            Войти через Google
+            <span data-i18n="authGoogleButton">
+                Войти через Google
+            </span>
         </button>
 
         <p class="auth-switch">
-            <span id="auth-switch-text">Нет аккаунта?</span>
-            <button onclick="toggleAuthMode()">Зарегистрироваться</button>
+            <span id="auth-switch-text" data-i18n="authSwitchToRegister">
+                Нет аккаунта?
+            </span>
+            <button onclick="toggleAuthMode()" data-i18n="authSwitchBtnRegister">
+                Зарегистрироваться
+            </button>
         </p>
     </div>
 </div>
@@ -204,9 +240,8 @@
     <!-- ANNOUNCEMENT BANNER -->
     <div class="announcement-banner" id="announcement-banner" style="display:none" role="alert">
         <span class="announcement-banner__text" id="announcement-banner-text"></span>
-        <button class="announcement-banner__close" onclick="dismissBanner()" aria-label="Закрыть">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                 stroke-linecap="round">
+        <button class="announcement-banner__close" onclick="dismissBanner()" aria-label="Закрыть" data-i18n-aria="ariaBannerClose">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>
                 <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -216,8 +251,7 @@
     <!-- HEADER -->
     <header>
         <a class="logo" href="#" onclick="switchView('qod');return false;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                 aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                 <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                 <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
             </svg>
@@ -225,23 +259,31 @@
         </a>
 
         <nav class="nav-tabs" role="tablist">
-            <button class="nav-tab active" role="tab" onclick="switchView('qod')" id="tab-qod">На сегодня</button>
-            <button class="nav-tab" role="tab" onclick="switchView('list')" id="tab-list">Мои цитаты</button>
-            <button class="nav-tab" role="tab" onclick="switchView('add')" id="tab-add">Добавить</button>
-            <button class="nav-tab" role="tab" onclick="switchView('settings')" id="tab-settings">Настройки</button>
+            <button class="nav-tab active" role="tab" onclick="switchView('qod')" id="tab-qod" data-i18n="navToday">
+                На сегодня
+            </button>
+            <button class="nav-tab" role="tab" onclick="switchView('list')" id="tab-list" data-i18n="navMyQuotes">
+                Мои цитаты
+            </button>
+            <button class="nav-tab" role="tab" onclick="switchView('add')" id="tab-add" data-i18n="navAdd">
+                Добавить
+            </button>
+            <button class="nav-tab" role="tab" onclick="switchView('settings')" id="tab-settings" data-i18n="navSettings">
+                Настройки
+            </button>
         </nav>
 
         <div class="header-actions">
-            <button class="btn-icon" data-theme-toggle aria-label="Переключить тему">
+            <button class="btn-icon" data-theme-toggle aria-label="Переключить тему" data-i18n-aria="ariaToggleTheme">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                 </svg>
             </button>
-            <button class="btn-secondary" id="login-btn" onclick="showAuthModal()">Войти</button>
-            <button class="btn-icon" id="logout-btn" onclick="logout()" style="display:none"
-                    aria-label="Выйти из аккаунта">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
+            <button class="btn-secondary" id="login-btn" data-i18n="authSubmitLogin" onclick="showAuthModal()">
+                Войти
+            </button>
+            <button class="btn-icon" id="logout-btn" onclick="logout()" style="display:none" aria-label="Выйти из аккаунта" data-i18n-aria="ariaLogout">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
@@ -265,30 +307,32 @@
                 </div>
                 <div class="qod-actions">
                     <button class="btn-primary" onclick="randomQuote()">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2.5">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <polyline points="17 1 21 5 17 9"/>
                             <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
                             <polyline points="7 23 3 19 7 15"/>
                             <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
                         </svg>
-                        Случайная
+                        <span data-i18n="qodRandomBtn">
+                            Случайная
+                        </span>
                     </button>
                     <button class="btn-secondary" onclick="copyQod()">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                         </svg>
-                        Копировать
+                        <span data-i18n="qodCopyBtn">
+                            Копировать
+                        </span>
                     </button>
                     <button class="btn-secondary" id="btn-fav-qod" onclick="favQod()">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2">
-                            <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                         </svg>
-                        В избранное
+                        <span data-i18n="favInactive">
+                            В избранное
+                        </span>
                     </button>
                 </div>
                 <p class="qod-progress" id="qod-progress"></p>
@@ -299,68 +343,72 @@
         <div class="view" id="view-list">
             <section class="list-section">
                 <div class="list-header">
-                    <h2>Мои цитаты</h2>
+                    <h2 data-i18n="listHeading">
+                        Мои цитаты
+                    </h2>
                     <div class="search-wrap">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <circle cx="11" cy="11" r="8"/>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg>
-                        <input class="search-input" type="search" placeholder="Поиск по цитатам..." id="search-input"
-                               oninput="renderList()" aria-label="Поиск">
+                        <input class="search-input" type="search" placeholder="Поиск по цитатам..." id="search-input" oninput="renderList()" aria-label="Поиск" data-i18n-aria="ariaSearch">
                     </div>
                 </div>
                 <div class="stats-bar" id="stats-bar"></div>
                 <div class="filter-tabs" id="filter-tabs">
-                    <button class="filter-tab active" onclick="setFilter('all', this)">Все</button>
-                    <button class="filter-tab" onclick="setFilter('fav', this)">⭐ Избранные</button>
+                    <button class="filter-tab active" onclick="setFilter('all', this)" data-i18n="filterAll">
+                        Все
+                    </button>
+                    <button class="filter-tab" onclick="setFilter('fav', this)" data-i18n="filterFav">
+                        ⭐ Избранные
+                    </button>
                     <div class="sort-dropdown" id="sort-dropdown">
-                        <button class="sort-btn" id="sort-btn" onclick="toggleSortMenu()" aria-haspopup="listbox"
-                                aria-expanded="false">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <button class="sort-btn" id="sort-btn" onclick="toggleSortMenu()" aria-haspopup="listbox" aria-expanded="false">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <line x1="3" y1="6" x2="21" y2="6"/>
                                 <line x1="3" y1="12" x2="15" y2="12"/>
                                 <line x1="3" y1="18" x2="9" y2="18"/>
                             </svg>
-                            <span id="sort-btn-label">Сначала новые</span>
+                            <span id="sort-btn-label" data-i18n="sortDateDesc">
+                                Сначала новые
+                            </span>
                             <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none"
                                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
                         </button>
                         <div class="sort-menu" id="sort-menu" role="listbox">
-                            <button class="sort-menu-item active" data-sort="date_desc"
-                                    onclick="selectSort('date_desc')" role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2.5" stroke-linecap="round">
+                            <button class="sort-menu-item active" data-sort="date_desc" onclick="selectSort('date_desc')" role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                                     <polyline points="20 6 9 17 4 12"/>
                                 </svg>
-                                Сначала новые
+                                <span data-i18n="sortDateDesc">
+                                    Сначала новые
+                                </span>
                             </button>
-                            <button class="sort-menu-item" data-sort="date_asc" onclick="selectSort('date_asc')"
-                                    role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2.5" stroke-linecap="round">
+                            <button class="sort-menu-item" data-sort="date_asc" onclick="selectSort('date_asc')" role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                                     <polyline points="20 6 9 17 4 12"/>
                                 </svg>
-                                Сначала старые
+                                <span data-i18n="sortDateAsc">
+                                    Сначала старые
+                                </span>
                             </button>
-                            <button class="sort-menu-item" data-sort="author_asc" onclick="selectSort('author_asc')"
-                                    role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2.5" stroke-linecap="round">
+                            <button class="sort-menu-item" data-sort="author_asc" onclick="selectSort('author_asc')" role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                                     <polyline points="20 6 9 17 4 12"/>
                                 </svg>
-                                По автору (А–Я)
+                                <span data-i18n="sortAuthorAsc">
+                                    По автору (А–Я)
+                                </span>
                             </button>
-                            <button class="sort-menu-item" data-sort="author_desc" onclick="selectSort('author_desc')"
-                                    role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="2.5" stroke-linecap="round">
+                            <button class="sort-menu-item" data-sort="author_desc" onclick="selectSort('author_desc')" role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                                     <polyline points="20 6 9 17 4 12"/>
                                 </svg>
-                                По автору (Я–А)
+                                <span data-i18n="sortAuthorDesc">
+                                    По автору (Я–А)
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -372,84 +420,126 @@
         <!-- ADD QUOTE -->
         <div class="view" id="view-add">
             <section class="add-section">
-                <h2>Добавить цитату</h2>
-                <p class="subtitle">Добавляйте цитаты вручную или импортируйте через JSON файл.</p>
+                <h2 data-i18n="addTitle">
+                    Добавить цитату
+                </h2>
+                <p class="subtitle" data-i18n="addSubtitle">
+                    Добавляйте цитаты вручную или импортируйте через JSON файл.
+                </p>
 
                 <form onsubmit="addQuote(event)">
                     <div class="form-group">
                         <label class="form-label" for="q-text">
-                            Текст цитаты <span>(обязательно)</span>
+                            <span data-i18n="addLabelText">
+                                Текст цитаты
+                            </span>
+                            <span> </span>
+                            <span data-i18n="addRequired">
+                                (обязательно)
+                            </span>
                         </label>
-                        <div class="form-textarea-wrap"><textarea class="form-textarea" id="q-text"
-                                                                  placeholder="Введите текст цитаты…"
-                                                                  maxlength="1000"></textarea>
+                        <div class="form-textarea-wrap"><textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…" maxlength="1000" data-i18n-placeholder="placeholderQuoteText"></textarea>
                             <div class="char-counter" id="quoteTextCounter">0 / 1000</div>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="q-author">Автор <span>(необязательно)</span></label>
+                            <label class="form-label" for="q-author">
+                                <span data-i18n="addLabelAuthor">
+                                    Автор
+                                </span>
+                                <span> </span>
+                                <span data-i18n="addOptional">
+                                    (необязательно)
+                                </span>
+                            </label>
                             <div class="form-input-wrap">
-                                <input class="form-input" type="text" id="q-author" placeholder="Имя автора"
-                                       maxlength="100">
+                                <input class="form-input" type="text" id="q-author" placeholder="Имя автора" data-i18n-placeholder="placeholderAuthor" maxlength="100">
                                 <div class="char-counter" id="authorCounter">0 / 100</div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="q-source">Источник <span>(необязательно)</span></label>
+                            <label class="form-label" for="q-source">
+                                <span data-i18n="addLabelSource">
+                                    Источник
+                                </span>
+                                <span> </span>
+                                <span data-i18n="addOptional">
+                                    (необязательно)
+                                </span>
+                            </label>
                             <div class="form-input-wrap">
-                                <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…"
-                                       maxlength="200">
+                                <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…" data-i18n-placeholder="placeholderSource" maxlength="200">
                                 <div class="char-counter" id="sourceCounter">0 / 200</div>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Теги <span>(необязательно)</span></label>
+                        <label class="form-label">
+                            <span data-i18n="addLabelTags">
+                                Теги
+                            </span>
+                            <span> </span>
+                            <span data-i18n="addOptional">
+                                (необязательно)
+                            </span>
+                        </label>
                         <div class="tag-input-wrap" id="tags-wrap">
                             <!-- chips + add-button rendered by renderTags() -->
                         </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn-primary" id="addQuoteSubmitBtn">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2.5">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="12" y1="5" x2="12" y2="19"/>
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                             </svg>
-                            Добавить цитату
+                            <span data-i18n="addSubmitBtn">
+                                Добавить цитату
+                            </span>
                         </button>
-                        <button type="button" class="btn-secondary" onclick="resetForm()">Очистить</button>
+                        <button type="button" class="btn-secondary" onclick="resetForm()" data-i18n="addClearBtn">
+                            Очистить
+                        </button>
                     </div>
                 </form>
 
                 <hr class="form-divider">
 
-                <h3 class="section-subheading">Импорт из JSON</h3>
-                <p class="import-hint">Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.
+                <h3 class="section-subheading" data-i18n="addImportTitle">
+                    Импорт из JSON
+                </h3>
+                <p class="import-hint">
+                    Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.
                 </p>
                 <label class="import-area" for="import-file">
-                    <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.5">
+                    <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
-                    <strong>Выберите файл или перетащите сюда</strong>
-                    <p>Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code></p>
-                    <input type="file" id="import-file" accept=".json" class="import-file-input"
-                           onchange="importJSON(event)">
+                    <strong data-i18n="addImportDropLabel">
+                        Выберите файл или перетащите сюда
+                    </strong>
+                    <p>
+                        Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code>
+                    </p>
+                    <input type="file" id="import-file" accept=".json" class="import-file-input" onchange="importJSON(event)">
                 </label>
 
                 <div class="json-example-wrap">
-                    <p class="json-example-label">Пример структуры JSON:</p>
-                    <pre class="json-example">[
-  {
-    "text": "Текст цитаты",
-    "author": "Имя автора",
-    "source": "Название книги"
-  }
-]</pre>
+                    <p class="json-example-label" data-i18n="addJsonExampleLabel">
+                        Пример структуры JSON:
+                    </p>
+                    <pre class="json-example">
+                        [
+                            {
+                            "text": "Текст цитаты",
+                            "author": "Имя автора",
+                            "source": "Название книги"
+                            }
+                        ]
+                    </pre>
                 </div>
             </section>
         </div>
@@ -457,102 +547,127 @@
         <!-- SETTINGS -->
         <div class="view" id="view-settings">
             <section class="settings-section">
-                <h2>Настройки</h2>
+                <h2 data-i18n="settingsTitle">
+                    Настройки
+                </h2>
 
                 <!-- ACCOUNT -->
                 <div class="settings-group" id="settings-account-group" style="display:none">
-                    <div class="settings-group-title">Аккаунт</div>
+                    <div class="settings-group-title" data-i18n="settingsAccountTitle">
+                        Аккаунт
+                    </div>
                     <div class="settings-item">
                         <div class="settings-item-info settings-account-info">
                             <div class="settings-account-avatar" aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                                     <circle cx="12" cy="7" r="4"/>
                                 </svg>
                             </div>
                             <div>
-                                <h4>Пользователь</h4>
-                                <p id="settings-account-stats">—</p>
+                                <h4 data-i18n="settingsAccountUser">
+                                    Пользователь
+                                </h4>
+                                <p id="settings-account-stats">
+                                    —
+                                </p>
                             </div>
                         </div>
                         <button class="export-btn" onclick="logout()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                                 <polyline points="16 17 21 12 16 7"/>
                                 <line x1="21" y1="12" x2="9" y2="12"/>
                             </svg>
-                            Выйти
+                            <span data-i18n="settingsLogoutBtn">
+                                Выйти
+                            </span>
                         </button>
                     </div>
                     <div class="settings-item" id="settings-change-password-item">
                         <div class="settings-item-info">
-                            <h4 id="settings-change-password-title">—</h4>
-                            <p id="settings-change-password-desc">—</p>
+                            <h4 id="settings-change-password-title">
+                                —
+                            </h4>
+                            <p id="settings-change-password-desc">
+                                —
+                            </p>
                         </div>
                         <button class="export-btn" onclick="showChangePasswordModal()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                             </svg>
-                            <span id="settings-change-password-btn-label">—</span>
+                            <span id="settings-change-password-btn-label">
+                                —
+                            </span>
                         </button>
                     </div>
                 </div>
 
                 <!-- NOTIFICATIONS -->
                 <div class="settings-group" id="settings-notif-group">
-                    <div class="settings-group-title">Уведомления</div>
+                    <div class="settings-group-title">
+                        Уведомления
+                    </div>
 
                     <!-- iOS PWA hint — shown only when needed -->
                     <div class="settings-item" id="notif-ios-hint" style="display:none">
                         <div class="settings-item-info">
-                            <h4>iPhone / iPad</h4>
-                            <p>Для уведомлений: Safari → <strong>Поделиться</strong> → <strong>«На экран
-                                "Домой"»</strong> → запустите приложение оттуда.</p>
+                            <h4>
+                                iPhone / iPad
+                            </h4>
+                            <p>
+                                Для уведомлений: Safari → <strong>Поделиться</strong> → <strong>«На экран "Домой"»</strong> → запустите приложение оттуда.
+                            </p>
                         </div>
                     </div>
 
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Цитата дня</h4>
-                            <p>Push-уведомление с цитатой. Работает даже с закрытой вкладкой.</p>
+                            <h4 data-i18n="settingsNotifQodTitle">
+                                Цитата дня
+                            </h4>
+                            <p data-i18n="settingsNotifQodDesc">
+                                Push-уведомление с цитатой. Работает даже с закрытой вкладкой.
+                            </p>
                         </div>
-                        <label class="toggle-switch" aria-label="Уведомления о цитате дня">
-                            <input type="checkbox" id="notif-toggle"
-                                   onchange="handleNotifToggle(this.checked)">
+                        <label class="toggle-switch" aria-label="Уведомления о цитате дня" data-i18n-aria="ariaNotificationsToggle">
+                            <input type="checkbox" id="notif-toggle" onchange="handleNotifToggle(this.checked)">
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
 
                     <div class="settings-item" id="notif-interval-row">
                         <div class="settings-item-info">
-                            <h4>Частота</h4>
-                            <p>Как часто отправлять уведомление.</p>
+                            <h4 data-i18n="settingsNotifFreqTitle">
+                                Частота
+                            </h4>
+                            <p data-i18n="settingsNotifFreqDesc">
+                                Как часто отправлять уведомление.
+                            </p>
                         </div>
                         <div class="sort-dropdown" id="notif-interval-dropdown">
                             <button class="sort-btn" id="notif-interval-btn"
                                     onclick="toggleNotifIntervalMenu()"
                                     aria-haspopup="listbox" aria-expanded="false">
-                                <span id="notif-interval-label">Раз в день</span>
-                                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" stroke-width="2.2"
-                                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <span id="notif-interval-label" data-i18n="notifInterval24h">
+                                    Раз в день
+                                </span>
+                                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <polyline points="6 9 12 15 18 9"/>
                                 </svg>
                             </button>
                             <ul class="sort-menu" id="notif-interval-menu" role="listbox"
                                 style="min-width: 160px; left: auto; right: 0;">
-                                <li class="sort-menu-item" data-value="6"
-                                    onclick="selectNotifInterval(this)">Каждые 6 часов
+                                <li class="sort-menu-item" data-value="6" onclick="selectNotifInterval(this)" data-i18n="notifInterval6h">
+                                    Каждые 6 часов
                                 </li>
-                                <li class="sort-menu-item" data-value="12"
-                                    onclick="selectNotifInterval(this)">Каждые 12 часов
+                                <li class="sort-menu-item" data-value="12" onclick="selectNotifInterval(this)" data-i18n="notifInterval12h">
+                                    Каждые 12 часов
                                 </li>
-                                <li class="sort-menu-item active" data-value="24"
-                                    onclick="selectNotifInterval(this)">Раз в день
+                                <li class="sort-menu-item active" data-value="24" onclick="selectNotifInterval(this)" data-i18n="notifInterval24h">
+                                    Раз в день
                                 </li>
                             </ul>
                         </div>
@@ -561,78 +676,105 @@
 
                 <!-- DATA -->
                 <div class="settings-group">
-                    <div class="settings-group-title">Данные</div>
+                    <div class="settings-group-title" data-i18n="settingsDataTitle">
+                        Данные
+                    </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Экспорт в JSON</h4>
-                            <p>Скачайте все ваши цитаты для резервного копирования или переноса.</p>
+                            <h4 data-i18n="settingsExportTitle">
+                                Экспорт в JSON
+                            </h4>
+                            <p data-i18n="settingsExportDesc">
+                                Скачайте все ваши цитаты для резервного копирования или переноса.
+                            </p>
                         </div>
                         <button class="export-btn" onclick="exportJSON()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                 <polyline points="7 10 12 15 17 10"/>
                                 <line x1="12" y1="15" x2="12" y2="3"/>
                             </svg>
-                            Экспорт
+                            <span data-i18n="settingsExportBtn">
+                                Экспорт
+                            </span>
                         </button>
                     </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Копировать всё как текст</h4>
-                            <p>Скопируйте все ваши цитаты в буфер обмена в текстовом формате.</p>
+                            <h4 data-i18n="settingsCopyAllTitle">
+                                Копировать всё как текст
+                            </h4>
+                            <p data-i18n="settingsCopyAllDesc">
+                                Скопируйте все ваши цитаты в буфер обмена в текстовом формате.
+                            </p>
                         </div>
                         <button class="export-btn" id="copy-all-btn" onclick="copyAll()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2"/>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                             </svg>
-                            Копировать
+                            <span data-i18n="settingsCopyAllBtn">
+                                Копировать
+                            </span>
                         </button>
                     </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Импорт из JSON</h4>
-                            <p>Загрузите файл со списком цитат для добавления в коллекцию.</p>
+                            <h4 data-i18n="settingsImportTitle">
+                                Импорт из JSON
+                            </h4>
+                            <p data-i18n="settingsImportDesc">
+                                Загрузите файл со списком цитат для добавления в коллекцию.
+                            </p>
                         </div>
                         <button class="export-btn" onclick="goToImport()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                 <polyline points="17 8 12 3 7 8"/>
                                 <line x1="12" y1="3" x2="12" y2="15"/>
                             </svg>
-                            Импорт
+                            <span data-i18n="settingsImportBtn">
+                                Импорт
+                            </span>
                         </button>
                     </div>
                 </div>
 
                 <!-- DANGER ZONE -->
                 <div class="settings-group">
-                    <div class="settings-group-title">Опасная зона</div>
+                    <div class="settings-group-title" data-i18n="settingsDangerTitle">
+                        Опасная зона
+                    </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Удалить все ваши цитаты</h4>
-                            <p>Безвозвратное удаление всех ваших цитат из приложения.</p>
+                            <h4 data-i18n="settingsDeleteAllTitle">
+                                Удалить все ваши цитаты
+                            </h4>
+                            <p data-i18n="settingsDeleteAllDesc">
+                                Безвозвратное удаление всех ваших цитат из приложения.
+                            </p>
                         </div>
                         <button class="btn-danger" onclick="confirmClear()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="3 6 5 6 21 6"/>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                             </svg>
-                            Удалить всё
+                            <span data-i18n="deleteAllButton">
+                                Удалить всё
+                            </span>
                         </button>
                     </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Удалить аккаунт</h4>
-                            <p>Безвозвратное удаление аккаунта и всех ваших данных.</p>
+                            <h4 data-i18n="settingsDeleteAccountTitle">
+                                Удалить аккаунт
+                            </h4>
+                            <p data-i18n="settingsDeleteAccountDesc">
+                                Безвозвратное удаление аккаунта и всех ваших данных.
+                            </p>
                         </div>
                         <button class="btn-danger" onclick="confirmDeleteAccount()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <!-- Outer circle -->
                                 <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10"/>
                                 <!-- Head -->
@@ -643,45 +785,56 @@
                                 <line x1="17" y1="17" x2="21" y2="21"/>
                                 <line x1="21" y1="17" x2="17" y2="21"/>
                             </svg>
-                            Удалить аккаунт
+                            <span data-i18n="settingsDeleteAccountBtn">
+                                Удалить аккаунт
+                            </span>
                         </button>
                     </div>
                 </div>
 
                 <!-- ABOUT -->
                 <div class="settings-group">
-                    <div class="settings-group-title">О приложении</div>
+                    <div class="settings-group-title" data-i18n="settingsAboutTitle">
+                        О приложении
+                    </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
                             <h4>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                     stroke-width="1.8"
-                                     style="display:inline-block;vertical-align:-2px;margin-right:5px;color:var(--color-primary)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:inline-block;vertical-align:-2px;margin-right:5px;color:var(--color-primary)">
                                     <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                                     <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
                                 </svg>
                                 Epigraph
                             </h4>
-                            <p>Личная коллекция цитат — храните, читайте и делитесь тем, что вас вдохновляет.</p>
+                            <p data-i18n="settingsAboutDesc">
+                                Личная коллекция цитат — храните, читайте и делитесь тем, что вас вдохновляет.
+                            </p>
                         </div>
-                        <span class="settings-version-badge" id="settings-version-badge">…</span>
+                        <span class="settings-version-badge" id="settings-version-badge">
+                            …
+                        </span>
                     </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Хранение данных</h4>
-                            <p>Ваши цитаты хранятся в облаке и доступны с любого устройства. Используйте экспорт для
-                                резервных копий.</p>
+                            <h4 data-i18n="settingsStorageTitle">
+                                Хранение данных
+                            </h4>
+                            <p data-i18n="settingsStorageDesc">
+                                Ваши цитаты хранятся в облаке и доступны с любого устройства. Используйте экспорт для резервных копий.
+                            </p>
                         </div>
                     </div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Исходный код</h4>
-                            <p>Проект с открытым исходным кодом на GitHub.</p>
+                            <h4 data-i18n="settingsSourceTitle">
+                                Исходный код
+                            </h4>
+                            <p data-i18n="settingsSourceDesc">
+                                Проект с открытым исходным кодом на GitHub.
+                            </p>
                         </div>
-                        <a class="settings-github-link" href="https://github.com/mkrasikoff/epigraph" target="_blank"
-                           rel="noopener noreferrer">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <a class="settings-github-link" href="https://github.com/mkrasikoff/epigraph" target="_blank" rel="noopener noreferrer">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
                             </svg>
                             GitHub
