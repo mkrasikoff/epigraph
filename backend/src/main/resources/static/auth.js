@@ -278,6 +278,10 @@ function pluralQuotes(n) {
 }
 
 function toggleAuthMode() {
+    if (document.getElementById('auth-forgot-panel')) {
+        hideForgotPasswordForm();
+    }
+
     authMode = authMode === 'login' ? 'register' : 'login';
     const isRegister = authMode === 'register';
 
