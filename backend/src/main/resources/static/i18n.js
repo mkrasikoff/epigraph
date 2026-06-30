@@ -31,6 +31,7 @@ const TRANSLATIONS = {
         authPasswordHint:               'Минимум 8 символов, хотя бы одна буква и одна цифра.',
         authDivider:                    'или',
         authGoogleButton:               'Войти через Google',
+        authYandexButton:               'Войти через Яндекс',
 
         // Auth validation errors ────────────────────────────────────────────────────────
         authErrorFillAllFields:         'Заполните все поля',
@@ -43,6 +44,7 @@ const TRANSLATIONS = {
         authErrorPasswordPattern:       'Минимум 8 символов, буква и цифра.',
         authErrorWrongCredentials:      'Неверный email или пароль',
         authGeoBlocked:                 'Вход через Google недоступен в вашем регионе',
+        authGeoBlockedYandex:           'Вход через Яндекс доступен только из России',
         authErrorInvalidEmailServer:    'Некорректный email',
         authErrorConnection:            'Ошибка соединения',
 

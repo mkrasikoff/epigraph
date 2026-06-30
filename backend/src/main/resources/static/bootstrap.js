@@ -45,8 +45,6 @@
 
     loadBanner();
 
-    loadBanner();
-
     // If Google OAuth — token inside query-param
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token');
@@ -62,6 +60,11 @@
         window.history.replaceState({}, document.title, '/');
         const errorEl = document.getElementById('auth-error');
         if (errorEl) errorEl.textContent = t('authGeoBlocked');
+    }
+    if (urlError === 'geo_blocked_yandex') {
+        window.history.replaceState({}, document.title, '/');
+        const errorEl = document.getElementById('auth-error');
+        if (errorEl) errorEl.textContent = t('authGeoBlockedYandex');
     }
 
     // If password-reset link — handle before normal auth flow
