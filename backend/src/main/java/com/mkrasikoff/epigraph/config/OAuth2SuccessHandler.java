@@ -34,18 +34,38 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                                         Authentication authentication) throws IOException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
 
-        String email = oauthUser.getAttribute("email");
-        String providerId = oauthUser.getAttribute("sub");
+        // Identify provider
+        String providerId;
+        String email;
+        String providerName;
 
-        // Проверяем ДО orElseGet — нужно знать, новый ли это пользователь
+        if (oauthUser.getAttribute("sub") != null) {
+            // Google
+            email = oauthUser.getAttribute("email");
+            providerId = oauthUser.getAttribute("sub");
+            providerName = "google";
+        } else {
+            // Yandex
+            Object idObj = oauthUser.getAttribute("id");
+            providerId = idObj != null ? idObj.toString() : null;
+            email = oauthUser.getAttribute("default_email");
+            providerName = "yandex";
+        }
+
         boolean isNewUser = !userRepository.existsByEmail(email);
+
+        String finalEmail = email;
+        String finalProviderId = providerId;
+        String finalProviderName = providerName;
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setProvider("google");
-            newUser.setProviderId(providerId);
+
+            newUser.setEmail(finalEmail);
+            newUser.setProvider(finalProviderName);
+            newUser.setProviderId(finalProviderId);
             newUser.setCreatedAt(System.currentTimeMillis());
+
             return userRepository.save(newUser);
         });
 

@@ -32,13 +32,25 @@ public class GeoBlockFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (enabled && request.getRequestURI().equals("/oauth2/authorization/google")) {
+        if (enabled) {
+            String uri = request.getRequestURI();
             String ip = request.getRemoteAddr();
             String country = geoIpService.getCountryCode(ip);
 
-            if (country != null && blockedCountries.contains(country)) {
-                response.sendRedirect("/?error=geo_blocked");
-                return;
+            // Google — block for RU
+            if (uri.equals("/oauth2/authorization/google")) {
+                if (country != null && blockedCountries.contains(country)) {
+                    response.sendRedirect("/?error=geo_blocked");
+                    return;
+                }
+            }
+
+            // Yandex — block for every region, except RU
+            if (uri.equals("/oauth2/authorization/yandex")) {
+                if (country == null || !blockedCountries.contains(country)) {
+                    response.sendRedirect("/?error=geo_blocked_yandex");
+                    return;
+                }
             }
         }
 
