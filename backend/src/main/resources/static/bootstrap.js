@@ -56,6 +56,14 @@
         window.history.replaceState({}, document.title, '/');
     }
 
+    // Handle geo-block error from Google OAuth
+    const urlError = urlParams.get('error');
+    if (urlError === 'geo_blocked') {
+        window.history.replaceState({}, document.title, '/');
+        const errorEl = document.getElementById('auth-error');
+        if (errorEl) errorEl.textContent = t('authGeoBlocked');
+    }
+
     // If password-reset link — handle before normal auth flow
     const resetHandled = await handleResetTokenFromUrl();
     if (resetHandled) {
