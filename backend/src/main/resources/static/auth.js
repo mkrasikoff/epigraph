@@ -458,6 +458,10 @@ function loginWithGoogle() {
     window.location.href = '/oauth2/authorization/google';
 }
 
+function loginWithYandex() {
+    window.location.href = '/oauth2/authorization/yandex';
+}
+
 function logout() {
     clearToken();
     showGuestMode();
