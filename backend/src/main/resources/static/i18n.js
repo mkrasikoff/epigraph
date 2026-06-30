@@ -42,6 +42,7 @@ const TRANSLATIONS = {
         authErrorPasswordNoDigit:       'Пароль должен содержать минимум одну цифру',
         authErrorPasswordPattern:       'Минимум 8 символов, буква и цифра.',
         authErrorWrongCredentials:      'Неверный email или пароль',
+        authGeoBlocked:                 'Вход через Google недоступен в вашем регионе',
         authErrorInvalidEmailServer:    'Некорректный email',
         authErrorConnection:            'Ошибка соединения',
 
