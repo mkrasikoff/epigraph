@@ -44,6 +44,7 @@
     }
 
     loadBanner();
+    initAuthButtons();
 
     // If Google OAuth — token inside query-param
     const urlParams = new URLSearchParams(window.location.search);
