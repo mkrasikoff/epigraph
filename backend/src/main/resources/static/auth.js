@@ -464,9 +464,9 @@ function loginWithYandex() {
 
 async function initAuthButtons() {
     try {
-        const res = await fetch('http://ip-api.com/json/?fields=countryCode');
+        const res = await fetch('/api/geo');
         const data = await res.json();
-        const isRussia = data.countryCode === 'RU';
+        const isRussia = data.country === 'RU';
 
         document.querySelectorAll('.btn-google').forEach(btn => {
             btn.style.display = isRussia ? 'none' : '';
