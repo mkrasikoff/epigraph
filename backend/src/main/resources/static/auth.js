@@ -462,6 +462,26 @@ function loginWithYandex() {
     window.location.href = '/oauth2/authorization/yandex';
 }
 
+async function initAuthButtons() {
+    try {
+        const res = await fetch('http://ip-api.com/json/?fields=countryCode');
+        const data = await res.json();
+        const isRussia = data.countryCode === 'RU';
+
+        document.querySelectorAll('.btn-google').forEach(btn => {
+            btn.style.display = isRussia ? 'none' : '';
+        });
+        document.querySelectorAll('.btn-yandex').forEach(btn => {
+            btn.style.display = isRussia ? '' : 'none';
+        });
+    } catch (e) {
+        // On error — show all OAuth buttons
+        document.querySelectorAll('.btn-google, .btn-yandex').forEach(btn => {
+            btn.style.display = '';
+        });
+    }
+}
+
 function logout() {
     clearToken();
     showGuestMode();

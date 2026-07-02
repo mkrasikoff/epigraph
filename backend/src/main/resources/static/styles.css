@@ -2075,6 +2075,7 @@ body.no-scroll {
 .auth-card--register > #auth-submit-btn,
 .auth-card--register > .auth-divider,
 .auth-card--register > .btn-google,
+.auth-card--register > .btn-yandex,
 .auth-card--register > .auth-switch {
     display: none !important;
 }
@@ -2126,8 +2127,9 @@ body.no-scroll {
         text-align: center;
     }
 
-    /* Google button centered */
-    .btn-google {
+    /* OAuth buttons centered */
+    .btn-google,
+    .btn-yandex {
         justify-content: center;
     }
 }
@@ -2149,6 +2151,28 @@ body.no-scroll {
 }
 
 .btn-google:hover {
+    background: var(--color-surface-offset);
+    border-color: var(--color-primary);
+}
+
+/* Yandex OAuth button — mirrors .btn-google */
+.btn-yandex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-yandex:hover {
     background: var(--color-surface-offset);
     border-color: var(--color-primary);
 }
