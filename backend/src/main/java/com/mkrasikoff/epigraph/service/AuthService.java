@@ -36,7 +36,7 @@ public class AuthService {
      * Does NOT return a JWT — the client must call verify() to complete registration.
      */
     @Transactional
-    public void register(String email, String rawPassword) {
+    public void register(String email, String rawPassword, String username) {
         userRepository.findByEmail(email).ifPresent(existing -> {
             if (existing.isEmailVerified()) {
                 throw new IllegalArgumentException("Этот email уже зарегистрирован");
@@ -52,6 +52,7 @@ public class AuthService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setProvider("local");
+        user.setUsername(username);
         user.setCreatedAt(System.currentTimeMillis());
         user.setEmailVerified(false);
         userRepository.save(user);

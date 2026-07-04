@@ -64,7 +64,27 @@ const Api = {
      * @returns {Promise<Response>}
      */
     deleteAll: () =>
-        fetch(API, { method: 'DELETE', headers: authHeaders() })
+        fetch(API, { method: 'DELETE', headers: authHeaders() }),
+
+    /**
+     * Fetches the authenticated user's own profile (id, email, username).
+     * @returns {Promise<Object|null>} Profile object, or null on failure/guest.
+     */
+    getMe: () =>
+        fetch(`${AUTH_API}/me`, { headers: authHeaders() })
+            .then(r => r.ok ? r.json() : null),
+
+    /**
+     * Updates the authenticated user's display username.
+     * @param {string} username
+     * @returns {Promise<Response>}
+     */
+    updateUsername: (username) =>
+        fetch('/api/user/me/username', {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ username })
+        })
 
 };
 

@@ -22,6 +22,7 @@
  * - setToken()                {fn}  — defined in auth.js
  * - clearToken()              {fn}  — defined in auth.js
  * - authHeaders()             {fn}  — defined in auth.js
+ * - loadCurrentUser()         {fn}  — defined in auth.js
  * - applyHashRoute()          {fn}  — defined in auth.js
  * - hideLoadingOverlay()      {fn}  — defined in auth.js
  * - authSubmit()              {fn}  — defined in auth.js
@@ -110,6 +111,7 @@
         const rawQuotes = await res.json();
         quotes = rawQuotes.map(q => ({...q, tags: tagsFromCsv(q.tags)}));
         hideGuestMode();
+        await loadCurrentUser();
 
         // Navigate to the section matching the URL hash (or default to QoD)
         applyHashRoute();

@@ -102,8 +102,22 @@ function hideGuestMode() {
 }
 
 /**
- * Updates the account section in Settings with current user's quote stats.
- * Shows the section for authenticated users, hides for guests.
+ * Fetches the authenticated user's profile (id, email, username) and caches
+ * it in `currentUser` for display in Settings > Account. No-ops to null on
+ * failure — callers fall back to placeholder text.
+ */
+async function loadCurrentUser() {
+    try {
+        currentUser = await Api.getMe();
+    } catch (e) {
+        currentUser = null;
+    }
+}
+
+/**
+ * Updates the account section in Settings with the current user's profile
+ * (username, id, email) and quote stats. Shows the section for authenticated
+ * users, hides for guests.
  */
 function updateSettingsAccount() {
     const accountGroup = document.getElementById('settings-account-group');
@@ -116,6 +130,20 @@ function updateSettingsAccount() {
 
     accountGroup.style.display = '';
 
+    const usernameEl = document.getElementById('settings-account-username');
+    const idEl = document.getElementById('settings-account-id');
+    const emailEl = document.getElementById('settings-account-email');
+
+    if (currentUser) {
+        usernameEl.textContent = '@' + (currentUser.username || ('user' + currentUser.id));
+        idEl.textContent = '#' + currentUser.id;
+        emailEl.textContent = currentUser.email || '';
+    } else {
+        usernameEl.textContent = '—';
+        idEl.textContent = '';
+        emailEl.textContent = '';
+    }
+
     const total = quotes.length;
     const favCount = quotes.filter(q => q.fav).length;
 
@@ -126,6 +154,106 @@ function updateSettingsAccount() {
     document.getElementById('settings-change-password-title').textContent = t('changePasswordTitle');
     document.getElementById('settings-change-password-desc').textContent = t('changePasswordSettingsDesc');
     document.getElementById('settings-change-password-btn-label').textContent = t('changePasswordButton');
+}
+
+/**
+ * Opens the modal to change the authenticated user's display username.
+ */
+function showEditUsernameModal() {
+    showModal(
+        t('editUsernameTitle'),
+        `<div class="auth-field" style="margin-bottom:0">
+             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
+                 ${t('editUsernameLabel')}
+             </label>
+             <input id="eu-username" type="text" class="modal-confirm-input"
+                    style="margin-top:var(--space-1)"
+                    maxlength="20"
+                    placeholder="${t('editUsernamePlaceholder')}"
+                    value="${currentUser?.username || ''}"
+                    autocomplete="off">
+         </div>
+         <p id="eu-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
+         color:#c0392b;min-height:1.2em"></p>`,
+        [
+            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
+            {
+                label: t('changePasswordSubmit'),
+                cls: 'btn-primary',
+                id: 'eu-submit-btn',
+                action: submitEditUsername
+            }
+        ]
+    );
+
+    const input = document.getElementById('eu-username');
+    setTimeout(() => input?.focus(), 100);
+
+    input?.addEventListener('input', () => validateUsernameInput(input));
+    validateUsernameInput(input);
+}
+
+/**
+ * Validates the username field live, mirroring the backend's format rules
+ * (3–20 chars, latin letters/digits/underscore), and toggles the submit button.
+ * @param {HTMLInputElement} input
+ */
+function validateUsernameInput(input) {
+    const btn = document.getElementById('eu-submit-btn');
+    const errorEl = document.getElementById('eu-error');
+    if (!btn || !input) return;
+
+    const value = input.value.trim();
+    let message = '';
+
+    if (!value) {
+        message = t('editUsernameErrorRequired');
+    } else if (!USERNAME_REGEX.test(value)) {
+        message = (value.length < 3 || value.length > 20)
+            ? t('editUsernameErrorLength')
+            : t('editUsernameErrorChars');
+    }
+
+    if (errorEl) errorEl.textContent = message;
+    btn.disabled = !!message;
+    btn.classList.toggle('btn-disabled-empty', !!message);
+}
+
+/**
+ * Submits the new username to PATCH /api/user/me/username.
+ */
+async function submitEditUsername() {
+    const input = document.getElementById('eu-username');
+    const errorEl = document.getElementById('eu-error');
+    const btn = document.getElementById('eu-submit-btn');
+    const username = input?.value.trim();
+
+    if (!username || !USERNAME_REGEX.test(username)) {
+        validateUsernameInput(input);
+        return;
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await Api.updateUsername(username);
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            if (errorEl) errorEl.textContent = data?.message || t('editUsernameErrorInvalid');
+            return;
+        }
+
+        if (currentUser) currentUser.username = username;
+        closeModal();
+        updateSettingsAccount();
+        toast(t('editUsernameSuccess'));
+
+    } catch {
+        if (errorEl) errorEl.textContent = t('authErrorConnection');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
 }
 
 /**
@@ -389,6 +517,7 @@ async function authSubmit() {
         hideAuthModal();
         hideGuestMode();
         await loadData();
+        await loadCurrentUser();
         renderQod();
 
     } catch (e) {
@@ -404,11 +533,17 @@ async function authSubmit() {
  */
 async function authSubmitRegister() {
     const email = document.getElementById('auth-email-reg')?.value.trim() || '';
+    const username = document.getElementById('auth-username-reg')?.value.trim() || '';
     const password = document.getElementById('auth-password-reg')?.value || '';
     const errorEl = document.getElementById('auth-error-reg');
 
     if (!EMAIL_REGEX.test(email)) {
         if (errorEl) errorEl.textContent = t('authErrorInvalidEmailDot');
+        return;
+    }
+
+    if (!USERNAME_REGEX.test(username)) {
+        if (errorEl) errorEl.textContent = t('authErrorUsernameInvalid');
         return;
     }
 
@@ -434,7 +569,7 @@ async function authSubmitRegister() {
         const res = await fetch(AUTH_API + '/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, username, password })
         });
 
         const data = res.status === 202 ? null : await res.json().catch(() => null);
@@ -484,6 +619,7 @@ async function initAuthButtons() {
 
 function logout() {
     clearToken();
+    currentUser = null;
     showGuestMode();
     switchView('qod');
 }
@@ -582,6 +718,7 @@ async function submitVerifyCode(email) {
         hideAuthModal();
         hideGuestMode();
         await loadData();
+        await loadCurrentUser();
         await loadQod();
 
     } catch {
@@ -863,6 +1000,7 @@ async function submitPasswordReset(resetToken) {
         hideAuthModal();
         hideGuestMode();
         await loadData();
+        await loadCurrentUser();
         switchView('settings');
         toast(t('changePasswordSuccess'));
 

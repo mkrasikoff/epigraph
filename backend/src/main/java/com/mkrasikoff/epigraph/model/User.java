@@ -47,4 +47,13 @@ public class User {
      */
     @Column(nullable = false)
     private boolean emailVerified = true;
+
+    /**
+     * Display name chosen by the user. Purely cosmetic — not unique, not used
+     * as an identifier anywhere. Defaults to a name derived from the OAuth
+     * provider (Google/Yandex) on first login, or is set explicitly at
+     * registration for local accounts.
+     */
+    @Column(length = 20)
+    private String username;
 }

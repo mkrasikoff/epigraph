@@ -90,10 +90,6 @@ class UserServiceTest {
                 .hasMessageContaining("не найден");
     }
 
-    // -------------------------------------------------------------------------
-    // initiatePasswordReset
-    // -------------------------------------------------------------------------
-
     @Test
     @DisplayName("initiatePasswordReset: sends reset link for verified user")
     void initiatePasswordReset_sendsLink_forVerifiedUser() {
@@ -132,10 +128,6 @@ class UserServiceTest {
         verify(emailService, never()).sendPasswordResetLink(any(), any());
     }
 
-    // -------------------------------------------------------------------------
-    // getEmailByUserId
-    // -------------------------------------------------------------------------
-
     @Test
     @DisplayName("getEmailByUserId: returns email for existing user")
     void getEmailByUserId_returnsEmail() {
@@ -155,5 +147,64 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.getEmailByUserId(99L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("не найден");
+    }
+
+    @Test
+    @DisplayName("findById: returns user when found")
+    void findById_returnsUser_whenFound() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findById(USER_ID);
+
+        assertThat(result).contains(user);
+    }
+
+    @Test
+    @DisplayName("findById: returns empty when user not found")
+    void findById_returnsEmpty_whenNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Optional<User> result = userService.findById(99L);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("updateUsername: sets username and saves user")
+    void updateUsername_setsUsernameAndSaves() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updateUsername(USER_ID, "newname");
+
+        assertThat(user.getUsername()).isEqualTo("newname");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("updateUsername: allows non-unique username shared with another user")
+    void updateUsername_allowsDuplicateUsername() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        user.setUsername("taken");
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updateUsername(USER_ID, "taken");
+
+        assertThat(user.getUsername()).isEqualTo("taken");
+        verify(userRepository).save(user);
+        verify(userRepository, never()).existsByEmail(any());
+    }
+
+    @Test
+    @DisplayName("updateUsername: throws when user not found")
+    void updateUsername_throws_whenUserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updateUsername(99L, "newname"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("не найден");
+
+        verify(userRepository, never()).save(any());
     }
 }
