@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.AuthRequest;
 import com.mkrasikoff.epigraph.dto.AuthResponse;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.MeResponse;
 import com.mkrasikoff.epigraph.dto.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.VerifyRequest;
 import com.mkrasikoff.epigraph.service.AuthService;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,9 +42,21 @@ public class AuthController {
     public void register(@Valid @RequestBody RegisterRequest request) {
         log.info("Registration attempt — email = {}", request.getEmail());
 
-        authService.register(request.getEmail(), request.getPassword());
+        authService.register(request.getEmail(), request.getPassword(), request.getUsername());
 
         log.info("Verification code sent — email = {}", request.getEmail());
+    }
+
+    /**
+     * Returns the authenticated user's own profile (id, email, username).
+     * Used by the client to display real account info instead of a placeholder.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> me(@AuthenticationPrincipal Long userId) {
+        return userService.findById(userId)
+                .map(user -> ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername())))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ErrorResponse("Пользователь не найден")));
     }
 
     @PostMapping("/verify")

@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.AuthResponse;
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;
@@ -56,6 +57,23 @@ public class UserController {
             log.info("Password changed — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse("Пароль успешно изменён"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Updates the authenticated user's display name (username).
+     * Purely cosmetic — not unique across users.
+     */
+    @PatchMapping("/me/username")
+    public ResponseEntity<?> updateUsername(@AuthenticationPrincipal Long userId,
+                                            @Valid @RequestBody UpdateUsernameRequest request) {
+        try {
+            userService.updateUsername(userId, request.getUsername());
+            log.info("Username updated — userId = {}", userId);
+
+            return ResponseEntity.ok(new ErrorResponse("Имя пользователя обновлено"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }

@@ -1,0 +1,16 @@
+package com.mkrasikoff.epigraph.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+/**
+ * Response for GET /api/auth/me — the authenticated user's own profile info.
+ */
+@Data
+@AllArgsConstructor
+public class MeResponse {
+
+    private Long id;
+    private String email;
+    private String username;
+}

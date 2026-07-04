@@ -7,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -70,5 +72,23 @@ public class UserService {
         return userRepository.findById(userId)
                 .map(User::getEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    /**
+     * Sets the user's display name (username). Purely cosmetic — not unique,
+     * validated only for format/length by the controller-level DTO.
+     */
+    @Transactional
+    public void updateUsername(Long userId, String username) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+
+        user.setUsername(username);
+        userRepository.save(user);
     }
 }
