@@ -290,7 +290,7 @@ class AuthControllerTest {
         user.setId(42L);
         user.setEmail("user@example.com");
         user.setUsername("testuser");
-        when(userService.findById(42L)).thenReturn(Optional.of(user));
+        when(userService.findById(null)).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isOk())
@@ -317,7 +317,7 @@ class AuthControllerTest {
         User user = new User();
         user.setId(7L);
         user.setEmail("nouser@example.com");
-        when(userService.findById(7L)).thenReturn(Optional.of(user));
+        when(userService.findById(null)).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isOk())

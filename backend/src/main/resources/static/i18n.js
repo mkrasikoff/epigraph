@@ -32,6 +32,8 @@ const TRANSLATIONS = {
         authDivider:                    'или',
         authGoogleButton:               'Войти через Google',
         authYandexButton:               'Войти через Яндекс',
+        authUsernameLabel:              'Имя пользователя',
+        authUsernamePlaceholder:        'ivan_petrov',
 
         // Auth validation errors ────────────────────────────────────────────────────────
         authErrorFillAllFields:         'Заполните все поля',
@@ -47,6 +49,7 @@ const TRANSLATIONS = {
         authGeoBlockedYandex:           'Вход через Яндекс доступен только из России',
         authErrorInvalidEmailServer:    'Некорректный email',
         authErrorConnection:            'Ошибка соединения',
+        authErrorUsernameInvalid:       'Имя пользователя: 3–20 символов, латинские буквы, цифры и подчёркивание',
 
         // Auth Email Verification ────────────────────────────────────────────────────────
         verifyTitle:            'Подтвердите email',
@@ -71,6 +74,16 @@ const TRANSLATIONS = {
         changePasswordSubmit:             'Сохранить',
         changePasswordSuccess:            'Пароль успешно изменён',
         changePasswordErrorMismatch:      'Пароли не совпадают',
+
+        // ── Edit username modal ───────────────────────────────────────────────
+        editUsernameTitle:                'Изменить имя пользователя',
+        editUsernameLabel:                'Имя пользователя',
+        editUsernamePlaceholder:          'ivan_petrov',
+        editUsernameErrorRequired:        'Введите имя пользователя',
+        editUsernameErrorLength:          'От 3 до 20 символов',
+        editUsernameErrorChars:           'Только латинские буквы, цифры и подчёркивание',
+        editUsernameErrorInvalid:         'Некорректное имя пользователя',
+        editUsernameSuccess:              'Имя пользователя обновлено',
 
         // ── Forgot password ──────────────────────────────────────────────────────
         forgotPasswordLink:               'Забыли пароль?',
@@ -195,7 +208,7 @@ const TRANSLATIONS = {
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Настройки',
         settingsAccountTitle:           'Аккаунт',
-        settingsAccountUser:            'Пользователь',
+        settingsAccountEditAria:        'Изменить имя пользователя',
         settingsLogoutBtn:              'Выйти',
         settingsNotifTitle:             'Уведомления',
         settingsNotifQodTitle:          'Цитата дня',

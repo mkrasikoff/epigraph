@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -63,14 +64,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             suggestedUsername = login != null ? login : displayName;
         }
 
-        boolean isNewUser = !userRepository.existsByEmail(email);
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        boolean isNewUser = existingUser.isEmpty();
 
         String finalEmail = email;
         String finalProviderId = providerId;
         String finalProviderName = providerName;
         String finalUsername = sanitizeUsername(suggestedUsername);
 
-        User user = userRepository.findByEmail(email).orElseGet(() -> {
+        User user = existingUser.orElseGet(() -> {
             User newUser = new User();
 
             newUser.setEmail(finalEmail);
