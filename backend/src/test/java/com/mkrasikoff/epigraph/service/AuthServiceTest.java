@@ -49,13 +49,14 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("pass123")).thenReturn("encoded");
 
-        authService.register("test@mail.com", "pass123");
+        authService.register("test@mail.com", "pass123", "testuser");
 
         verify(userRepository).save(argThat(u ->
                 "test@mail.com".equals(u.getEmail()) &&
                         "encoded".equals(u.getPassword()) &&
                         !u.isEmailVerified() &&
-                        "local".equals(u.getProvider())
+                        "local".equals(u.getProvider()) &&
+                        "testuser".equals(u.getUsername())
         ));
         verify(emailVerificationService).sendCode("test@mail.com");
     }
@@ -66,7 +67,7 @@ class AuthServiceTest {
         User existing = buildUser(1L, "test@mail.com", true);
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> authService.register("test@mail.com", "pass"))
+        assertThatThrownBy(() -> authService.register("test@mail.com", "pass", "testuser"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("уже зарегистрирован");
     }
@@ -78,7 +79,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(stale));
         when(passwordEncoder.encode(any())).thenReturn("encoded");
 
-        authService.register("test@mail.com", "newpass");
+        authService.register("test@mail.com", "newpass", "testuser");
 
         verify(userRepository).delete(stale);
         verify(userRepository).flush();

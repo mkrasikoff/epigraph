@@ -1,6 +1,7 @@
 package com.mkrasikoff.epigraph.controller;
 
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
+import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -186,5 +187,85 @@ class UserControllerTest {
                         .content("{\"resetToken\":\"valid-reset-token\",\"newPassword\":\"weak\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Слабый пароль"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/username: returns 200 on success")
+    void updateUsername_returnsOk() throws Exception {
+        UpdateUsernameRequest request = new UpdateUsernameRequest();
+        request.setUsername("newname");
+        doNothing().when(userService).updateUsername(isNull(), eq("newname"));
+
+        mockMvc.perform(patch("/api/user/me/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Имя пользователя обновлено"));
+
+        verify(userService).updateUsername(isNull(), eq("newname"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/username: returns 400 when service throws")
+    void updateUsername_returnsBadRequest_whenServiceThrows() throws Exception {
+        UpdateUsernameRequest request = new UpdateUsernameRequest();
+        request.setUsername("newname");
+        doThrow(new IllegalArgumentException("Пользователь не найден"))
+                .when(userService).updateUsername(isNull(), eq("newname"));
+
+        mockMvc.perform(patch("/api/user/me/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/username: returns 400 when username too short")
+    void updateUsername_returnsBadRequest_whenTooShort() throws Exception {
+        UpdateUsernameRequest request = new UpdateUsernameRequest();
+        request.setUsername("ab");
+
+        mockMvc.perform(patch("/api/user/me/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/username: returns 400 when username too long")
+    void updateUsername_returnsBadRequest_whenTooLong() throws Exception {
+        UpdateUsernameRequest request = new UpdateUsernameRequest();
+        request.setUsername("a".repeat(21));
+
+        mockMvc.perform(patch("/api/user/me/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/username: returns 400 when username has invalid characters")
+    void updateUsername_returnsBadRequest_whenInvalidChars() throws Exception {
+        UpdateUsernameRequest request = new UpdateUsernameRequest();
+        request.setUsername("bad name!");
+
+        mockMvc.perform(patch("/api/user/me/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/username: returns 400 when username is blank")
+    void updateUsername_returnsBadRequest_whenBlank() throws Exception {
+        UpdateUsernameRequest request = new UpdateUsernameRequest();
+        request.setUsername("");
+
+        mockMvc.perform(patch("/api/user/me/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 }

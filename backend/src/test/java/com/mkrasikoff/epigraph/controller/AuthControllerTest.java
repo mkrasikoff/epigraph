@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.AuthRequest;
 import com.mkrasikoff.epigraph.dto.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.VerifyRequest;
+import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AuthService;
 import com.mkrasikoff.epigraph.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,11 +17,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,15 +55,16 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("user@example.com");
         request.setPassword("password1");
+        request.setUsername("testuser");
 
-        doNothing().when(authService).register(eq("user@example.com"), anyString());
+        doNothing().when(authService).register(eq("user@example.com"), anyString(), anyString());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted());
 
-        verify(authService).register(eq("user@example.com"), anyString());
+        verify(authService).register(eq("user@example.com"), anyString(), eq("testuser"));
     }
 
     @Test
@@ -68,6 +73,7 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("not-an-email");
         request.setPassword("password1");
+        request.setUsername("testuser");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,6 +87,7 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("user@example.com");
         request.setPassword("abc");
+        request.setUsername("testuser");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,6 +101,34 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("user@example.com");
         request.setPassword("onlyletters");
+        request.setUsername("testuser");
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /api/auth/register: returns 400 when username is blank")
+    void register_returnsBadRequest_whenUsernameBlank() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("user@example.com");
+        request.setPassword("password1");
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /api/auth/register: returns 400 when username has invalid characters")
+    void register_returnsBadRequest_whenUsernameInvalidChars() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("user@example.com");
+        request.setPassword("password1");
+        request.setUsername("bad name!");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -246,5 +281,48 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"\"}"))
                 .andExpect(status().isAccepted());
+    }
+
+    @Test
+    @DisplayName("GET /api/auth/me: returns 200 with profile when user found")
+    void me_returnsOkWithProfile() throws Exception {
+        User user = new User();
+        user.setId(42L);
+        user.setEmail("user@example.com");
+        user.setUsername("testuser");
+        when(userService.findById(null)).thenReturn(Optional.of(user));
+
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(42))
+                .andExpect(jsonPath("$.email").value("user@example.com"))
+                .andExpect(jsonPath("$.username").value("testuser"));
+    }
+
+    @Test
+    @DisplayName("GET /api/auth/me: returns 404 when user not found")
+    void me_returnsNotFound_whenUserMissing() throws Exception {
+        when(userService.findById(null)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+    }
+
+    @Test
+    @DisplayName("GET /api/auth/me: returns null username when not set")
+    void me_returnsNullUsername_whenNotSet() throws Exception {
+        User user = new User();
+        user.setId(7L);
+        user.setEmail("nouser@example.com");
+        when(userService.findById(null)).thenReturn(Optional.of(user));
+
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(7))
+                .andExpect(jsonPath("$.email").value("nouser@example.com"))
+                .andExpect(jsonPath("$.username").doesNotExist());
     }
 }

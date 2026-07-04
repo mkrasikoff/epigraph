@@ -21,6 +21,7 @@
  * - currentQodIndex             {number}
  * - editingId                   {number}
  * - currentSort                 {string}  — default sort
+ * - currentUser                 {Object|null} — {id, email, username} of the logged-in user
  */
 
 const API = '/api/quotes';
@@ -36,6 +37,9 @@ let currentFilter = 'all';
 let currentQodIndex = -1;
 let editingId = null;
 let currentSort = 'date_desc'; // default sort
+
+/** Cached profile of the logged-in user, loaded via Api.getMe(). Null for guests. */
+let currentUser = null;
 
 // =============================================================================
 // TAG SERIALIZATION HELPERS
@@ -73,3 +77,6 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 // Password: ≥8 chars, ≥1 Latin or Cyrillic letter, ≥1 digit. No upper-bound cap.
 const PASSWORD_REGEX = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d).{8,}$/;
+
+// Username: 3–20 chars, Latin letters, digits, underscore only — mirrors UpdateUsernameRequest on the backend.
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
