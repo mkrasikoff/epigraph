@@ -85,6 +85,11 @@ const TRANSLATIONS = {
         editUsernameErrorInvalid:         'Некорректное имя пользователя',
         editUsernameSuccess:              'Имя пользователя обновлено',
 
+        // ── Avatar picker modal ────────────────────────────────────────────────
+        avatarPickerTitle:                'Выберите иконку',
+        avatarPickerSuccess:              'Иконка обновлена',
+        avatarPickerError:                'Не удалось обновить иконку',
+
         // ── Forgot password ──────────────────────────────────────────────────────
         forgotPasswordLink:               'Забыли пароль?',
         forgotPasswordTitle:              'Восстановление пароля',
@@ -209,6 +214,7 @@ const TRANSLATIONS = {
         settingsTitle:                  'Настройки',
         settingsAccountTitle:           'Аккаунт',
         settingsAccountEditAria:        'Изменить имя пользователя',
+        settingsAccountAvatarAria:      'Изменить иконку',
         settingsLogoutBtn:              'Выйти',
         settingsNotifTitle:             'Уведомления',
         settingsNotifQodTitle:          'Цитата дня',

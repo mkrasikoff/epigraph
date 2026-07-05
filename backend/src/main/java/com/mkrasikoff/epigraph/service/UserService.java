@@ -91,4 +91,17 @@ public class UserService {
         user.setUsername(username);
         userRepository.save(user);
     }
+
+    /**
+     * Sets the user's avatar icon. Value is restricted to a fixed set of
+     * presets, validated at the controller-level DTO.
+     */
+    @Transactional
+    public void updateAvatarIcon(Long userId, String avatarIcon) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+
+        user.setAvatarIcon(avatarIcon);
+        userRepository.save(user);
+    }
 }
