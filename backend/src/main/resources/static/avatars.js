@@ -11,8 +11,8 @@
  * Provides (globals):
  * - AVATAR_ICON_KEYS   {string[]} — display order for the icon picker
  * - AVATAR_ICONS       {Object}   — key -> inline SVG markup string
- * - AVATAR_ICON_LABELS {Object}   — key -> human-readable Russian label
  * - avatarIconMarkup(key) {fn}    — returns markup for a key, falling back to 'neutral'
+ * - avatarIconLabelKey(key) {fn}  — returns the i18n key for a display label (see i18n.js)
  */
 
 const AVATAR_ICON_KEYS = [
@@ -46,21 +46,18 @@ const AVATAR_ICONS = {
     seal: '<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="13.6" r="7.8" fill="#d4956a"/><ellipse cx="12" cy="16.6" rx="3" ry="2.3" fill="#f0b888"/><circle cx="9.1" cy="12.6" r="1.15" fill="#3a2d22"/><circle cx="14.9" cy="12.6" r="1.15" fill="#3a2d22"/><ellipse cx="12" cy="15.8" rx="0.75" ry="0.55" fill="#3a2d22"/><circle cx="5.6" cy="15.5" r="0.35" fill="#3a2d22"/><circle cx="5.6" cy="17" r="0.35" fill="#3a2d22"/><circle cx="18.4" cy="15.5" r="0.35" fill="#3a2d22"/><circle cx="18.4" cy="17" r="0.35" fill="#3a2d22"/></svg>'
 };
 
-/** Human-readable labels for the icon picker (aria-label / title on each option). */
-const AVATAR_ICON_LABELS = {
-    neutral: 'Нейтральная',
-    bear: 'Медведь',
-    cat: 'Кот',
-    dog: 'Собака',
-    hamster: 'Хомяк',
-    rabbit: 'Кролик',
-    fox: 'Лиса',
-    owl: 'Сова',
-    elephant: 'Слон',
-    mouse: 'Мышь',
-    duck: 'Утка',
-    seal: 'Тюлень'
-};
+/**
+ * Returns the i18n translation key for the given avatar icon's display label
+ * (e.g. 'bear' -> 'avatarIconBear'). Icon keys themselves stay English/lowercase
+ * — they're shared with the backend and CSS — only the label shown to the
+ * user goes through i18n, so this is the seam an English localization pass
+ * hooks into (see TRANSLATIONS.ru.avatarIcon* in i18n.js).
+ * @param {string} key
+ * @returns {string}
+ */
+function avatarIconLabelKey(key) {
+    return 'avatarIcon' + key.charAt(0).toUpperCase() + key.slice(1);
+}
 
 /**
  * Returns the SVG markup for the given avatar icon key, falling back to the
