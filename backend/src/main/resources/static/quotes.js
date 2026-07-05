@@ -842,12 +842,13 @@ async function deleteQuote(id) {
 // =============================================================================
 
 /**
- * Imports a list of quotes from a user-selected JSON file.
+ * Reads a user-selected JSON file and shows a preview modal before actually importing.
  * @param {Event} e - The file input change event.
  * @returns {Promise<void>}
  */
 async function importJSON(e) {
     const file = e.target.files[0];
+    e.target.value = ''; // allow re-selecting the same file later
     if (!file) return;
 
     try {
@@ -856,31 +857,77 @@ async function importJSON(e) {
 
         if (!Array.isArray(data)) throw new Error(t('importExpectedArray'));
 
-        let added = 0;
+        const valid = data.filter(item => item && item.text);
+        if (!valid.length) throw new Error(t('importNoValidItems'));
 
-        for (const item of data) {
-            if (!item.text) continue;
-
-            const payload = {
-                text: item.text,
-                author: item.author || '',
-                source: item.source || '',
-                tags: Array.isArray(item.tags) ? tagsToCsv(item.tags) : (item.tags || ''),
-                fav: false,
-                added: Date.now()
-            };
-
-            const res = await Api.create(payload);
-            const saved = await res.json();
-            saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
-            quotes.push(saved);
-            added++;
-        }
-        toast(t('toastImported', {count: added}));
-        e.target.value = '';
+        showImportPreview(valid);
     } catch (err) {
         toast(t('toastImportError', {message: err.message}));
     }
+}
+
+const IMPORT_PREVIEW_COUNT = 5;
+
+/**
+ * Shows a modal with a truncated preview of the quotes about to be imported,
+ * letting the user confirm or cancel before any network calls are made.
+ * @param {Array<Object>} items - Parsed quote objects with at least a `text` field.
+ */
+function showImportPreview(items) {
+    const preview = items.slice(0, IMPORT_PREVIEW_COUNT);
+    const remaining = items.length - preview.length;
+
+    const rows = preview.map(item => `
+        <div class="import-preview-row">
+            <p class="import-preview-text">${escHtml(item.text)}</p>
+            ${(item.author || item.source) ? `
+                <p class="import-preview-meta">
+                    ${item.author ? `<span class="quote-card-author">${escHtml(item.author)}</span>` : ''}
+                    ${item.author && item.source ? '<span class="import-preview-meta-sep"> — </span>' : ''}
+                    ${item.source ? `<span class="quote-card-source">${escHtml(item.source)}</span>` : ''}
+                </p>
+            ` : ''}
+        </div>
+    `).join('');
+
+    const body = `
+        <p class="import-preview-summary">${t('importPreviewSummary', {count: items.length, word: quoteCountWord(items.length)})}</p>
+        <div class="import-preview-list">${rows}</div>
+        ${remaining > 0 ? `<div class="import-preview-more">${t('importPreviewMore', {count: remaining, word: quoteCountWord(remaining)})}</div>` : ''}
+    `;
+
+    showModal(t('importPreviewTitle'), body, [
+        {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
+        {label: t('importPreviewConfirm', {count: items.length, word: quoteCountWord(items.length)}), cls: 'btn-primary', action: () => runImport(items)}
+    ], true);
+}
+
+/**
+ * Creates each previewed quote via the API after the user has confirmed the import.
+ * @param {Array<Object>} items - Parsed quote objects to create.
+ * @returns {Promise<void>}
+ */
+async function runImport(items) {
+    closeModal();
+    let added = 0;
+
+    for (const item of items) {
+        const payload = {
+            text: item.text,
+            author: item.author || '',
+            source: item.source || '',
+            tags: Array.isArray(item.tags) ? tagsToCsv(item.tags) : (item.tags || ''),
+            fav: false,
+            added: item.added || Date.now()
+        };
+
+        const res = await Api.create(payload);
+        const saved = await res.json();
+        saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
+        quotes.push(saved);
+        added++;
+    }
+    toast(t('toastImported', {count: added, word: quoteCountWord(added)}));
 }
 
 /**

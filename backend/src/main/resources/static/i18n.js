@@ -157,7 +157,7 @@ const TRANSLATIONS = {
         placeholderAuthor:              'Имя автора',
         placeholderSource:              'Книга, фильм, речь…',
         addTitle:                       'Добавить цитату',
-        addSubtitle:                    'Добавляйте цитаты вручную или импортируйте через JSON файл.',
+        addSubtitle:                    'Добавляйте цитаты вручную, импортируйте через JSON файл или перенесите из Яндекс.Книг.',
         addLabelText:                   'Текст цитаты',
         addLabelAuthor:                 'Автор',
         addLabelSource:                 'Источник',
@@ -166,7 +166,9 @@ const TRANSLATIONS = {
         addOptional:                    '(необязательно)',
         addSubmitBtn:                   'Добавить цитату',
         addClearBtn:                    'Очистить',
-        addImportTitle:                 'Импорт из JSON',
+        addImportTitle:                 'Импорт цитат',
+        addImportTabJson:               'Файл JSON',
+        addImportTabYandex:             'Яндекс.Книги',
         addImportDropLabel:             'Выберите файл или перетащите сюда',
         addJsonExampleLabel:            'Пример структуры JSON:',
         placeholderTagInput:            'тег…',
@@ -217,11 +219,39 @@ const TRANSLATIONS = {
 
         // ── Import / Export ───────────────────────────────────────────────────
         importExpectedArray:            'Ожидается массив',
-        toastImported:                  'Импортировано: {count} цитат',
+        importNoValidItems:             'В файле не найдено ни одной цитаты с текстом',
+        toastImported:                  'Импортировано: {count} {word}',
         toastImportError:               'Ошибка импорта: {message}',
         toastCopied:                    'Скопировано!',
         toastCopyError:                 'Ошибка копирования',
         copiedButtonLabel:              'Скопировано',
+
+        // ── Import preview modal ──────────────────────────────────────────────
+        importPreviewTitle:             'Предпросмотр импорта',
+        importPreviewSummary:           'Найдено {count} {word} в загруженном файле. Проверьте несколько примеров ниже и подтвердите импорт.',
+        importPreviewMore:              'и ещё {count} {word}',
+        importPreviewConfirm:           'Импортировать {count} {word}',
+
+        // ── Import from Yandex Books ──────────────────────────────────────────
+        importYandexBenefit:            'Стоит использовать, если в Яндекс.Книгах накопилось больше 20–30 цитат — переносить их вручную одну за другой будет намного дольше. Если цитат всего пара штук, проще добавить их сразу в форме выше.',
+        importYandexStep1Prefix:        'Открой ',
+        importYandexStep1Suffix:        ', зайди в свой профиль, залогинившись.',
+        importYandexStep2:              'Открой консоль браузера (F12 → Console), вставь скрипт и нажми Enter.',
+        importYandexStep3Prefix:        'Скрипт скачает файл ',
+        importYandexStep3Suffix:        ' — загрузи его ниже, как обычный JSON.',
+        importYandexCopyBtn:            'Скопировать скрипт',
+        importYandexUploadLabel:        'Загрузить скачанный файл',
+        importYandexFaqSummary:         'Это безопасно? Что такое консоль?',
+        importYandexFaqQ1:              'Что такое консоль браузера?',
+        importYandexFaqA1:              'Панель разработчика, встроенная в каждый браузер. Она умеет выполнять код прямо на открытой странице — но не имеет доступа к твоим файлам, паролям или другим сайтам.',
+        importYandexFaqQ2:              'Безопасно ли вставлять туда код?',
+        importYandexFaqA2:              'Скрипт работает только в твоём браузере и обращается только к books.yandex.ru под твоей же сессией. Epigraph не получает и не хранит ни пароль, ни куки твоего аккаунта Яндекс — только файл с цитатами, который ты сам сюда загружаешь.',
+        importYandexFaqQ3:              'Браузер показал предупреждение при вставке — это нормально?',
+        importYandexFaqA3:              'Да, это стандартная защита от случайной вставки чужого вредоносного кода. Раз ты скопировал скрипт именно с этой страницы, всё в порядке — просто подтверди вставку. Но не вставляй в консоль код из источников, которым не доверяешь.',
+        importYandexFaqQ4:              'F12 не открывает панель — что делать?',
+        importYandexFaqA4:              'Кликни правой кнопкой мыши на странице и выбери «Просмотреть код» / «Inspect». На Mac можно также нажать Cmd+Option+I, на Windows — Ctrl+Shift+I. В Safari сначала включи меню «Разработка» в настройках браузера.',
+        importYandexFaqQ5:              'Сколько это занимает?',
+        importYandexFaqA5:              'Если книг в библиотеке много (сотни), скрипт может выполняться минуту-две — он обращается к каждой книге по отдельности с небольшой паузой между запросами, чтобы не перегружать сервер Яндекса. Дождись сообщения «ГОТОВО» в консоли, прежде чем загружать скачанный файл.',
 
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Настройки',
@@ -292,6 +322,31 @@ const TRANSLATIONS = {
 
 /** Currently active language code. */
 let currentLanguage = localStorage.getItem('epigraph_lang') || 'ru';
+
+/**
+ * Picks the grammatically correct Russian plural form for a count.
+ * @param {number} n - The count.
+ * @param {string} one - Form for 1, 21, 31... (e.g. "цитата").
+ * @param {string} few - Form for 2-4, 22-24... (e.g. "цитаты").
+ * @param {string} many - Form for 0, 5-20, 25-30... (e.g. "цитат").
+ * @returns {string}
+ */
+function pluralRu(n, one, few, many) {
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+    return many;
+}
+
+/**
+ * Returns the correctly declined word for "quote(s)" for the given count.
+ * @param {number} n
+ * @returns {string}
+ */
+function quoteCountWord(n) {
+    return pluralRu(n, 'цитата', 'цитаты', 'цитат');
+}
 
 /**
  * Returns the translated string for the given key in the current language.
