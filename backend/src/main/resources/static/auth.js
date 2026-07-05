@@ -168,7 +168,7 @@ function showAvatarPickerModal() {
 
     const optionsHtml = AVATAR_ICON_KEYS.map(key => {
         const selected = key === current ? ' avatar-picker-option--selected' : '';
-        const label = AVATAR_ICON_LABELS[key] || key;
+        const label = t(avatarIconLabelKey(key));
         return `<div class="avatar-picker-item">
                     <button type="button" class="avatar-picker-option${selected}"
                             aria-label="${label}" onclick="submitAvatarIcon('${key}')">
