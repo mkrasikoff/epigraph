@@ -86,9 +86,22 @@ const TRANSLATIONS = {
         editUsernameSuccess:              'Имя пользователя обновлено',
 
         // ── Avatar picker modal ────────────────────────────────────────────────
-        avatarPickerTitle:                'Выберите иконку',
         avatarPickerSuccess:              'Иконка обновлена',
         avatarPickerError:                'Не удалось обновить иконку',
+
+        // ── Avatar icon labels (keys mirror AVATAR_ICON_KEYS in avatars.js) ────
+        avatarIconNeutral:                'Нейтральная',
+        avatarIconBear:                   'Медведь',
+        avatarIconCat:                    'Кот',
+        avatarIconDog:                    'Собака',
+        avatarIconHamster:                'Хомяк',
+        avatarIconRabbit:                 'Кролик',
+        avatarIconFox:                    'Лиса',
+        avatarIconOwl:                    'Сова',
+        avatarIconElephant:               'Слон',
+        avatarIconMouse:                  'Мышь',
+        avatarIconDuck:                   'Утка',
+        avatarIconSeal:                   'Тюлень',
 
         // ── Forgot password ──────────────────────────────────────────────────────
         forgotPasswordLink:               'Забыли пароль?',
