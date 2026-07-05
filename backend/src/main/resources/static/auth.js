@@ -133,6 +133,9 @@ function updateSettingsAccount() {
     const usernameEl = document.getElementById('settings-account-username');
     const idEl = document.getElementById('settings-account-id');
     const emailEl = document.getElementById('settings-account-email');
+    const avatarEl = document.getElementById('settings-account-avatar');
+
+    if (avatarEl) avatarEl.innerHTML = avatarIconMarkup(currentUser?.avatarIcon);
 
     if (currentUser) {
         usernameEl.textContent = '@' + (currentUser.username || ('user' + currentUser.id));
@@ -154,6 +157,57 @@ function updateSettingsAccount() {
     document.getElementById('settings-change-password-title').textContent = t('changePasswordTitle');
     document.getElementById('settings-change-password-desc').textContent = t('changePasswordSettingsDesc');
     document.getElementById('settings-change-password-btn-label').textContent = t('changePasswordButton');
+}
+
+/**
+ * Opens the modal to pick one of the 12 preset avatar icons.
+ * Selecting an option applies it immediately — no separate submit step.
+ */
+function showAvatarPickerModal() {
+    const current = currentUser?.avatarIcon || 'neutral';
+
+    const optionsHtml = AVATAR_ICON_KEYS.map(key => {
+        const selected = key === current ? ' avatar-picker-option--selected' : '';
+        const label = AVATAR_ICON_LABELS[key] || key;
+        return `<div class="avatar-picker-item">
+                    <button type="button" class="avatar-picker-option${selected}"
+                            aria-label="${label}" onclick="submitAvatarIcon('${key}')">
+                        ${avatarIconMarkup(key, 1.8)}
+                    </button>
+                    <span class="avatar-picker-label">${label}</span>
+                </div>`;
+    }).join('');
+
+    showModal('', `<div class="avatar-picker-grid">${optionsHtml}</div>`, [], true);
+}
+
+/**
+ * Submits the chosen avatar icon to PATCH /api/user/me/avatar.
+ * @param {string} key - One of AVATAR_ICON_KEYS.
+ */
+async function submitAvatarIcon(key) {
+    if (currentUser?.avatarIcon === key) {
+        closeModal();
+        return;
+    }
+
+    try {
+        const res = await Api.updateAvatar(key);
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            toast(data?.message || t('avatarPickerError'));
+            return;
+        }
+
+        if (currentUser) currentUser.avatarIcon = key;
+        closeModal();
+        updateSettingsAccount();
+        toast(t('avatarPickerSuccess'));
+
+    } catch {
+        toast(t('authErrorConnection'));
+    }
 }
 
 /**

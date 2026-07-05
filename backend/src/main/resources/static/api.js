@@ -84,6 +84,18 @@ const Api = {
             method: 'PATCH',
             headers: authHeaders(),
             body: JSON.stringify({ username })
+        }),
+
+    /**
+     * Updates the authenticated user's avatar icon (one of a fixed set of presets).
+     * @param {string} avatarIcon
+     * @returns {Promise<Response>}
+     */
+    updateAvatar: (avatarIcon) =>
+        fetch('/api/user/me/avatar', {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ avatarIcon })
         })
 
 };

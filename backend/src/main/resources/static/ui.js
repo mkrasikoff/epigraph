@@ -111,12 +111,15 @@ function goToImport() {
 // =============================================================================
 /**
  * Shows the shared modal dialog with the given title, body, and action buttons.
- * @param {string} title - Modal heading text.
+ * @param {string} title - Modal heading text. Pass '' to hide the heading entirely.
  * @param {string} body - HTML string rendered inside the modal body.
  * @param {Array<{label: string, cls: string, action: Function}>} actions - Buttons to render in the footer.
+ * @param {boolean} [wide] - Use a wider dialog (e.g. for icon-grid pickers). Resets on every call.
  */
-function showModal(title, body, actions) {
-    document.getElementById('modal-title').textContent = title;
+function showModal(title, body, actions, wide) {
+    const titleEl = document.getElementById('modal-title');
+    titleEl.textContent = title;
+    titleEl.style.display = title ? '' : 'none';
     document.getElementById('modal-body').innerHTML = body;
     const actEl = document.getElementById('modal-actions');
     actEl.innerHTML = '';
@@ -131,6 +134,7 @@ function showModal(title, body, actions) {
         actEl.appendChild(btn);
     });
 
+    document.querySelector('#modal .modal').classList.toggle('modal--wide', !!wide);
     document.getElementById('modal').classList.add('open');
 }
 

@@ -13,4 +13,5 @@ public class MeResponse {
     private Long id;
     private String email;
     private String username;
+    private String avatarIcon;
 }

@@ -56,4 +56,12 @@ public class User {
      */
     @Column(length = 20)
     private String username;
+
+    /**
+     * Avatar icon key chosen from a fixed set of 12 presets (see
+     * UpdateAvatarRequest for the allowed keys). Always has a value —
+     * "neutral" until the user picks something else.
+     */
+    @Column(nullable = false, length = 20)
+    private String avatarIcon = "neutral";
 }

@@ -1,6 +1,7 @@
 package com.mkrasikoff.epigraph.controller;
 
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
+import com.mkrasikoff.epigraph.dto.UpdateAvatarRequest;
 import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
@@ -264,6 +265,62 @@ class UserControllerTest {
         request.setUsername("");
 
         mockMvc.perform(patch("/api/user/me/username")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/avatar: returns 200 on success")
+    void updateAvatarIcon_returnsOk() throws Exception {
+        UpdateAvatarRequest request = new UpdateAvatarRequest();
+        request.setAvatarIcon("cat");
+        doNothing().when(userService).updateAvatarIcon(isNull(), eq("cat"));
+
+        mockMvc.perform(patch("/api/user/me/avatar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Иконка обновлена"));
+
+        verify(userService).updateAvatarIcon(isNull(), eq("cat"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/avatar: returns 400 when service throws")
+    void updateAvatarIcon_returnsBadRequest_whenServiceThrows() throws Exception {
+        UpdateAvatarRequest request = new UpdateAvatarRequest();
+        request.setAvatarIcon("cat");
+        doThrow(new IllegalArgumentException("Пользователь не найден"))
+                .when(userService).updateAvatarIcon(isNull(), eq("cat"));
+
+        mockMvc.perform(patch("/api/user/me/avatar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/avatar: returns 400 when icon is not one of the presets")
+    void updateAvatarIcon_returnsBadRequest_whenIconInvalid() throws Exception {
+        UpdateAvatarRequest request = new UpdateAvatarRequest();
+        request.setAvatarIcon("dragon");
+
+        mockMvc.perform(patch("/api/user/me/avatar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/avatar: returns 400 when icon is blank")
+    void updateAvatarIcon_returnsBadRequest_whenBlank() throws Exception {
+        UpdateAvatarRequest request = new UpdateAvatarRequest();
+        request.setAvatarIcon("");
+
+        mockMvc.perform(patch("/api/user/me/avatar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

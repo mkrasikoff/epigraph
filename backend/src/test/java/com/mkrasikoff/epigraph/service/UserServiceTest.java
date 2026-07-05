@@ -207,4 +207,28 @@ class UserServiceTest {
 
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("updateAvatarIcon: sets avatar icon and saves user")
+    void updateAvatarIcon_setsIconAndSaves() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updateAvatarIcon(USER_ID, "cat");
+
+        assertThat(user.getAvatarIcon()).isEqualTo("cat");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("updateAvatarIcon: throws when user not found")
+    void updateAvatarIcon_throws_whenUserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updateAvatarIcon(99L, "cat"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("не найден");
+
+        verify(userRepository, never()).save(any());
+    }
 }
