@@ -1376,6 +1376,57 @@ body.no-scroll {
     justify-content: center;
     flex-shrink: 0;
     margin-top: 1px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: box-shadow var(--transition);
+}
+
+.settings-account-avatar:hover {
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.avatar-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-3);
+    justify-items: center;
+}
+
+.avatar-picker-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.avatar-picker-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.avatar-picker-option {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-highlight);
+    color: var(--color-primary);
+    border: 2px solid transparent;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color var(--transition), transform var(--transition);
+}
+
+.avatar-picker-option:hover {
+    transform: scale(1.06);
+}
+
+.avatar-picker-option--selected {
+    border-color: var(--color-primary);
 }
 
 .settings-account-name {
@@ -1588,9 +1639,13 @@ body.no-scroll {
     width: 100%;
     box-shadow: var(--shadow-lg);
     transform: scale(0.96);
-    transition: transform 0.2s;
+    transition: transform 0.2s, max-width 0.2s;
     max-height: 90dvh;
     overflow-y: auto;
+}
+
+.modal--wide {
+    max-width: 700px;
 }
 
 .modal-overlay.open .modal {

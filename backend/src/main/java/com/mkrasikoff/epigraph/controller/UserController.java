@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.AuthResponse;
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.UpdateAvatarRequest;
 import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
@@ -74,6 +75,22 @@ public class UserController {
             log.info("Username updated — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse("Имя пользователя обновлено"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Updates the authenticated user's avatar icon (one of a fixed set of presets).
+     */
+    @PatchMapping("/me/avatar")
+    public ResponseEntity<?> updateAvatarIcon(@AuthenticationPrincipal Long userId,
+                                              @Valid @RequestBody UpdateAvatarRequest request) {
+        try {
+            userService.updateAvatarIcon(userId, request.getAvatarIcon());
+            log.info("Avatar icon updated — userId = {}", userId);
+
+            return ResponseEntity.ok(new ErrorResponse("Иконка обновлена"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
