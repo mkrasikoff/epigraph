@@ -546,6 +546,9 @@ function searchByTag(tag) {
  * @param {Event} e - The form submit event.
  * @returns {Promise<void>}
  */
+/** Mirrors the backend's MAX_QUOTES_PER_USER cap — checked client-side to skip a wasted request. */
+const MAX_QUOTES_PER_USER = 1000;
+
 async function addQuote(e) {
     e.preventDefault();
     const text = document.getElementById('q-text').value.trim();
@@ -553,6 +556,11 @@ async function addQuote(e) {
     if (!text) {
         toast(t('toastQuoteTextRequired'), 'error');
         document.getElementById('q-text').focus();
+        return;
+    }
+
+    if (quotes.length >= MAX_QUOTES_PER_USER) {
+        toast(t('toastQuoteLimitReached', {limit: MAX_QUOTES_PER_USER}), 'error');
         return;
     }
 

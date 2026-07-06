@@ -2,6 +2,7 @@ package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.dto.BatchImportResult;
 import com.mkrasikoff.epigraph.dto.RejectedQuote;
+import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
@@ -18,6 +19,11 @@ import java.util.Set;
 
 @Service
 public class QuoteService {
+
+    /**
+     * Personal-app safety cap — keeps a single account from growing unbounded.
+     */
+    private static final int MAX_QUOTES_PER_USER = 1000;
 
     private final QuoteRepository repo;
     private final Validator validator;
@@ -55,6 +61,10 @@ public class QuoteService {
 
     @Transactional
     public Quote save(Quote quote, Long userId) {
+        if (repo.countByUserId(userId) >= MAX_QUOTES_PER_USER) {
+            throw new QuoteLimitExceededException(MAX_QUOTES_PER_USER);
+        }
+
         if (quote.getAdded() == null) {
             quote.setAdded(System.currentTimeMillis());
         }
@@ -71,10 +81,12 @@ public class QuoteService {
      * Validates each quote individually and reports failures back (rather than rejecting
      * the whole batch, the way @Valid on a List would) — a single overly long quote
      * shouldn't take 19 valid ones down with it, and the caller can show/recover them.
+     * Quotes beyond the per-account limit are reported the same way, as rejected items.
      */
     @Transactional
     public BatchImportResult saveAll(List<Quote> quotes, Long userId) {
         long now = System.currentTimeMillis();
+        long remainingSlots = MAX_QUOTES_PER_USER - repo.countByUserId(userId);
         List<Quote> valid = new ArrayList<>();
         List<RejectedQuote> rejected = new ArrayList<>();
 
@@ -86,11 +98,18 @@ public class QuoteService {
             quote.setUserId(userId);
 
             Set<ConstraintViolation<Quote>> violations = validator.validate(quote);
-            if (violations.isEmpty()) {
-                valid.add(quote);
-            } else {
+            if (!violations.isEmpty()) {
                 rejected.add(new RejectedQuote(quote, violations.stream().map(ConstraintViolation::getMessage).toList()));
+                continue;
             }
+
+            if (remainingSlots <= 0) {
+                rejected.add(new RejectedQuote(quote, List.of(QuoteLimitExceededException.buildMessage(MAX_QUOTES_PER_USER))));
+                continue;
+            }
+
+            valid.add(quote);
+            remainingSlots--;
         }
 
         return new BatchImportResult(repo.saveAll(valid), rejected);

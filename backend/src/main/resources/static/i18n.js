@@ -178,6 +178,7 @@ const TRANSLATIONS = {
         toastQuoteTextRequired:         'Текст цитаты обязателен',
         toastQuoteAdded:                'Цитата добавлена!',
         toastQuoteSaveError:            'Ошибка сохранения',
+        toastQuoteLimitReached:         'Достигнут лимит в {limit} цитат. Удалите часть цитат, чтобы добавить новые.',
 
         // ── Edit quote modal ──────────────────────────────────────────────────
         editModalTitle:                 'Редактировать цитату',
