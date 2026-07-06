@@ -867,6 +867,10 @@ async function importJSON(e) {
 }
 
 const IMPORT_PREVIEW_COUNT = 5;
+const IMPORT_BATCH_SIZE = 20;
+
+/** Set to true by the Stop button; checked between batches in runImport(). */
+let importStopRequested = false;
 
 /**
  * Shows a modal with a truncated preview of the quotes about to be imported,
@@ -897,7 +901,14 @@ function showImportPreview(items) {
     `;
 
     showModal(t('importPreviewTitle'), body, [
-        {label: t('cancelButton'), cls: 'btn-secondary', id: 'import-cancel-btn', action: closeModal},
+        {label: t('cancelButton'), cls: 'btn-secondary', id: 'import-cancel-btn', action: () => {
+            if (modalBusy) {
+                importStopRequested = true;
+                document.getElementById('import-cancel-btn').disabled = true;
+            } else {
+                closeModal();
+            }
+        }},
         {label: t('importPreviewConfirm', {count: items.length, word: quoteCountWord(items.length)}), cls: 'btn-primary', id: 'import-confirm-btn', action: () => runImport(items)}
     ], true);
 }
@@ -915,40 +926,95 @@ function setImportProgress(current, total) {
 }
 
 /**
- * Creates each previewed quote via the API after the user has confirmed the import.
+ * Splits an array into consecutive chunks of at most `size` items.
+ * @param {Array} arr
+ * @param {number} size
+ * @returns {Array<Array>}
+ */
+function chunkArray(arr, size) {
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+    return chunks;
+}
+
+/**
+ * Replaces the preview modal with a final summary and a single Close button.
+ * @param {number} added - Quotes actually created.
+ * @param {number} total - Quotes that were queued for import.
+ * @param {'done'|'stopped'|'error'} outcome
+ * @param {number} skipped - Quotes rejected by server-side validation (e.g. too long).
+ */
+function showImportSummary(added, total, outcome, skipped) {
+    const key = outcome === 'stopped' ? 'importSummaryStopped'
+        : outcome === 'error' ? 'importSummaryError'
+        : 'importSummaryDone';
+
+    const body = `
+        <p class="import-preview-summary">${t(key, {count: added, total, word: quoteCountWord(added)})}</p>
+        ${skipped > 0 ? `<p class="import-preview-summary">${t('importSummarySkipped', {count: skipped, word: quoteCountWord(skipped)})}</p>` : ''}
+    `;
+
+    showModal(t('importPreviewTitle'), body, [
+        {label: t('closeButton'), cls: 'btn-primary', action: closeModal}
+    ], true);
+}
+
+/**
+ * Creates the previewed quotes via the batch API, in chunks, after the user has confirmed
+ * the import. Supports being stopped mid-way (the in-flight batch always finishes first).
  * @param {Array<Object>} items - Parsed quote objects to create.
  * @returns {Promise<void>}
  */
 async function runImport(items) {
     const total = items.length;
     let added = 0;
+    let skipped = 0;
+    let outcome = 'done';
 
+    importStopRequested = false;
     modalBusy = true;
-    const cancelBtn = document.getElementById('import-cancel-btn');
-    if (cancelBtn) cancelBtn.disabled = true;
+    document.getElementById('import-cancel-btn').textContent = t('importStopBtn');
     setImportProgress(added, total);
 
-    for (const item of items) {
-        const payload = {
+    for (const chunk of chunkArray(items, IMPORT_BATCH_SIZE)) {
+        if (importStopRequested) {
+            outcome = 'stopped';
+            break;
+        }
+
+        const payloads = chunk.map(item => ({
             text: item.text,
             author: item.author || '',
             source: item.source || '',
             tags: Array.isArray(item.tags) ? tagsToCsv(item.tags) : (item.tags || ''),
             fav: false,
             added: item.added || Date.now()
-        };
+        }));
 
-        const res = await Api.create(payload);
-        const saved = await res.json();
-        saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
-        quotes.push(saved);
-        added++;
-        setImportProgress(added, total);
+        try {
+            const res = await Api.createBatch(payloads);
+            if (!res.ok) {
+                outcome = 'error';
+                break;
+            }
+
+            const saved = await res.json();
+            saved.forEach(q => {
+                q.tags = q.tags ? q.tags.split(',').filter(Boolean) : [];
+                quotes.push(q);
+            });
+            added += saved.length;
+            skipped += payloads.length - saved.length;
+            setImportProgress(added, total);
+        } catch (e) {
+            console.error('Batch import error:', e);
+            outcome = 'error';
+            break;
+        }
     }
 
     modalBusy = false;
-    closeModal();
-    toast(t('toastImported', {count: added, word: quoteCountWord(added)}));
+    showImportSummary(added, total, outcome, skipped);
 }
 
 /**

@@ -126,6 +126,25 @@ class QuoteControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/quotes/batch: creates quotes and returns 201")
+    void createBatch_returnsCreatedQuotes() throws Exception {
+        List<Quote> incoming = List.of(buildQuote(null, "First"), buildQuote(null, "Second"));
+        List<Quote> saved = List.of(buildQuote(100L, "First"), buildQuote(101L, "Second"));
+        when(quoteService.saveAll(any(), isNull())).thenReturn(saved);
+
+        mockMvc.perform(post("/api/quotes/batch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(incoming)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(100))
+                .andExpect(jsonPath("$[1].id").value(101));
+
+        verify(quoteService).saveAll(any(), isNull());
+    }
+
+    @Test
     @DisplayName("PUT /api/quotes/{id}: updates quote and returns updated object")
     void update_returnsUpdatedQuote() throws Exception {
         Quote incoming = buildQuote(1L, "Updated quote");
