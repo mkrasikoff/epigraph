@@ -1,6 +1,7 @@
 package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.dto.BatchImportResult;
+import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
@@ -24,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -133,6 +135,18 @@ class QuoteServiceTest {
     }
 
     @Test
+    @DisplayName("save: throws QuoteLimitExceededException when user already has 1000 quotes")
+    void save_throwsWhenLimitReached() {
+        Quote quote = buildQuote(null, "One quote too many");
+        when(repo.countByUserId(USER_ID)).thenReturn(1000L);
+
+        assertThatThrownBy(() -> quoteService.save(quote, USER_ID))
+                .isInstanceOf(QuoteLimitExceededException.class);
+
+        verify(repo, never()).save(any());
+    }
+
+    @Test
     @DisplayName("save: preserves existing added timestamp")
     void save_preservesAddedTimestamp_whenAlreadySet() {
         Quote quote = buildQuote(null, "Quote with timestamp");
@@ -195,6 +209,23 @@ class QuoteServiceTest {
         assertThat(result.getRejected().get(0).getQuote().getText()).isEqualTo("Too long, pretend");
         assertThat(result.getRejected().get(0).getErrors()).containsExactly("Размер цитаты не должен превышать 1000 символов");
         verify(repo).saveAll(List.of(valid));
+    }
+
+    @Test
+    @DisplayName("saveAll: rejects only the quotes beyond the remaining quota, keeps the rest")
+    void saveAll_rejectsQuotesBeyondRemainingQuota() {
+        Quote fitsQuota = buildQuote(null, "Fits");
+        Quote overQuota = buildQuote(null, "Over quota");
+        when(repo.countByUserId(USER_ID)).thenReturn(999L);
+        when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        BatchImportResult result = quoteService.saveAll(List.of(fitsQuota, overQuota), USER_ID);
+
+        assertThat(result.getSaved()).hasSize(1);
+        assertThat(result.getSaved().get(0).getText()).isEqualTo("Fits");
+        assertThat(result.getRejected()).hasSize(1);
+        assertThat(result.getRejected().get(0).getQuote().getText()).isEqualTo("Over quota");
+        assertThat(result.getRejected().get(0).getErrors().get(0)).contains("1000");
     }
 
     @Test

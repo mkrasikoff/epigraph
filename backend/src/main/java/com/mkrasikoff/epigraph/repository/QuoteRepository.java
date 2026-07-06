@@ -12,6 +12,8 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
 
     List<Quote> findByUserId(Long userId);
 
+    long countByUserId(Long userId);
+
     Optional<Quote> findByIdAndUserId(Long id, Long userId);
 
     boolean existsByIdAndUserId(Long id, Long userId);
