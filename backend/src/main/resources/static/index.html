@@ -522,37 +522,140 @@
                 <hr class="form-divider">
 
                 <h3 class="section-subheading" data-i18n="addImportTitle">
-                    Импорт из JSON
+                    Импорт цитат
                 </h3>
-                <p class="import-hint">
-                    Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.
-                </p>
-                <label class="import-area" for="import-file">
-                    <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
-                    </svg>
-                    <strong data-i18n="addImportDropLabel">
-                        Выберите файл или перетащите сюда
-                    </strong>
-                    <p>
-                        Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code>
-                    </p>
-                    <input type="file" id="import-file" accept=".json" class="import-file-input" onchange="importJSON(event)">
-                </label>
 
-                <div class="json-example-wrap">
-                    <p class="json-example-label" data-i18n="addJsonExampleLabel">
-                        Пример структуры JSON:
+                <div class="import-source-toggle">
+                    <button type="button" id="import-tab-json" class="import-source-tab is-active" onclick="switchImportSource('json')" data-i18n="addImportTabJson">
+                        Файл JSON
+                    </button>
+                    <button type="button" id="import-tab-yandex" class="import-source-tab" onclick="switchImportSource('yandex')" data-i18n="addImportTabYandex">
+                        Яндекс.Книги
+                    </button>
+                </div>
+
+                <div id="import-panel-json">
+                    <p class="import-hint">
+                        Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.
                     </p>
-                    <pre class="json-example">[
+                    <label class="import-area" for="import-file">
+                        <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <strong data-i18n="addImportDropLabel">
+                            Выберите файл или перетащите сюда
+                        </strong>
+                        <p>
+                            Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code>
+                        </p>
+                        <input type="file" id="import-file" accept=".json" class="import-file-input" onchange="importJSON(event)">
+                    </label>
+
+                    <div class="json-example-wrap">
+                        <p class="json-example-label" data-i18n="addJsonExampleLabel">
+                            Пример структуры JSON:
+                        </p>
+                        <pre class="json-example">[
   {
     "text": "Текст цитаты",
     "author": "Имя автора",
     "source": "Название книги"
   }
 ]</pre>
+                    </div>
+                </div>
+
+                <div id="import-panel-yandex" class="is-hidden">
+                    <div class="import-benefit-banner">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M9 18h6"/>
+                            <path d="M10 22h4"/>
+                            <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>
+                        </svg>
+                        <p data-i18n="importYandexBenefit">
+                            Стоит использовать, если в Яндекс.Книгах накопилось больше 20–30 цитат — переносить их вручную одну за другой будет намного дольше. Если цитат всего пара штук, проще добавить их сразу в форме выше.
+                        </p>
+                    </div>
+
+                    <div class="import-step">
+                        <span class="import-step-num">1</span>
+                        <p>
+                            <span data-i18n="importYandexStep1Prefix">Открой </span><a href="https://books.yandex.ru" target="_blank" rel="noopener" class="import-highlight">books.yandex.ru</a><span data-i18n="importYandexStep1Suffix">, зайди в свой профиль, залогинившись.</span>
+                        </p>
+                    </div>
+                    <div class="import-step">
+                        <span class="import-step-num">2</span>
+                        <div class="import-step-body">
+                            <p data-i18n="importYandexStep2">
+                                Открой консоль браузера (F12 → Console), вставь скрипт и нажми Enter.
+                            </p>
+                            <button type="button" class="btn-secondary import-copy-btn" onclick="copyYandexImportScript()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                                <span data-i18n="importYandexCopyBtn">Скопировать скрипт</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="import-step">
+                        <span class="import-step-num">3</span>
+                        <p>
+                            <span data-i18n="importYandexStep3Prefix">Скрипт скачает файл </span><code class="inline-code">yandex-books-quotes.json</code><span data-i18n="importYandexStep3Suffix"> — загрузи его ниже, как обычный JSON.</span>
+                        </p>
+                    </div>
+
+                    <label class="import-area" for="import-file-yandex">
+                        <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <strong data-i18n="importYandexUploadLabel">
+                            Загрузить скачанный файл
+                        </strong>
+                        <input type="file" id="import-file-yandex" accept=".json" class="import-file-input" onchange="importJSON(event)">
+                    </label>
+
+                    <details class="import-faq">
+                        <summary class="import-faq-summary">
+                            <span class="import-faq-summary-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10z"/>
+                                    <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 5"/>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                </svg>
+                                <span data-i18n="importYandexFaqSummary">Это безопасно? Что такое консоль?</span>
+                            </span>
+                            <svg class="import-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </summary>
+                        <div class="import-faq-body">
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ1">Что такое консоль браузера?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA1">Панель разработчика, встроенная в каждый браузер. Она умеет выполнять код прямо на открытой странице — но не имеет доступа к твоим файлам, паролям или другим сайтам.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ2">Безопасно ли вставлять туда код?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA2">Скрипт работает только в твоём браузере и обращается только к books.yandex.ru под твоей же сессией. Epigraph не получает и не хранит ни пароль, ни куки твоего аккаунта Яндекс — только файл с цитатами, который ты сам сюда загружаешь.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ3">Браузер показал предупреждение при вставке — это нормально?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA3">Да, это стандартная защита от случайной вставки чужого вредоносного кода. Раз ты скопировал скрипт именно с этой страницы, всё в порядке — просто подтверди вставку. Но не вставляй в консоль код из источников, которым не доверяешь.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ4">F12 не открывает панель — что делать?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA4">Кликни правой кнопкой мыши на странице и выбери «Просмотреть код» / «Inspect». На Mac можно также нажать Cmd+Option+I, на Windows — Ctrl+Shift+I. В Safari сначала включи меню «Разработка» в настройках браузера.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ5">Сколько это занимает?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA5">Если книг в библиотеке много (сотни), скрипт может выполняться минуту-две — он обращается к каждой книге по отдельности с небольшой паузой между запросами, чтобы не перегружать сервер Яндекса. Дождись сообщения «ГОТОВО» в консоли, прежде чем загружать скачанный файл.</p>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             </section>
         </div>
@@ -906,6 +1009,7 @@
 
 <script src="/i18n.js"></script>
 <script src="/avatars.js"></script>
+<script src="/yandex-import.js"></script>
 <script src="/api.js"></script>
 <script src="/auth.js"></script>
 <script src="/tags.js"></script>
