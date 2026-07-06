@@ -294,7 +294,8 @@ header {
 }
 
 .btn-primary:disabled,
-.btn-danger:disabled {
+.btn-danger:disabled,
+.btn-secondary:disabled {
     opacity: 0.45;
     cursor: not-allowed;
     pointer-events: none;
@@ -370,6 +371,12 @@ header {
 body.no-scroll {
     overflow: hidden;
     height: 100dvh;
+}
+
+/* Locks background scroll while the shared modal or the auth screen is open. Kept separate from
+   .no-scroll (owned by the qod fullscreen-fit logic) so the two don't fight over toggling it. */
+body.modal-lock-scroll {
+    overflow: hidden;
 }
 
 /* =============================================================================

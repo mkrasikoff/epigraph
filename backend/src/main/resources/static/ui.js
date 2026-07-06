@@ -136,13 +136,19 @@ function showModal(title, body, actions, wide) {
 
     document.querySelector('#modal .modal').classList.toggle('modal--wide', !!wide);
     document.getElementById('modal').classList.add('open');
+    document.body.classList.add('modal-lock-scroll');
 }
 
+/** Set while a long-running operation (e.g. bulk import) owns the open modal, to block Escape/overlay-click from closing it underneath that operation. */
+let modalBusy = false;
+
 /**
- * Closes the shared modal dialog.
+ * Closes the shared modal dialog. No-ops while modalBusy is set.
  */
 function closeModal() {
+    if (modalBusy) return;
     document.getElementById('modal').classList.remove('open');
+    document.body.classList.remove('modal-lock-scroll');
 }
 
 /**
