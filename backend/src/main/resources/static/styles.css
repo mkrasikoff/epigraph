@@ -377,6 +377,7 @@ body.no-scroll {
    .no-scroll (owned by the qod fullscreen-fit logic) so the two don't fight over toggling it. */
 body.modal-lock-scroll {
     overflow: hidden;
+    height: 100dvh;
 }
 
 /* =============================================================================
@@ -1267,6 +1268,12 @@ body.modal-lock-scroll {
 .import-copy-btn {
     padding: var(--space-2) var(--space-4);
     font-size: var(--text-xs);
+}
+
+.import-step-body .import-step-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-faint);
+    margin: var(--space-2) 0 0;
 }
 
 .import-faq {

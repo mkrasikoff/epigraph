@@ -69,6 +69,17 @@ public class QuoteController {
         return saved;
     }
 
+    @PostMapping("/batch")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<Quote> createBatch(@RequestBody List<Quote> quotes,
+                                   @AuthenticationPrincipal Long userId) {
+        List<Quote> saved = service.saveAll(quotes, userId);
+
+        log.info("Batch quotes created — count = {} (requested = {})", saved.size(), quotes.size());
+
+        return saved;
+    }
+
     @PutMapping("/{id}")
     public Quote update(@PathVariable Long id,
                         @Valid @RequestBody Quote quote,

@@ -39,6 +39,19 @@ const Api = {
         }),
 
     /**
+     * Creates a batch of quotes in a single request — used by bulk imports to avoid
+     * one HTTP round-trip (and DB transaction) per quote.
+     * @param {Object[]} payloads - Array of quote data objects.
+     * @returns {Promise<Response>}
+     */
+    createBatch: (payloads) =>
+        fetch(`${API}/batch`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(payloads)
+        }),
+
+    /**
      * Updates an existing quote by ID.
      * @param {number|string} id - Quote identifier.
      * @param {Object} payload - Updated quote data.

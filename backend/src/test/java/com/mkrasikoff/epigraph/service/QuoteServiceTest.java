@@ -3,6 +3,8 @@ package com.mkrasikoff.epigraph.service;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,11 +15,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +32,9 @@ class QuoteServiceTest {
 
     @Mock
     private QuoteRepository repo;
+
+    @Mock
+    private Validator validator;
 
     @InjectMocks
     private QuoteService quoteService;
@@ -134,6 +142,53 @@ class QuoteServiceTest {
         Quote saved = quoteService.save(quote, USER_ID);
 
         assertThat(saved.getAdded()).isEqualTo(existingTimestamp);
+    }
+
+    @Test
+    @DisplayName("saveAll: sets userId on every quote and calls repo.saveAll")
+    void saveAll_setsUserIdOnEveryQuote() {
+        List<Quote> quotes = List.of(buildQuote(null, "First"), buildQuote(null, "Second"));
+        quotes.forEach(q -> q.setUserId(null));
+        when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        List<Quote> saved = quoteService.saveAll(quotes, USER_ID);
+
+        assertThat(saved).hasSize(2);
+        assertThat(saved).allMatch(q -> USER_ID.equals(q.getUserId()));
+        verify(repo).saveAll(quotes);
+    }
+
+    @Test
+    @DisplayName("saveAll: sets added timestamp only for quotes missing one")
+    void saveAll_setsAddedTimestamp_onlyWhenMissing() {
+        Quote withoutTimestamp = buildQuote(null, "No timestamp");
+        withoutTimestamp.setAdded(null);
+        Quote withTimestamp = buildQuote(null, "Has timestamp");
+        withTimestamp.setAdded(1000000L);
+        when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        List<Quote> saved = quoteService.saveAll(List.of(withoutTimestamp, withTimestamp), USER_ID);
+
+        assertThat(saved.get(0).getAdded()).isNotNull().isPositive();
+        assertThat(saved.get(1).getAdded()).isEqualTo(1000000L);
+    }
+
+    @Test
+    @DisplayName("saveAll: skips quotes that fail validation instead of rejecting the whole batch")
+    void saveAll_skipsInvalidQuotes() {
+        Quote valid = buildQuote(null, "Valid quote");
+        Quote invalid = buildQuote(null, "Too long, pretend");
+        @SuppressWarnings("unchecked")
+        ConstraintViolation<Quote> violation = mock(ConstraintViolation.class);
+        when(validator.validate(valid)).thenReturn(Collections.emptySet());
+        when(validator.validate(invalid)).thenReturn(Set.of(violation));
+        when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        List<Quote> saved = quoteService.saveAll(List.of(valid, invalid), USER_ID);
+
+        assertThat(saved).hasSize(1);
+        assertThat(saved.get(0).getText()).isEqualTo("Valid quote");
+        verify(repo).saveAll(List.of(valid));
     }
 
     @Test
