@@ -1911,6 +1911,12 @@ body.modal-lock-scroll {
     color: var(--color-text-faint);
 }
 
+.import-preview-row .import-preview-reason {
+    font-size: var(--text-xs);
+    color: #c0392b;
+    margin: var(--space-2) 0 0;
+}
+
 .import-preview-more {
     width: fit-content;
     font-size: var(--text-xs);

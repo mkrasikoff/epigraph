@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
+import com.mkrasikoff.epigraph.dto.BatchImportResult;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.service.QuoteService;
 import jakarta.validation.Valid;
@@ -71,13 +72,13 @@ public class QuoteController {
 
     @PostMapping("/batch")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<Quote> createBatch(@RequestBody List<Quote> quotes,
-                                   @AuthenticationPrincipal Long userId) {
-        List<Quote> saved = service.saveAll(quotes, userId);
+    public BatchImportResult createBatch(@RequestBody List<Quote> quotes,
+                                         @AuthenticationPrincipal Long userId) {
+        BatchImportResult result = service.saveAll(quotes, userId);
 
-        log.info("Batch quotes created — count = {} (requested = {})", saved.size(), quotes.size());
+        log.info("Batch quotes created — saved = {}, rejected = {}", result.getSaved().size(), result.getRejected().size());
 
-        return saved;
+        return result;
     }
 
     @PutMapping("/{id}")

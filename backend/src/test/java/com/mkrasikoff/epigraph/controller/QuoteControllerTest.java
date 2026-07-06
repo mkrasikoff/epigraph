@@ -1,5 +1,7 @@
 package com.mkrasikoff.epigraph.controller;
 
+import com.mkrasikoff.epigraph.dto.BatchImportResult;
+import com.mkrasikoff.epigraph.dto.RejectedQuote;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.service.QuoteService;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,22 +128,42 @@ class QuoteControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/quotes/batch: creates quotes and returns 201")
+    @DisplayName("POST /api/quotes/batch: creates quotes and returns 201 with saved + rejected")
     void createBatch_returnsCreatedQuotes() throws Exception {
         List<Quote> incoming = List.of(buildQuote(null, "First"), buildQuote(null, "Second"));
         List<Quote> saved = List.of(buildQuote(100L, "First"), buildQuote(101L, "Second"));
-        when(quoteService.saveAll(any(), isNull())).thenReturn(saved);
+        BatchImportResult result = new BatchImportResult(saved, List.of());
+        when(quoteService.saveAll(any(), isNull())).thenReturn(result);
 
         mockMvc.perform(post("/api/quotes/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(incoming)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(100))
-                .andExpect(jsonPath("$[1].id").value(101));
+                .andExpect(jsonPath("$.saved.length()").value(2))
+                .andExpect(jsonPath("$.saved[0].id").value(100))
+                .andExpect(jsonPath("$.saved[1].id").value(101))
+                .andExpect(jsonPath("$.rejected.length()").value(0));
 
         verify(quoteService).saveAll(any(), isNull());
+    }
+
+    @Test
+    @DisplayName("POST /api/quotes/batch: reports rejected quotes with reasons")
+    void createBatch_reportsRejectedQuotes() throws Exception {
+        List<Quote> incoming = List.of(buildQuote(null, "Too long"));
+        RejectedQuote rejectedQuote = new RejectedQuote(buildQuote(null, "Too long"), List.of("Размер цитаты не должен превышать 1000 символов"));
+        BatchImportResult result = new BatchImportResult(List.of(), List.of(rejectedQuote));
+        when(quoteService.saveAll(any(), isNull())).thenReturn(result);
+
+        mockMvc.perform(post("/api/quotes/batch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(incoming)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.saved.length()").value(0))
+                .andExpect(jsonPath("$.rejected.length()").value(1))
+                .andExpect(jsonPath("$.rejected[0].quote.text").value("Too long"))
+                .andExpect(jsonPath("$.rejected[0].errors[0]").value("Размер цитаты не должен превышать 1000 символов"));
     }
 
     @Test
