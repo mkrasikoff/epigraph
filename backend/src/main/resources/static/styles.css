@@ -18,6 +18,7 @@
     --color-primary-hover: #6e4a2d;
     --color-primary-active: #523620;
     --color-primary-highlight: #e8ddd4;
+    --color-banner-highlight: #e2c9ac;
     --color-accent: #c8956c;
     --color-gold: #c9a227;
     --color-toast-error-bg: #7a2318;
@@ -72,6 +73,7 @@
     --color-primary-hover: #e8a87a;
     --color-primary-active: #f0b888;
     --color-primary-highlight: #3a2d22;
+    --color-banner-highlight: #3a2d22;
     --color-accent: #c8956c;
     --color-gold: #d4a830;
     --color-toast-error-bg: #e85d4a;
@@ -98,6 +100,7 @@
         --color-primary-hover: #e8a87a;
         --color-primary-active: #f0b888;
         --color-primary-highlight: #3a2d22;
+        --color-banner-highlight: #3a2d22;
         --color-accent: #c8956c;
         --color-gold: #d4a830;
         --shadow-sm: 0 1px 3px oklch(0 0 0/.25);
@@ -1203,8 +1206,8 @@ body.modal-lock-scroll {
 .import-benefit-banner {
     display: flex;
     gap: var(--space-3);
-    background: var(--color-primary-highlight);
-    color: var(--color-primary);
+    background: var(--color-banner-highlight);
+    color: var(--color-primary-active);
     border-radius: var(--radius-md);
     padding: var(--space-4);
     margin-bottom: var(--space-6);
@@ -1272,7 +1275,7 @@ body.modal-lock-scroll {
 
 .import-step-body .import-step-hint {
     font-size: var(--text-xs);
-    color: var(--color-text-faint);
+    color: var(--color-text-muted);
     margin: var(--space-2) 0 0;
 }
 
