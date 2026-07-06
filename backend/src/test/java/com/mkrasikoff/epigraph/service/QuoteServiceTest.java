@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.dto.BatchImportResult;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
@@ -151,10 +152,11 @@ class QuoteServiceTest {
         quotes.forEach(q -> q.setUserId(null));
         when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
-        List<Quote> saved = quoteService.saveAll(quotes, USER_ID);
+        BatchImportResult result = quoteService.saveAll(quotes, USER_ID);
 
-        assertThat(saved).hasSize(2);
-        assertThat(saved).allMatch(q -> USER_ID.equals(q.getUserId()));
+        assertThat(result.getSaved()).hasSize(2);
+        assertThat(result.getRejected()).isEmpty();
+        assertThat(result.getSaved()).allMatch(q -> USER_ID.equals(q.getUserId()));
         verify(repo).saveAll(quotes);
     }
 
@@ -167,27 +169,31 @@ class QuoteServiceTest {
         withTimestamp.setAdded(1000000L);
         when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
-        List<Quote> saved = quoteService.saveAll(List.of(withoutTimestamp, withTimestamp), USER_ID);
+        List<Quote> saved = quoteService.saveAll(List.of(withoutTimestamp, withTimestamp), USER_ID).getSaved();
 
         assertThat(saved.get(0).getAdded()).isNotNull().isPositive();
         assertThat(saved.get(1).getAdded()).isEqualTo(1000000L);
     }
 
     @Test
-    @DisplayName("saveAll: skips quotes that fail validation instead of rejecting the whole batch")
-    void saveAll_skipsInvalidQuotes() {
+    @DisplayName("saveAll: reports invalid quotes as rejected instead of failing the whole batch")
+    void saveAll_reportsInvalidQuotesAsRejected() {
         Quote valid = buildQuote(null, "Valid quote");
         Quote invalid = buildQuote(null, "Too long, pretend");
         @SuppressWarnings("unchecked")
         ConstraintViolation<Quote> violation = mock(ConstraintViolation.class);
+        when(violation.getMessage()).thenReturn("Размер цитаты не должен превышать 1000 символов");
         when(validator.validate(valid)).thenReturn(Collections.emptySet());
         when(validator.validate(invalid)).thenReturn(Set.of(violation));
         when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
-        List<Quote> saved = quoteService.saveAll(List.of(valid, invalid), USER_ID);
+        BatchImportResult result = quoteService.saveAll(List.of(valid, invalid), USER_ID);
 
-        assertThat(saved).hasSize(1);
-        assertThat(saved.get(0).getText()).isEqualTo("Valid quote");
+        assertThat(result.getSaved()).hasSize(1);
+        assertThat(result.getSaved().get(0).getText()).isEqualTo("Valid quote");
+        assertThat(result.getRejected()).hasSize(1);
+        assertThat(result.getRejected().get(0).getQuote().getText()).isEqualTo("Too long, pretend");
+        assertThat(result.getRejected().get(0).getErrors()).containsExactly("Размер цитаты не должен превышать 1000 символов");
         verify(repo).saveAll(List.of(valid));
     }
 

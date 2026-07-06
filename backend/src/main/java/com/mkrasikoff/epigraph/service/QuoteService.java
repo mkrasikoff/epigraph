@@ -1,8 +1,11 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.dto.BatchImportResult;
+import com.mkrasikoff.epigraph.dto.RejectedQuote;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class QuoteService {
@@ -64,14 +68,15 @@ public class QuoteService {
      * Saves a batch of quotes in a single transaction — used by bulk imports so a large
      * import doesn't pay a separate transaction/connection-checkout cost per quote.
      *
-     * Validates each quote individually and silently skips ones that fail (rather than
-     * rejecting the whole batch, the way @Valid on a List would) — a single overly long
-     * quote shouldn't take 19 valid ones down with it.
+     * Validates each quote individually and reports failures back (rather than rejecting
+     * the whole batch, the way @Valid on a List would) — a single overly long quote
+     * shouldn't take 19 valid ones down with it, and the caller can show/recover them.
      */
     @Transactional
-    public List<Quote> saveAll(List<Quote> quotes, Long userId) {
+    public BatchImportResult saveAll(List<Quote> quotes, Long userId) {
         long now = System.currentTimeMillis();
         List<Quote> valid = new ArrayList<>();
+        List<RejectedQuote> rejected = new ArrayList<>();
 
         for (Quote quote : quotes) {
             if (quote.getAdded() == null) {
@@ -80,12 +85,15 @@ public class QuoteService {
 
             quote.setUserId(userId);
 
-            if (validator.validate(quote).isEmpty()) {
+            Set<ConstraintViolation<Quote>> violations = validator.validate(quote);
+            if (violations.isEmpty()) {
                 valid.add(quote);
+            } else {
+                rejected.add(new RejectedQuote(quote, violations.stream().map(ConstraintViolation::getMessage).toList()));
             }
         }
 
-        return repo.saveAll(valid);
+        return new BatchImportResult(repo.saveAll(valid), rejected);
     }
 
     @Transactional
