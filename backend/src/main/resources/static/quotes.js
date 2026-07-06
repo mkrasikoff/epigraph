@@ -897,9 +897,21 @@ function showImportPreview(items) {
     `;
 
     showModal(t('importPreviewTitle'), body, [
-        {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
-        {label: t('importPreviewConfirm', {count: items.length, word: quoteCountWord(items.length)}), cls: 'btn-primary', action: () => runImport(items)}
+        {label: t('cancelButton'), cls: 'btn-secondary', id: 'import-cancel-btn', action: closeModal},
+        {label: t('importPreviewConfirm', {count: items.length, word: quoteCountWord(items.length)}), cls: 'btn-primary', id: 'import-confirm-btn', action: () => runImport(items)}
     ], true);
+}
+
+/**
+ * Renders the spinner + live counter into the import confirm button.
+ * @param {number} current - Quotes created so far.
+ * @param {number} total - Total quotes to import.
+ */
+function setImportProgress(current, total) {
+    const btn = document.getElementById('import-confirm-btn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-spinner-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('importProgressLabel', {current, total})}`;
 }
 
 /**
@@ -908,8 +920,13 @@ function showImportPreview(items) {
  * @returns {Promise<void>}
  */
 async function runImport(items) {
-    closeModal();
+    const total = items.length;
     let added = 0;
+
+    modalBusy = true;
+    const cancelBtn = document.getElementById('import-cancel-btn');
+    if (cancelBtn) cancelBtn.disabled = true;
+    setImportProgress(added, total);
 
     for (const item of items) {
         const payload = {
@@ -926,7 +943,11 @@ async function runImport(items) {
         saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
         quotes.push(saved);
         added++;
+        setImportProgress(added, total);
     }
+
+    modalBusy = false;
+    closeModal();
     toast(t('toastImported', {count: added, word: quoteCountWord(added)}));
 }
 

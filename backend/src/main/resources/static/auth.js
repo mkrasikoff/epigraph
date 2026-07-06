@@ -58,11 +58,13 @@ let isGuest = true;
 function showAuthModal() {
     document.getElementById('auth-screen').classList.add('visible');
     document.getElementById('app-blur-overlay').classList.add('visible');
+    document.body.classList.add('modal-lock-scroll');
 }
 
 function hideAuthModal() {
     document.getElementById('auth-screen').classList.remove('visible');
     document.getElementById('app-blur-overlay').classList.remove('visible');
+    document.body.classList.remove('modal-lock-scroll');
 }
 
 function hideLoadingOverlay() {

@@ -261,8 +261,7 @@ const YANDEX_IMPORT_SCRIPT = `(async () => {
             text: content,
             author: book_authors || book.authors || '',
             source: book_title || book.name || '',
-            added: created_at ? parseDate(created_at) : Date.now(),
-            tags: color ? color.toLowerCase() : ''
+            added: created_at ? parseDate(created_at) : Date.now()
           });
         }
       }
