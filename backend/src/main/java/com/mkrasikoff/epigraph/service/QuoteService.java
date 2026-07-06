@@ -3,9 +3,11 @@ package com.mkrasikoff.epigraph.service;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
+import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -14,9 +16,11 @@ import java.util.Optional;
 public class QuoteService {
 
     private final QuoteRepository repo;
+    private final Validator validator;
 
-    public QuoteService(QuoteRepository repo) {
+    public QuoteService(QuoteRepository repo, Validator validator) {
         this.repo = repo;
+        this.validator = validator;
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +58,34 @@ public class QuoteService {
         quote.setUserId(userId);
 
         return repo.save(quote);
+    }
+
+    /**
+     * Saves a batch of quotes in a single transaction — used by bulk imports so a large
+     * import doesn't pay a separate transaction/connection-checkout cost per quote.
+     *
+     * Validates each quote individually and silently skips ones that fail (rather than
+     * rejecting the whole batch, the way @Valid on a List would) — a single overly long
+     * quote shouldn't take 19 valid ones down with it.
+     */
+    @Transactional
+    public List<Quote> saveAll(List<Quote> quotes, Long userId) {
+        long now = System.currentTimeMillis();
+        List<Quote> valid = new ArrayList<>();
+
+        for (Quote quote : quotes) {
+            if (quote.getAdded() == null) {
+                quote.setAdded(now);
+            }
+
+            quote.setUserId(userId);
+
+            if (validator.validate(quote).isEmpty()) {
+                valid.add(quote);
+            }
+        }
+
+        return repo.saveAll(valid);
     }
 
     @Transactional

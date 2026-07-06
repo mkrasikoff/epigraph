@@ -220,7 +220,6 @@ const TRANSLATIONS = {
         // ── Import / Export ───────────────────────────────────────────────────
         importExpectedArray:            'Ожидается массив',
         importNoValidItems:             'В файле не найдено ни одной цитаты с текстом',
-        toastImported:                  'Импортировано: {count} {word}',
         toastImportError:               'Ошибка импорта: {message}',
         toastCopied:                    'Скопировано!',
         toastCopyError:                 'Ошибка копирования',
@@ -232,12 +231,19 @@ const TRANSLATIONS = {
         importPreviewMore:              'и ещё {count} {word}',
         importPreviewConfirm:           'Импортировать {count} {word}',
         importProgressLabel:            'Импортируем: {current} из {total}',
+        importStopBtn:                  'Остановить',
+        closeButton:                    'Закрыть',
+        importSummaryDone:              'Готово! Добавлено {count} {word}.',
+        importSummaryStopped:           'Импорт остановлен. Успело добавиться {count} из {total} {word}.',
+        importSummaryError:             'Импорт прерван из-за ошибки соединения. Успело добавиться {count} из {total} {word}.',
+        importSummarySkipped:           'Пропущено {count} {word} — не прошли проверку (слишком длинный текст, автор или источник).',
 
         // ── Import from Yandex Books ──────────────────────────────────────────
         importYandexBenefit:            'Стоит использовать, если в Яндекс.Книгах накопилось больше 20–30 цитат — переносить их вручную одну за другой будет намного дольше. Если цитат всего пара штук, проще добавить их сразу в форме выше.',
         importYandexStep1Prefix:        'Открой ',
         importYandexStep1Suffix:        ', зайди в свой профиль, залогинившись.',
         importYandexStep2:              'Открой консоль браузера (F12 → Console), вставь скрипт и нажми Enter.',
+        importYandexDesktopOnly:        'Доступно только в браузере на компьютере — на телефоне нет инструментов разработчика, которые нужны для этого способа.',
         importYandexStep3Prefix:        'Скрипт скачает файл ',
         importYandexStep3Suffix:        ' — загрузи его ниже, как обычный JSON.',
         importYandexCopyBtn:            'Скопировать скрипт',
