@@ -231,6 +231,7 @@ const TRANSLATIONS = {
         importPreviewSummary:           'Найдено {count} {word} в загруженном файле. Проверьте несколько примеров ниже и подтвердите импорт.',
         importPreviewMore:              'и ещё {count} {word}',
         importPreviewConfirm:           'Импортировать {count} {word}',
+        importProgressLabel:            'Импортируем: {current} из {total}',
 
         // ── Import from Yandex Books ──────────────────────────────────────────
         importYandexBenefit:            'Стоит использовать, если в Яндекс.Книгах накопилось больше 20–30 цитат — переносить их вручную одну за другой будет намного дольше. Если цитат всего пара штук, проще добавить их сразу в форме выше.',
