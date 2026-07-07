@@ -39,10 +39,10 @@
 
         if (mode === 'dark') {
             btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
-            btn.setAttribute('aria-label', 'Переключить на светлую тему');
+            btn.setAttribute('aria-label', t('ariaSwitchToLightTheme'));
         } else {
             btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-            btn.setAttribute('aria-label', 'Переключить на тёмную тему');
+            btn.setAttribute('aria-label', t('ariaSwitchToDarkTheme'));
         }
     }
 })();
@@ -59,44 +59,85 @@ function updateThemeColorMeta(mode) {
 
 // =============================================================================
 // LANGUAGE
-// Language toggle button — shows the language a click would switch TO, and
-// persists the choice. Reloads on switch since dynamically rendered content
-// (quote list, modals, etc.) is only ever localized at render time, not
-// re-rendered live — see setLanguage() in i18n.js.
+// Two toggle controls, shown in different states:
+// - [data-lang-toggle] in the header — guests only (hidden once signed in,
+//   see showGuestMode()/hideGuestMode() in auth.js). No network call, since
+//   guests only ever see the QoD view. Briefly shows the same full-screen
+//   loading overlay used at startup (#app-loading-overlay) before applying
+//   the switch — otherwise the reflow (English text is more compact than
+//   Russian) reads as a jarring flicker rather than a deliberate change.
+// - [data-lang-toggle-settings] in Settings — signed-in users only. A
+//   segmented RU/EN control (same pattern as the JSON/Yandex import source
+//   toggle). Persists the choice to the account and reloads, since a
+//   signed-in session has a lot more rendered state (quote list, modals,
+//   tags) that only gets localized at render time — see setLanguage() in
+//   i18n.js.
 // =============================================================================
 (function () {
-    const langToggleBtn = document.querySelector('[data-lang-toggle]');
-    if (!langToggleBtn) return;
+    const headerBtn = document.querySelector('[data-lang-toggle]');
+    if (!headerBtn) return;
 
-    updateLangToggleLabel();
+    const SWITCH_DELAY_MS = 700;
 
-    langToggleBtn.addEventListener('click', async () => {
+    headerBtn.addEventListener('click', () => {
+        if (headerBtn.disabled) return;
+
         const newLang = currentLanguage === 'ru' ? 'en' : 'ru';
-        try {
-            localStorage.setItem('epigraph_lang', newLang);
-        } catch (e) {
-        }
+        headerBtn.disabled = true;
 
-        if (!isGuest) {
+        const overlay = document.getElementById('app-loading-overlay');
+        overlay?.classList.remove('hidden');
+
+        setTimeout(() => {
+            setLanguage(newLang);
+            if (isGuest) quotes = getGuestQuotes();
+            renderQod(currentQodIndex);
+            headerBtn.disabled = false;
+            overlay?.classList.add('hidden');
+        }, SWITCH_DELAY_MS);
+    });
+})();
+
+(function () {
+    const settingsToggle = document.querySelector('[data-lang-toggle-settings]');
+    if (!settingsToggle) return;
+
+    settingsToggle.querySelectorAll('[data-lang-option]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const newLang = btn.dataset.langOption;
+            if (newLang === currentLanguage) return;
+
+            try {
+                localStorage.setItem('epigraph_lang', newLang);
+            } catch (e) {
+            }
+
             try {
                 await Api.updatePreferredLanguage(newLang);
             } catch (e) {
             }
-        }
 
-        location.reload();
+            location.reload();
+        });
     });
 })();
 
+updateLangToggleLabel();
+
 /**
- * Updates the language toggle button's label to the language a click
- * would switch to (e.g. shows "EN" while the app is in Russian).
+ * Updates the header toggle's label to the language a click would switch to
+ * (e.g. shows "EN" while the app is in Russian), and marks the matching
+ * option active in the Settings segmented toggle.
  */
 function updateLangToggleLabel() {
-    const btn = document.querySelector('[data-lang-toggle]');
-    if (!btn) return;
+    const headerBtn = document.querySelector('[data-lang-toggle]');
+    if (headerBtn) {
+        headerBtn.textContent = currentLanguage === 'ru' ? 'EN' : 'RU';
+    }
 
-    btn.textContent = currentLanguage === 'ru' ? 'EN' : 'RU';
+    document.querySelectorAll('[data-lang-toggle-settings] [data-lang-option]').forEach(btn => {
+        btn.classList.toggle('is-active', btn.dataset.langOption === currentLanguage);
+    });
 }
 
 // =============================================================================

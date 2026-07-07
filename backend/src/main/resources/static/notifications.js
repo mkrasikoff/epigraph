@@ -56,7 +56,7 @@ async function subscribeToPush(intervalHours) {
 
     if (!reg) {
         toast(t('toastPushNotSupported'));
-        document.getElementById('notif-toggle').checked = false;
+        setNotifToggleState(false);
         return;
     }
 
@@ -71,7 +71,7 @@ async function subscribeToPush(intervalHours) {
 
     if (perm !== 'granted') {
         toast(t('toastPushDenied'));
-        document.getElementById('notif-toggle').checked = false;
+        setNotifToggleState(false);
         return;
     }
 
@@ -82,7 +82,7 @@ async function subscribeToPush(intervalHours) {
 
         if (!publicKey) {
             toast(t('toastPushUnavailable'));
-            document.getElementById('notif-toggle').checked = false;
+            setNotifToggleState(false);
             return;
         }
 
@@ -113,7 +113,7 @@ async function subscribeToPush(intervalHours) {
     } catch (e) {
         console.error('[Notif] Subscribe failed:', e);
         toast(t('toastPushSubscribeError'));
-        document.getElementById('notif-toggle').checked = false;
+        setNotifToggleState(false);
     }
 }
 
@@ -147,9 +147,11 @@ async function unsubscribeFromPush() {
  * @param {boolean} enabled
  */
 async function handleNotifToggle(enabled) {
+    setNotifToggleState(enabled);
+
     if (isGuest) {
         toast(t('toastPushLoginRequired'));
-        document.getElementById('notif-toggle').checked = false;
+        setNotifToggleState(false);
         return;
     }
 
@@ -215,18 +217,43 @@ function handleNotifIntervalChange(value) {
 }
 
 /**
+ * Updates the Quote-of-the-day segmented toggle (Off/On) to reflect the
+ * given state.
+ * @param {boolean} enabled
+ */
+function setNotifToggleState(enabled) {
+    document.querySelectorAll('#notif-toggle [data-notif-toggle-value]').forEach(btn => {
+        btn.classList.toggle('is-active', (btn.dataset.notifToggleValue === 'on') === enabled);
+    });
+}
+
+/**
+ * Disables/enables both buttons of the Quote-of-the-day toggle — used on iOS
+ * Safari outside of PWA mode, where push notifications aren't available.
+ * @param {boolean} disabled
+ */
+function setNotifToggleDisabled(disabled) {
+    const group = document.getElementById('notif-toggle');
+    if (!group) return;
+
+    group.querySelectorAll('[data-notif-toggle-value]').forEach(btn => {
+        btn.disabled = disabled;
+    });
+    group.style.opacity = disabled ? '0.4' : '';
+}
+
+/**
  * Syncs the notification Settings UI with the current subscription state.
  * @param {boolean} subscribed
  * @param {number} [intervalHours]
  */
 function updateNotifUI(subscribed, intervalHours) {
-    const toggle = document.getElementById('notif-toggle');
-    if (toggle) toggle.checked = subscribed;
+    setNotifToggleState(subscribed);
 
     if (intervalHours) {
         const labels = { '6': t('notifInterval6h'), '12': t('notifInterval12h'), '24': t('notifInterval24h') };
         const label = document.getElementById('notif-interval-label');
-        if (label) label.textContent = labels[String(intervalHours)] || 'Раз в день';
+        if (label) label.textContent = labels[String(intervalHours)] || t('notifInterval24h');
         document.querySelectorAll('#notif-interval-menu .sort-menu-item').forEach(item => {
             item.classList.toggle('active', item.dataset.value === String(intervalHours));
         });
@@ -246,12 +273,7 @@ async function initNotifications() {
         // iOS Safari: push doesn't work without PWA — show hint, disable toggle
         if (iosHint) iosHint.style.display = '';
 
-        const toggle = document.getElementById('notif-toggle');
-
-        if (toggle) {
-            toggle.disabled = true;
-            toggle.closest('label').style.opacity = '0.4';
-        }
+        setNotifToggleDisabled(true);
         return;
     }
 
