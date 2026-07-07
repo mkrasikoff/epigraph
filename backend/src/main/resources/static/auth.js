@@ -637,16 +637,6 @@ function toggleAuthMode() {
         const regEmail = document.getElementById('auth-email-reg')?.value.trim();
         if (regEmail) document.getElementById('auth-email').value = regEmail;
     }
-
-    const hint = document.getElementById('auth-password-hint');
-    const passInput = document.getElementById('auth-password');
-
-    if (hint) hint.style.display = isRegister ? 'block' : 'none';
-
-    if (passInput) {
-        passInput.placeholder = isRegister ? t('authPlaceholderPasswordRegister') : t('authPlaceholderPasswordLogin');
-        passInput.autocomplete = isRegister ? 'new-password' : 'current-password';
-    }
 }
 
 async function authSubmit() {
@@ -975,8 +965,7 @@ function showForgotPasswordForm() {
 
     // The login form elements sit directly inside .auth-card (not inside auth-register-form-col)
     // Select them by ID to avoid accidentally touching the register panel
-    const loginOnlyIds = ['auth-email', 'auth-password', 'auth-password-hint',
-        'auth-error', 'auth-submit-btn'];
+    const loginOnlyIds = ['auth-email', 'auth-password', 'auth-error', 'auth-submit-btn'];
     loginOnlyIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.dataset.forgotHidden = 'true'; el.style.display = 'none'; }

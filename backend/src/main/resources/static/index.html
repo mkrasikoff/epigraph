@@ -205,9 +205,6 @@
             </div>
             <input type="password" id="auth-password" placeholder="Ваш пароль" data-i18n-placeholder="authPlaceholderPasswordLogin" autocomplete="current-password">
         </div>
-        <p id="auth-password-hint" data-i18n="authPasswordHint" style="display:none;font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-2))">
-            Минимум 8 символов, хотя бы одна буква и одна цифра.
-        </p>
         <p class="auth-error" id="auth-error"></p>
         <button class="btn-primary" id="auth-submit-btn" data-i18n="authSubmitLogin" onclick="authSubmit()">
             Войти
@@ -798,29 +795,16 @@
                                 Как часто отправлять уведомление.
                             </p>
                         </div>
-                        <div class="sort-dropdown" id="notif-interval-dropdown">
-                            <button class="sort-btn" id="notif-interval-btn"
-                                    onclick="toggleNotifIntervalMenu()"
-                                    aria-haspopup="listbox" aria-expanded="false">
-                                <span id="notif-interval-label" data-i18n="notifInterval24h">
-                                    Раз в день
-                                </span>
-                                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <polyline points="6 9 12 15 18 9"/>
-                                </svg>
-                            </button>
-                            <ul class="sort-menu" id="notif-interval-menu" role="listbox"
-                                style="min-width: 160px; left: auto; right: 0;">
-                                <li class="sort-menu-item" data-value="6" onclick="selectNotifInterval(this)" data-i18n="notifInterval6h">
-                                    Каждые 6 часов
-                                </li>
-                                <li class="sort-menu-item" data-value="12" onclick="selectNotifInterval(this)" data-i18n="notifInterval12h">
-                                    Каждые 12 часов
-                                </li>
-                                <li class="sort-menu-item active" data-value="24" onclick="selectNotifInterval(this)" data-i18n="notifInterval24h">
-                                    Раз в день
-                                </li>
-                            </ul>
+                        <div class="import-source-toggle" id="notif-interval-toggle" role="group" data-i18n-aria="settingsNotifFreqTitle" aria-label="Частота">
+                            <button type="button" class="import-source-tab" data-interval-value="6"
+                                    data-i18n="notifIntervalShort6h" data-i18n-aria="notifInterval6h"
+                                    onclick="selectNotifInterval(this)">6ч</button>
+                            <button type="button" class="import-source-tab" data-interval-value="12"
+                                    data-i18n="notifIntervalShort12h" data-i18n-aria="notifInterval12h"
+                                    onclick="selectNotifInterval(this)">12ч</button>
+                            <button type="button" class="import-source-tab is-active" data-interval-value="24"
+                                    data-i18n="notifIntervalShort24h" data-i18n-aria="notifInterval24h"
+                                    onclick="selectNotifInterval(this)">24ч</button>
                         </div>
                     </div>
                     </div>

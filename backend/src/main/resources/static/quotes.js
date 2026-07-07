@@ -519,14 +519,10 @@ function sortQuotes(arr) {
     }
 }
 
-// Close sort and notification interval menus on outside click
+// Close sort menu on outside click
 document.addEventListener('click', e => {
     if (!document.getElementById('sort-dropdown')?.contains(e.target)) {
         closeSortMenu();
-    }
-
-    if (!document.getElementById('notif-interval-dropdown')?.contains(e.target)) {
-        closeNotifIntervalMenu();
     }
 });
 
@@ -743,7 +739,8 @@ function editQuote(id) {
                     editingId = null;
                 }
             }
-        ]
+        ],
+        true
     );
 
     const editQuoteTextArea = document.getElementById('editQuoteText');
@@ -846,7 +843,8 @@ async function deleteQuote(id) {
                 }
             }
         },
-            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal}]
+            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal}],
+        true
     );
 }
 

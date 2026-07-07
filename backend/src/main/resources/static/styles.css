@@ -943,6 +943,14 @@ body.modal-lock-scroll {
     background: var(--color-primary-highlight);
 }
 
+/* Unify with the other Settings action buttons (.export-btn) — a resting
+   muted state made sense for the quote-list sort trigger it was designed for,
+   but read as an unrelated third color next to the always-bright Export/Import/
+   Copy/etc. buttons here. */
+#notif-interval-btn {
+    color: var(--color-text);
+}
+
 .sort-btn svg {
     flex-shrink: 0;
     transition: transform var(--transition);
@@ -1212,6 +1220,13 @@ body.modal-lock-scroll {
 
 .settings-item .import-source-toggle {
     margin-bottom: 0;
+}
+
+/* Unify with the other Settings action buttons (.export-btn) — the muted resting
+   color made sense for the JSON/Yandex import source picker it was designed for,
+   but read as a third, unrelated color next to the always-bright buttons here. */
+.settings-item .import-source-tab:not(.is-active) {
+    color: var(--color-text);
 }
 
 .import-benefit-banner {
@@ -1496,6 +1511,12 @@ body.modal-lock-scroll {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+}
+
+/* Let an open dropdown (e.g. the notification-interval menu) escape the card's
+   rounded-corner clipping instead of being cut off — see toggleNotifIntervalMenu(). */
+.settings-card.dropdown-open {
+    overflow: visible;
 }
 
 .settings-item {
@@ -2431,7 +2452,6 @@ body.modal-lock-scroll {
 /* Hide login-mode elements directly in the card when in register mode */
 .auth-card--register > .auth-subtitle,
 .auth-card--register > .auth-field,
-.auth-card--register > #auth-password-hint,
 .auth-card--register > .auth-error,
 .auth-card--register > #auth-submit-btn,
 .auth-card--register > .auth-divider,
