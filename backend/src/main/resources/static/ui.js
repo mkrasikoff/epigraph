@@ -58,6 +58,48 @@ function updateThemeColorMeta(mode) {
 }
 
 // =============================================================================
+// LANGUAGE
+// Language toggle button — shows the language a click would switch TO, and
+// persists the choice. Reloads on switch since dynamically rendered content
+// (quote list, modals, etc.) is only ever localized at render time, not
+// re-rendered live — see setLanguage() in i18n.js.
+// =============================================================================
+(function () {
+    const langToggleBtn = document.querySelector('[data-lang-toggle]');
+    if (!langToggleBtn) return;
+
+    updateLangToggleLabel();
+
+    langToggleBtn.addEventListener('click', async () => {
+        const newLang = currentLanguage === 'ru' ? 'en' : 'ru';
+        try {
+            localStorage.setItem('epigraph_lang', newLang);
+        } catch (e) {
+        }
+
+        if (!isGuest) {
+            try {
+                await Api.updatePreferredLanguage(newLang);
+            } catch (e) {
+            }
+        }
+
+        location.reload();
+    });
+})();
+
+/**
+ * Updates the language toggle button's label to the language a click
+ * would switch to (e.g. shows "EN" while the app is in Russian).
+ */
+function updateLangToggleLabel() {
+    const btn = document.querySelector('[data-lang-toggle]');
+    if (!btn) return;
+
+    btn.textContent = currentLanguage === 'ru' ? 'EN' : 'RU';
+}
+
+// =============================================================================
 // NAVIGATION
 // Logic for switching between the main application views.
 // =============================================================================

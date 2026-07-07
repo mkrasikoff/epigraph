@@ -14,4 +14,5 @@ public class MeResponse {
     private String email;
     private String username;
     private String avatarIcon;
+    private String preferredLanguage;
 }

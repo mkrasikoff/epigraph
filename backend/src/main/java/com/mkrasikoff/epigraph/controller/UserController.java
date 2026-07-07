@@ -4,6 +4,7 @@ import com.mkrasikoff.epigraph.dto.AuthResponse;
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
 import com.mkrasikoff.epigraph.dto.UpdateAvatarRequest;
+import com.mkrasikoff.epigraph.dto.UpdatePreferredLanguageRequest;
 import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
@@ -91,6 +92,22 @@ public class UserController {
             log.info("Avatar icon updated — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse("Иконка обновлена"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Updates the authenticated user's interface language preference.
+     */
+    @PatchMapping("/me/language")
+    public ResponseEntity<?> updatePreferredLanguage(@AuthenticationPrincipal Long userId,
+                                                      @Valid @RequestBody UpdatePreferredLanguageRequest request) {
+        try {
+            userService.updatePreferredLanguage(userId, request.getPreferredLanguage());
+            log.info("Preferred language updated — userId = {}", userId);
+
+            return ResponseEntity.ok(new ErrorResponse("Язык обновлён"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }

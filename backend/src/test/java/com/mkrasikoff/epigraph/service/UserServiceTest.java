@@ -231,4 +231,28 @@ class UserServiceTest {
 
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("updatePreferredLanguage: sets language and saves user")
+    void updatePreferredLanguage_setsLanguageAndSaves() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updatePreferredLanguage(USER_ID, "en");
+
+        assertThat(user.getPreferredLanguage()).isEqualTo("en");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("updatePreferredLanguage: throws when user not found")
+    void updatePreferredLanguage_throws_whenUserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updatePreferredLanguage(99L, "en"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("не найден");
+
+        verify(userRepository, never()).save(any());
+    }
 }
