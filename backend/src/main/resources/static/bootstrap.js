@@ -46,7 +46,9 @@
     }
 
     loadBanner();
-    initAuthButtons();
+    // Only guests ever see the Google/Yandex buttons this decides between — skip the
+    // /api/geo round-trip entirely for an already-authenticated session.
+    if (!getToken()) initAuthButtons();
 
     // If Google OAuth — token inside query-param
     const urlParams = new URLSearchParams(window.location.search);

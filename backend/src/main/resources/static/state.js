@@ -19,6 +19,7 @@
  * - quotes                      {Array}   — mutable quotes array
  * - currentFilter               {string}
  * - currentQodIndex             {number}
+ * - qodAnchorId                 {number|null} — id of today's actual QoD quote (vs. one browsed to)
  * - editingId                   {number}
  * - currentSort                 {string}  — default sort
  * - currentUser                 {Object|null} — {id, email, username} of the logged-in user
@@ -35,6 +36,7 @@ const FAVORITE_RERENDER_DELAY_MS = 220;
 let quotes = [];
 let currentFilter = 'all';
 let currentQodIndex = -1;
+let qodAnchorId = null;
 let editingId = null;
 let currentSort = 'date_desc'; // default sort
 

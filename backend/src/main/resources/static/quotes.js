@@ -73,6 +73,11 @@ function renderQod(qodOrIdx) {
 
     currentQodIndex = idx;
     const q = quotes[idx];
+
+    // The "На сегодня" tab only stays highlighted while looking at today's actual
+    // quote — browsing away via Random/swipe fades it out (see .nav-tab transition in styles.css).
+    document.getElementById('tab-qod')?.classList.toggle('active', q.id === qodAnchorId);
+
     const now = new Date();
     const dateLocale = currentLanguage === 'ru' ? 'ru-RU' : 'en-US';
     const dateStr = now.toLocaleDateString(dateLocale, {weekday: 'long', day: 'numeric', month: 'long'});

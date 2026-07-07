@@ -76,6 +76,7 @@ function hideLoadingOverlay() {
 function showGuestMode() {
     isGuest = true;
     quotes = getGuestQuotes();
+    qodAnchorId = quotes[0]?.id ?? null;
 
     document.getElementById('logout-btn').style.display = 'none';
     document.getElementById('login-btn').style.display = '';
@@ -257,10 +258,12 @@ function showEditUsernameModal() {
  * Validates the username field live, mirroring the backend's format rules
  * (3–20 chars, latin letters/digits/underscore), and toggles the submit button.
  * @param {HTMLInputElement} input
+ * @param {string} [btnId='eu-submit-btn'] - Id of the submit button to enable/disable.
+ * @param {string} [errorId='eu-error'] - Id of the element to show the validation message in.
  */
-function validateUsernameInput(input) {
-    const btn = document.getElementById('eu-submit-btn');
-    const errorEl = document.getElementById('eu-error');
+function validateUsernameInput(input, btnId = 'eu-submit-btn', errorId = 'eu-error') {
+    const btn = document.getElementById(btnId);
+    const errorEl = document.getElementById(errorId);
     if (!btn || !input) return;
 
     const value = input.value.trim();
@@ -308,6 +311,125 @@ async function submitEditUsername() {
         closeModal();
         updateSettingsAccount();
         toast(t('editUsernameSuccess'));
+
+    } catch {
+        if (errorEl) errorEl.textContent = t('authErrorConnection');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+/** Avatar icon selected so far in the open profile-setup modal (see showProfileSetupModal). */
+let profileSetupAvatar = 'neutral';
+
+/**
+ * Opens the post-registration profile-setup modal — lets a freshly verified user pick an
+ * avatar icon and tweak the auto-generated username (see AuthService.deriveUsername on the
+ * backend). Skippable: the account already has a valid default for both, so this is purely
+ * optional polish, not a blocking step.
+ * @param {string} defaultUsername - The username already saved on the account (pre-fills the field).
+ */
+function showProfileSetupModal(defaultUsername) {
+    profileSetupAvatar = currentUser?.avatarIcon || 'neutral';
+
+    const optionsHtml = AVATAR_ICON_KEYS.map(key => {
+        const selected = key === profileSetupAvatar ? ' avatar-picker-option--selected' : '';
+        const label = t(avatarIconLabelKey(key));
+        return `<div class="avatar-picker-item">
+                    <button type="button" class="avatar-picker-option${selected}" id="profile-setup-avatar-${key}"
+                            aria-label="${label}" onclick="selectProfileSetupAvatar('${key}')">
+                        ${avatarIconMarkup(key, 1.8)}
+                    </button>
+                    <span class="avatar-picker-label">${label}</span>
+                </div>`;
+    }).join('');
+
+    showModal(
+        t('profileSetupTitle'),
+        `<p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)">
+             ${t('profileSetupDesc')}
+         </p>
+         <div class="avatar-picker-grid" id="profile-setup-avatar-grid">${optionsHtml}</div>
+         <div class="auth-field" style="margin-top:var(--space-5);margin-bottom:0">
+             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
+                 ${t('authUsernameLabel')}
+             </label>
+             <input id="profile-setup-username" type="text" class="modal-confirm-input"
+                    style="margin-top:var(--space-1)"
+                    maxlength="20"
+                    placeholder="${t('authUsernamePlaceholder')}"
+                    value="${escHtml(defaultUsername || '')}"
+                    autocomplete="off">
+         </div>
+         <p id="profile-setup-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
+         color:#c0392b;min-height:1.2em"></p>`,
+        [
+            {label: t('profileSetupSkip'), cls: 'btn-secondary', action: closeModal},
+            {
+                label: t('changePasswordSubmit'),
+                cls: 'btn-primary',
+                id: 'profile-setup-save-btn',
+                action: submitProfileSetup
+            }
+        ],
+        true
+    );
+
+    const input = document.getElementById('profile-setup-username');
+    input?.addEventListener('input', () => validateUsernameInput(input, 'profile-setup-save-btn', 'profile-setup-error'));
+}
+
+/**
+ * Selects an avatar icon within the open profile-setup modal (local selection only —
+ * applied together with the username on Save, unlike the standalone avatar picker in
+ * Settings which applies on click).
+ * @param {string} key - One of AVATAR_ICON_KEYS.
+ */
+function selectProfileSetupAvatar(key) {
+    profileSetupAvatar = key;
+
+    document.querySelectorAll('#profile-setup-avatar-grid .avatar-picker-option').forEach(btn => {
+        btn.classList.remove('avatar-picker-option--selected');
+    });
+    document.getElementById('profile-setup-avatar-' + key)?.classList.add('avatar-picker-option--selected');
+}
+
+/**
+ * Saves the chosen username/avatar from the profile-setup modal — only sends the PATCH
+ * requests for whichever of the two actually changed from the account's current values.
+ */
+async function submitProfileSetup() {
+    const input = document.getElementById('profile-setup-username');
+    const errorEl = document.getElementById('profile-setup-error');
+    const btn = document.getElementById('profile-setup-save-btn');
+    const username = input?.value.trim();
+
+    if (!username || !USERNAME_REGEX.test(username)) {
+        validateUsernameInput(input, 'profile-setup-save-btn', 'profile-setup-error');
+        return;
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+        if (username !== currentUser?.username) {
+            const res = await Api.updateUsername(username);
+            const data = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                if (errorEl) errorEl.textContent = data?.message || t('editUsernameErrorInvalid');
+                return;
+            }
+            if (currentUser) currentUser.username = username;
+        }
+
+        if (profileSetupAvatar !== (currentUser?.avatarIcon || 'neutral')) {
+            const res = await Api.updateAvatar(profileSetupAvatar);
+            if (res.ok && currentUser) currentUser.avatarIcon = profileSetupAvatar;
+        }
+
+        closeModal();
+        updateSettingsAccount();
 
     } catch {
         if (errorEl) errorEl.textContent = t('authErrorConnection');
@@ -433,6 +555,7 @@ async function loadQod() {
         const cachedId = sessionStorage.getItem(CACHE_KEY);
         if (cachedId !== null) {
             const quote = quotes.find(q => q.id === Number(cachedId)) || null;
+            qodAnchorId = quote ? quote.id : null;
             renderQod(quote);
             return;
         }
@@ -443,8 +566,10 @@ async function loadQod() {
         if (qodQuote) {
             sessionStorage.setItem(CACHE_KEY, String(qodQuote.id));
         }
+        qodAnchorId = qodQuote ? qodQuote.id : null;
         renderQod(qodQuote);
     } catch {
+        qodAnchorId = null;
         renderQod(null);
     }
 }
@@ -611,17 +736,11 @@ async function authSubmit() {
  */
 async function authSubmitRegister() {
     const email = document.getElementById('auth-email-reg')?.value.trim() || '';
-    const username = document.getElementById('auth-username-reg')?.value.trim() || '';
     const password = document.getElementById('auth-password-reg')?.value || '';
     const errorEl = document.getElementById('auth-error-reg');
 
     if (!EMAIL_REGEX.test(email)) {
         if (errorEl) errorEl.textContent = t('authErrorInvalidEmailDot');
-        return;
-    }
-
-    if (!USERNAME_REGEX.test(username)) {
-        if (errorEl) errorEl.textContent = t('authErrorUsernameInvalid');
         return;
     }
 
@@ -647,7 +766,7 @@ async function authSubmitRegister() {
         const res = await fetch(AUTH_API + '/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, username, password })
+            body: JSON.stringify({ email, password })
         });
 
         const data = res.status === 202 ? null : await res.json().catch(() => null);
@@ -675,18 +794,31 @@ function loginWithYandex() {
     window.location.href = '/oauth2/authorization/yandex';
 }
 
+/**
+ * Shows/hides the Google vs. Yandex OAuth buttons for the given region guess.
+ * @param {boolean} isRussia
+ */
+function applyAuthButtonVisibility(isRussia) {
+    document.querySelectorAll('.btn-google').forEach(btn => {
+        btn.style.display = isRussia ? 'none' : '';
+    });
+    document.querySelectorAll('.btn-yandex').forEach(btn => {
+        btn.style.display = isRussia ? '' : 'none';
+    });
+}
+
 async function initAuthButtons() {
+    // Both buttons start hidden in the HTML — apply an instant, zero-latency best guess
+    // from the browser locale first so they don't flash empty while /api/geo (an external
+    // IP lookup) resolves, then correct it below once the accurate answer is in. The actual
+    // region gate for the OAuth flow itself is enforced server-side (GeoBlockFilter)
+    // regardless of which button was visible, so a brief mismatch here is only cosmetic.
+    applyAuthButtonVisibility(/^ru\b/i.test(navigator.language || ''));
+
     try {
         const res = await fetch('/api/geo');
         const data = await res.json();
-        const isRussia = data.country === 'RU';
-
-        document.querySelectorAll('.btn-google').forEach(btn => {
-            btn.style.display = isRussia ? 'none' : '';
-        });
-        document.querySelectorAll('.btn-yandex').forEach(btn => {
-            btn.style.display = isRussia ? '' : 'none';
-        });
+        applyAuthButtonVisibility(data.country === 'RU');
     } catch (e) {
         // On error — show all OAuth buttons
         document.querySelectorAll('.btn-google, .btn-yandex').forEach(btn => {
@@ -799,6 +931,7 @@ async function submitVerifyCode(email) {
         await loadCurrentUser();
         await syncPreferredLanguage();
         await loadQod();
+        showProfileSetupModal(currentUser?.username || '');
 
     } catch {
         if (errorEl) errorEl.textContent = t('authErrorConnection');

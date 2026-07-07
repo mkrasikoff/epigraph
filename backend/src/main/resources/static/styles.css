@@ -269,6 +269,7 @@ header {
     color: var(--color-text-muted);
     cursor: pointer;
     white-space: nowrap;
+    transition: background 450ms ease, color 450ms ease, box-shadow 450ms ease;
 }
 
 .nav-tab.active {
