@@ -104,4 +104,16 @@ public class UserService {
         user.setAvatarIcon(avatarIcon);
         userRepository.save(user);
     }
+
+    /**
+     * Sets the user's interface language preference ("ru" or "en").
+     */
+    @Transactional
+    public void updatePreferredLanguage(Long userId, String preferredLanguage) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+
+        user.setPreferredLanguage(preferredLanguage);
+        userRepository.save(user);
+    }
 }

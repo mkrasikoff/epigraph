@@ -54,7 +54,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal Long userId) {
         return userService.findById(userId)
-                .<ResponseEntity<?>>map(user -> ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon())))
+                .<ResponseEntity<?>>map(user -> ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon(), user.getPreferredLanguage())))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ErrorResponse("Пользователь не найден")));
     }

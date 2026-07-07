@@ -9,6 +9,8 @@
  * - renderQod()      {fn}       — defined in quotes.js
  * - switchView()     {fn}       — defined in index.html NAVIGATION
  * - t()              {fn}       — defined in i18n.js
+ * - setLanguage()    {fn}       — defined in i18n.js
+ * - TRANSLATIONS     {Object}   — defined in i18n.js
  * - AUTH_API         {string}   — defined in index.html CONSTANTS
  */
 
@@ -153,7 +155,7 @@ function updateSettingsAccount() {
     const favCount = quotes.filter(q => q.fav).length;
 
     document.getElementById('settings-account-stats').textContent =
-        t('statsSummary', {total, word: pluralQuotes(total), favorites: favCount});
+        t('statsSummary', {total, word: quoteCountWord(total), favorites: favCount});
 
     // Update change-password item — same wording for all users
     document.getElementById('settings-change-password-title').textContent = t('changePasswordTitle');
@@ -313,6 +315,38 @@ async function submitEditUsername() {
 }
 
 /**
+ * Reconciles the app's active language with the authenticated user's account
+ * right after login/register/reset. If this device already has an explicit
+ * language choice (the guest picked one, or it was set on a previous
+ * session), that choice wins and is pushed to the account — this is how a
+ * language picked on the guest screen "sticks" through registration/login
+ * instead of being silently overwritten by whatever the account had stored.
+ * Otherwise (a fresh device with no local choice), the account's stored
+ * preference is pulled down and applied locally.
+ */
+async function syncPreferredLanguage() {
+    if (!currentUser) return;
+
+    let explicit = null;
+    try {
+        explicit = localStorage.getItem('epigraph_lang');
+    } catch (e) {
+    }
+
+    const serverLang = currentUser.preferredLanguage;
+
+    if (explicit && TRANSLATIONS[explicit] && explicit !== serverLang) {
+        try {
+            await Api.updatePreferredLanguage(explicit);
+            currentUser.preferredLanguage = explicit;
+        } catch (e) {
+        }
+    } else if (!explicit && serverLang) {
+        setLanguage(serverLang);
+    }
+}
+
+/**
  * Fetches the latest release tag from GitHub and displays it as the app version.
  * Caches the result in sessionStorage to avoid redundant API calls within the same session.
  */
@@ -446,21 +480,6 @@ function applyHashRoute() {
 // Handle browser back / forward buttons
 window.addEventListener('hashchange', applyHashRoute);
 
-/**
- * Returns the correct Russian plural form for the word "цитата".
- * @param {number} n
- * @returns {string}
- */
-function pluralQuotes(n) {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-
-    if (mod10 === 1 && mod100 !== 11) return t('pluralQuote1');
-    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return t('pluralQuote2');
-
-    return t('pluralQuote5');
-}
-
 function toggleAuthMode() {
     if (document.getElementById('auth-forgot-panel')) {
         hideForgotPasswordForm();
@@ -574,6 +593,7 @@ async function authSubmit() {
         hideGuestMode();
         await loadData();
         await loadCurrentUser();
+        await syncPreferredLanguage();
         renderQod();
 
     } catch (e) {
@@ -775,6 +795,7 @@ async function submitVerifyCode(email) {
         hideGuestMode();
         await loadData();
         await loadCurrentUser();
+        await syncPreferredLanguage();
         await loadQod();
 
     } catch {
@@ -1057,6 +1078,7 @@ async function submitPasswordReset(resetToken) {
         hideGuestMode();
         await loadData();
         await loadCurrentUser();
+        await syncPreferredLanguage();
         switchView('settings');
         toast(t('changePasswordSuccess'));
 

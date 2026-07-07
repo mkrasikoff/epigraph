@@ -6,7 +6,7 @@
  *   t('key', { n: 5 }) — returns the string with {n} replaced by 5
  *
  * To add a new language, duplicate the 'ru' block and translate every value.
- * To switch language at runtime, set window.__epigraphLang and call applyI18n().
+ * To switch language at runtime, call setLanguage('en' | 'ru').
  */
 
 const TRANSLATIONS = {
@@ -118,6 +118,7 @@ const TRANSLATIONS = {
         navAdd:                         'Добавить',
         navSettings:                    'Настройки',
         ariaToggleTheme:                'Переключить тему',
+        ariaToggleLanguage:             'Переключить язык',
         ariaLogout:                     'Выйти из аккаунта',
         ariaBannerClose:                'Закрыть',
 
@@ -326,11 +327,331 @@ const TRANSLATIONS = {
         // ── General ───────────────────────────────────────────────────────────
         toastLoginRequired:             'Войдите в аккаунт для доступа к этому разделу',
         toastError:                     'Ошибка',
+    },
+
+    en: {
+        // ── Auth ──────────────────────────────────────────────────────────────
+        authSubtitle:                   'Sign in to continue',
+        authSubmitLogin:                'Sign in',
+        authSubmitRegister:             'Sign up',
+        authSwitchToLogin:              'Already have an account?',
+        authSwitchToRegister:           "Don't have an account?",
+        authSwitchBtnLogin:             'Sign in',
+        authSwitchBtnRegister:          'Sign up',
+        authPlaceholderEmail:           'you@example.com',
+        authPlaceholderPasswordLogin:   'Your password',
+        authPlaceholderPasswordRegister:'At least 8 characters',
+        authLoading:                    'Loading...',
+        authTagline:                    'Your quotes. Every day.',
+        authRegisterHeading:            'Create an account',
+        authRegisterSub:                "It's free. Forever.",
+        authEmailLabel:                 'Email',
+        authPasswordLabel:              'Password',
+        authPasswordHint:               'At least 8 characters, with one letter and one digit.',
+        authDivider:                    'or',
+        authGoogleButton:               'Sign in with Google',
+        authYandexButton:               'Sign in with Yandex',
+        authUsernameLabel:              'Username',
+        authUsernamePlaceholder:        'john_smith',
+
+        // Auth validation errors ────────────────────────────────────────────────────────
+        authErrorFillAllFields:         'Fill in all fields',
+        authErrorInvalidEmail:          'Enter a valid email',
+        authErrorInvalidEmailDot:       'Enter a valid email.',
+        authErrorPasswordTooShort:      'Password must be at least 8 characters',
+        authErrorPasswordTooLong:       'Password is too long (128 characters max)',
+        authErrorPasswordNoLetter:      'Password must contain at least one letter',
+        authErrorPasswordNoDigit:       'Password must contain at least one digit',
+        authErrorPasswordPattern:       'At least 8 characters, with a letter and a digit.',
+        authErrorWrongCredentials:      'Incorrect email or password',
+        authGeoBlocked:                 'Google sign-in is unavailable in your region',
+        authGeoBlockedYandex:           'Yandex sign-in is only available from Russia',
+        authErrorInvalidEmailServer:    'Invalid email',
+        authErrorConnection:            'Connection error',
+        authErrorUsernameInvalid:       'Username: 3–20 characters, Latin letters, digits, and underscores',
+
+        // Auth Email Verification ────────────────────────────────────────────────────────
+        verifyTitle:            'Confirm your email',
+        verifySubtitle:         'We sent a 6-digit code to {email}',
+        verifyCodeLabel:        'Code from the email',
+        verifySubmit:           'Confirm',
+        verifyErrorInvalidCode: 'Invalid or expired code',
+        verifyResendHint:       "Didn't get the email?",
+        verifyResendLink:       'Resend',
+        verifyResendSuccess:    'Code resent',
+        verifyResendError:      'Failed to send the code',
+        verifyBack:             'Back',
+
+        // ── Change password ───────────────────────────────────────────────────
+        changePasswordTitle:              'Change password',
+        changePasswordSettingsDesc:       'Set or change your password for email sign-in.',
+        changePasswordButton:             'Change password',
+        changePasswordNew:                'New password',
+        changePasswordConfirm:            'Confirm new password',
+        changePasswordNewPlaceholder:     'At least 8 characters',
+        changePasswordConfirmPlaceholder: 'Repeat the new password',
+        changePasswordSubmit:             'Save',
+        changePasswordSuccess:            'Password changed successfully',
+        changePasswordErrorMismatch:      'Passwords do not match',
+
+        // ── Edit username modal ───────────────────────────────────────────────
+        editUsernameTitle:                'Change username',
+        editUsernameLabel:                'Username',
+        editUsernamePlaceholder:          'john_smith',
+        editUsernameErrorRequired:        'Enter a username',
+        editUsernameErrorLength:          '3 to 20 characters',
+        editUsernameErrorChars:           'Latin letters, digits, and underscores only',
+        editUsernameErrorInvalid:         'Invalid username',
+        editUsernameSuccess:              'Username updated',
+
+        // ── Avatar picker modal ────────────────────────────────────────────────
+        avatarPickerSuccess:              'Icon updated',
+        avatarPickerError:                'Failed to update the icon',
+
+        // ── Avatar icon labels (keys mirror AVATAR_ICON_KEYS in avatars.js) ────
+        avatarIconNeutral:                'Neutral',
+        avatarIconBear:                   'Bear',
+        avatarIconCat:                    'Cat',
+        avatarIconDog:                    'Dog',
+        avatarIconHamster:                'Hamster',
+        avatarIconRabbit:                 'Rabbit',
+        avatarIconFox:                    'Fox',
+        avatarIconOwl:                    'Owl',
+        avatarIconElephant:               'Elephant',
+        avatarIconMouse:                  'Mouse',
+        avatarIconDuck:                   'Duck',
+        avatarIconSeal:                   'Seal',
+
+        // ── Forgot password ──────────────────────────────────────────────────────
+        forgotPasswordLink:               'Forgot your password?',
+        forgotPasswordTitle:              'Password recovery',
+        forgotPasswordDesc:               "Enter your email and we'll send you a link to reset your password.",
+        forgotPasswordEmailLabel:         'Email',
+        forgotPasswordSubmit:             'Send link',
+        forgotPasswordSuccessHint:        "If an account with this email exists, you'll receive an email within a minute.",
+        forgotPasswordBack:               'Back to sign in',
+
+        // ── Navigation ────────────────────────────────────────────────────────
+        navToday:                       'Today',
+        navMyQuotes:                    'My quotes',
+        navAdd:                         'Add',
+        navSettings:                    'Settings',
+        ariaToggleTheme:                'Toggle theme',
+        ariaToggleLanguage:             'Switch language',
+        ariaLogout:                     'Sign out',
+        ariaBannerClose:                'Close',
+
+        // ── QOD (Quote of the Day) ────────────────────────────────────────────
+        qodEmptyText:                   'Add your first quote in the Add section',
+        qodProgress:                    'Quote {current} of {total}',
+        qodRandomBtn:                   'Random',
+        qodCopyBtn:                     'Copy',
+
+        // ── Quote list ────────────────────────────────────────────────────────
+        ariaFavorite:                   'Add to favorites',
+        ariaCopy:                       'Copy',
+        ariaEdit:                       'Edit',
+        ariaDelete:                     'Delete',
+        ariaSearch:                     'Search',
+        searchPlaceholder:              'Search quotes...',
+        listHeading:                    'My quotes',
+        filterAll:                      'All',
+        filterFav:                      '⭐ Favorites',
+        expandHintOpen:                 'Click to read in full ↓',
+        expandHintClose:                'Collapse ↑',
+        emptyStateNoQuotes:             'No quotes yet',
+        emptyStateNoResults:            'Nothing found',
+        emptyStateNoQuotesHint:         'Go to the Add section',
+        emptyStateNoResultsHint:        'Try a different search',
+        statsTotal:                     '{total} quotes total',
+        statsFavorites:                 '{count} favorited',
+
+        // ── Sort ──────────────────────────────────────────────────────────────
+        sortDateDesc:                   'Newest first',
+        sortDateAsc:                    'Oldest first',
+        sortAuthorAsc:                  'By author (A–Z)',
+        sortAuthorDesc:                 'By author (Z–A)',
+
+        // ── Add quote form ────────────────────────────────────────────────────
+        placeholderQuoteText:           'Enter the quote text…',
+        placeholderAuthor:              "Author's name",
+        placeholderSource:              'Book, movie, speech…',
+        addTitle:                       'Add a quote',
+        addSubtitle:                    'Add quotes manually, import them from a JSON file, or bring them over from Yandex Books.',
+        addLabelText:                   'Quote text',
+        addLabelAuthor:                 'Author',
+        addLabelSource:                 'Source',
+        addLabelTags:                   'Tags',
+        addRequired:                    '(required)',
+        addOptional:                    '(optional)',
+        addSubmitBtn:                   'Add quote',
+        addClearBtn:                    'Clear',
+        addImportTitle:                 'Import quotes',
+        addImportTabJson:               'JSON file',
+        addImportTabYandex:             'Yandex Books',
+        addImportDropLabel:             'Choose a file or drop it here',
+        addJsonExampleLabel:            'Example JSON structure:',
+        placeholderTagInput:            'tag…',
+        tagAddButtonLabel:              'tag',
+        ariaTagRemove:                  'Remove tag',
+        ariaTagAdd:                     'Add tag',
+        toastQuoteTextRequired:         'Quote text is required',
+        toastQuoteAdded:                'Quote added!',
+        toastQuoteSaveError:            'Failed to save',
+        toastQuoteLimitReached:         'You have reached the {limit}-quote limit. Delete some quotes to add new ones.',
+
+        // ── Edit quote modal ──────────────────────────────────────────────────
+        editModalTitle:                 'Edit quote',
+        placeholderEditQuoteText:       'Quote text...',
+        placeholderEditAuthor:          "Author's name",
+        placeholderEditSource:          'Book, movie, speech...',
+        editSaveButton:                 'Save',
+        editCancelButton:               'Cancel',
+        toastQuoteUpdated:              'Quote updated',
+        toastQuoteUpdateError:          'Failed to save',
+        toastConnectionError:           'Connection error',
+
+        // ── Delete quote modal ────────────────────────────────────────────────
+        deleteModalTitle:               'Delete this quote?',
+        deleteModalCannotUndo:          'This action cannot be undone.',
+        deleteButton:                   'Delete',
+        cancelButton:                   'Cancel',
+        toastQuoteDeleted:              'Quote deleted',
+        toastDeleteError:               'Failed to delete',
+
+        // ── Delete all quotes modal ───────────────────────────────────────────
+        deleteAllModalTitle:            'Delete all your quotes?',
+        deleteAllModalBody:             "You're about to delete all {count} quotes. This action cannot be undone.",
+        deleteAllButton:                'Delete all',
+        toastAllQuotesDeleted:          'All your quotes have been deleted',
+
+        // ── Delete account modal ──────────────────────────────────────────────
+        deleteAccountTitle:             'Delete your account?',
+        deleteAccountBody:              'This action is irreversible. All your quotes and data will be permanently deleted.',
+        deleteAccountButton:            'Yes, delete',
+        deleteAccountToastError:        'Failed to delete the account. Please try again later.',
+
+        // ── Delete confirm phrases ────────────────────────────────────────────
+        deleteAllConfirmPhrase:         'I want to delete all quotes',
+        deleteAllConfirmPlaceholder:    'Type the phrase to confirm',
+        deleteAccountConfirmPhrase:     'I want to delete my account',
+        deleteAccountConfirmPlaceholder:'Type the phrase to confirm',
+        deleteConfirmHint:              'To confirm, type:',
+
+        // ── Import / Export ───────────────────────────────────────────────────
+        importExpectedArray:            'Expected an array',
+        importNoValidItems:             'No quotes with text were found in the file',
+        toastImportError:               'Import error: {message}',
+        toastCopied:                    'Copied!',
+        toastCopyError:                 'Failed to copy',
+        copiedButtonLabel:              'Copied',
+
+        // ── Import preview modal ──────────────────────────────────────────────
+        importPreviewTitle:             'Import preview',
+        importPreviewSummary:           'Found {count} {word} in the uploaded file. Review a few examples below and confirm the import.',
+        importPreviewMore:              'and {count} more {word}',
+        importPreviewConfirm:           'Import {count} {word}',
+        importProgressLabel:            'Importing: {current} of {total}',
+        importStopBtn:                  'Stop',
+        closeButton:                    'Close',
+        importSummaryDone:              'Done! Added {count} {word}.',
+        importSummaryStopped:           'Import stopped. Added {count} of {total} {word}.',
+        importSummaryError:             'Import interrupted by a connection error. Added {count} of {total} {word}.',
+        importSummarySkipped:           'Skipped {count} {word} — failed validation (text, author, or source too long).',
+        importDownloadRejectedBtn:      'Download JSON with these quotes',
+
+        // ── Import from Yandex Books ──────────────────────────────────────────
+        importYandexBenefit:            "Worth using if you've built up more than 20–30 quotes in Yandex Books — moving them over one by one by hand would take much longer. If you only have a couple, it's easier to just add them in the form above.",
+        importYandexStep1Prefix:        'Open ',
+        importYandexStep1Suffix:        ', go to your profile, and log in.',
+        importYandexStep2:              'Open the browser console (F12 → Console), paste the script, and press Enter.',
+        importYandexDesktopOnly:        'Only available in a desktop browser — phones lack the developer tools this method needs.',
+        importYandexStep3Prefix:        'The script will download a file called ',
+        importYandexStep3Suffix:        ' — upload it below like a regular JSON file.',
+        importYandexCopyBtn:            'Copy script',
+        importYandexUploadLabel:        'Upload the downloaded file',
+        importYandexFaqSummary:         'Is this safe? What is the console?',
+        importYandexFaqQ1:              'What is the browser console?',
+        importYandexFaqA1:              'A developer panel built into every browser. It can run code right on the open page — but it has no access to your files, passwords, or other sites.',
+        importYandexFaqQ2:              'Is it safe to paste code there?',
+        importYandexFaqA2:              'The script runs only in your browser and only talks to books.yandex.ru under your own session. Epigraph never receives or stores your Yandex password or cookies — only the quotes file you upload yourself.',
+        importYandexFaqQ3:              'The browser showed a warning when I pasted — is that normal?',
+        importYandexFaqA3:              "Yes, that's standard protection against accidentally pasting malicious code. Since you copied the script from this page, you're fine — just confirm the paste. But never paste console code from sources you don't trust.",
+        importYandexFaqQ4:              "F12 doesn't open the panel — what do I do?",
+        importYandexFaqA4:              'Right-click anywhere on the page and choose "Inspect". On Mac you can also press Cmd+Option+I, on Windows Ctrl+Shift+I. In Safari, first enable the "Develop" menu in the browser settings.',
+        importYandexFaqQ5:              'How long does this take?',
+        importYandexFaqA5:              'If your library has a lot of books (hundreds), the script can take a minute or two — it queries each book individually with a small pause between requests so it doesn\'t overload Yandex\'s server. Wait for the "ГОТОВО" message in the console before uploading the downloaded file.',
+
+        // ── Settings page (static markup) ───────────────────────────────────
+        settingsTitle:                  'Settings',
+        settingsAccountTitle:           'Account',
+        settingsAccountEditAria:        'Change username',
+        settingsAccountAvatarAria:      'Change icon',
+        settingsLogoutBtn:              'Sign out',
+        settingsNotifTitle:             'Notifications',
+        settingsNotifQodTitle:          'Quote of the day',
+        settingsNotifQodDesc:           'A push notification with a quote. Works even with the tab closed.',
+        settingsNotifFreqTitle:         'Frequency',
+        settingsNotifFreqDesc:          'How often to send the notification.',
+        settingsDataTitle:              'Data',
+        settingsExportTitle:            'Export to JSON',
+        settingsExportDesc:             'Download all your quotes for backup or transfer.',
+        settingsExportBtn:              'Export',
+        settingsCopyAllTitle:           'Copy all as text',
+        settingsCopyAllDesc:            'Copy all your quotes to the clipboard as plain text.',
+        settingsCopyAllBtn:             'Copy',
+        settingsImportTitle:            'Import from JSON',
+        settingsImportDesc:             'Upload a file with a list of quotes to add to your collection.',
+        settingsImportBtn:              'Import',
+        settingsDangerTitle:            'Danger zone',
+        settingsDeleteAllTitle:         'Delete all your quotes',
+        settingsDeleteAllDesc:          'Permanently delete all your quotes from the app.',
+        settingsDeleteAccountTitle:     'Delete account',
+        settingsDeleteAccountDesc:      'Permanently delete your account and all your data.',
+        settingsDeleteAccountBtn:       'Delete account',
+        settingsAboutTitle:             'About',
+        settingsAboutDesc:              'A personal quote collection — keep, read, and share what inspires you.',
+        settingsStorageTitle:           'Data storage',
+        settingsStorageDesc:            'Your quotes are stored in the cloud and available from any device. Use export for backups.',
+        settingsSourceTitle:            'Source code',
+        settingsSourceDesc:             'An open-source project on GitHub.',
+        ariaNotificationsToggle:        'Quote of the day notifications',
+
+        // ── Notifications ─────────────────────────────────────────────────────
+        toastPushNotSupported:          'Your browser does not support push notifications',
+        toastPushAskPermission:         'Your browser will now ask for permission — click "Allow"',
+        toastPushDenied:                'Allow notifications in your browser settings',
+        toastPushUnavailable:           'Push notifications are temporarily unavailable',
+        toastPushEnabled:               'Notifications enabled',
+        toastPushSubscribeError:        'Failed to subscribe to notifications',
+        toastPushDisabled:              'Notifications disabled',
+        toastPushUnsubscribeError:      'Failed to unsubscribe from notifications',
+        toastPushLoginRequired:         'Sign in to configure notifications',
+
+        // ── Plural forms ──────────────────────────────────────────────────────────
+        pluralQuote1:                   'quote',
+        pluralQuote2:                   'quotes',
+        pluralQuote5:                   'quotes',
+        statsSummary:                   '{total} {word} · {favorites} favorited',
+
+        // ── Favorite button tooltip ───────────────────────────────────────────────
+        favActive:                      'In favorites',
+        favInactive:                    'Add to favorites',
+
+        // ── Notification interval labels ──────────────────────────────────────────
+        notifInterval6h:                'Every 6 hours',
+        notifInterval12h:               'Every 12 hours',
+        notifInterval24h:               'Once a day',
+
+        // ── General ───────────────────────────────────────────────────────────
+        toastLoginRequired:             'Sign in to access this section',
+        toastError:                     'Error',
     }
 };
 
 /** Currently active language code. */
 let currentLanguage = localStorage.getItem('epigraph_lang') || 'ru';
+document.documentElement.lang = currentLanguage;
 
 /**
  * Picks the grammatically correct Russian plural form for a count.
@@ -349,12 +670,39 @@ function pluralRu(n, one, few, many) {
 }
 
 /**
- * Returns the correctly declined word for "quote(s)" for the given count.
+ * Returns the correctly declined word for "quote(s)" for the given count,
+ * in the current language. Russian has 3 plural forms (mod10/mod100 rule);
+ * every other language falls back to a simple singular/plural split.
  * @param {number} n
  * @returns {string}
  */
 function quoteCountWord(n) {
-    return pluralRu(n, 'цитата', 'цитаты', 'цитат');
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralQuote1') : t('pluralQuote2');
+    }
+    return pluralRu(n, t('pluralQuote1'), t('pluralQuote2'), t('pluralQuote5'));
+}
+
+/**
+ * Switches the active language, persists the choice, and re-applies
+ * translations to the static markup (data-i18n* attributes). Does not
+ * re-render dynamically generated content (quote list, modals, etc.) —
+ * callers that need those updated should reload the page instead (see the
+ * language toggle button handler in ui.js).
+ * @param {string} lang - 'ru' or 'en'.
+ */
+function setLanguage(lang) {
+    if (!TRANSLATIONS[lang] || lang === currentLanguage) return;
+
+    currentLanguage = lang;
+    try {
+        localStorage.setItem('epigraph_lang', lang);
+    } catch (e) {
+    }
+    document.documentElement.lang = lang;
+    applyI18n();
+
+    if (typeof updateLangToggleLabel === 'function') updateLangToggleLabel();
 }
 
 /**

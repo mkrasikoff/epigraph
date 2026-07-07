@@ -243,6 +243,12 @@ header {
     color: var(--color-text);
 }
 
+[data-lang-toggle] {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
 /* =============================================================================
 // NAVIGATION TABS
 // Pill-style tabs for switching between main views.

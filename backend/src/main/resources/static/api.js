@@ -109,6 +109,18 @@ const Api = {
             method: 'PATCH',
             headers: authHeaders(),
             body: JSON.stringify({ avatarIcon })
+        }),
+
+    /**
+     * Updates the authenticated user's interface language preference.
+     * @param {string} preferredLanguage - 'ru' or 'en'.
+     * @returns {Promise<Response>}
+     */
+    updatePreferredLanguage: (preferredLanguage) =>
+        fetch('/api/user/me/language', {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ preferredLanguage })
         })
 
 };
