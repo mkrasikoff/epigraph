@@ -29,7 +29,9 @@ epigraph/
 │ │ │ ├── service/ — AuthService, QuoteService, UserService, EmailService, JwtService, PushNotificationService
 │ │ │ └── EpigraphBackendApplication.java
 │ │ └── resources/
-│ │ ├── static/ — Frontend (index.html, styles.css, quotes.js, auth.js, api.js, ui.js, tags.js, i18n.js, notifications.js, sw.js)
+│ │ ├── static/ — Frontend (index.html, styles.css, quotes.js, auth.js, api.js, ui.js, tags.js,
+│ │ │             i18n.js, notifications.js, sw.js, avatars.js, bootstrap.js, state.js, swipe.js,
+│ │ │             guest-quotes.js, yandex-import.js)
 │ │ ├── db/ — Flyway migrations
 │ │ ├── application.yaml
 │ │ ├── application-local.yaml
@@ -49,6 +51,13 @@ epigraph/
 | Database      | PostgreSQL + Flyway (migrations)                   |
 | Notifications | Web Push (VAPID)                                   |
 | Deployment    | Railway                                            |
+
+### Localization
+
+The UI is bilingual (Russian/English). All user-facing strings live in `TRANSLATIONS` in
+`static/i18n.js` (`TRANSLATIONS.ru` / `TRANSLATIONS.en`) and are looked up via `t('key')` — see the
+`epigraph-conventions` skill for the conventions around adding new strings and switching language
+at runtime.
 
 ### Requirements
 
