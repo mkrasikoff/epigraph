@@ -92,26 +92,26 @@
             </div>
             <div class="auth-register-panel-quotes">
                 <div class="auth-register-panel-quote">
-                    <p>
+                    <p data-i18n="authRegisterQuote1Text">
                         Не важно, как медленно ты идёшь, главное — не останавливаться.
                     </p>
-                    <cite>
+                    <cite data-i18n="authRegisterQuote1Author">
                         — Конфуций
                     </cite>
                 </div>
                 <div class="auth-register-panel-quote">
-                    <p>
+                    <p data-i18n="authRegisterQuote2Text">
                         Жизнь — это то, что происходит, пока ты строишь другие планы.
                     </p>
-                    <cite>
+                    <cite data-i18n="authRegisterQuote2Author">
                         — Джон Леннон
                     </cite>
                 </div>
                 <div class="auth-register-panel-quote">
-                    <p>
+                    <p data-i18n="authRegisterQuote3Text">
                         Начало — это половина всего.
                     </p>
-                    <cite>
+                    <cite data-i18n="authRegisterQuote3Author">
                         — Аристотель
                     </cite>
                 </div>
@@ -367,7 +367,7 @@
                             <circle cx="11" cy="11" r="8"/>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg>
-                        <input class="search-input" type="search" placeholder="Поиск по цитатам..." id="search-input" oninput="renderList()" aria-label="Поиск" data-i18n-aria="ariaSearch">
+                        <input class="search-input" type="search" placeholder="Поиск по цитатам..." data-i18n-placeholder="searchPlaceholder" id="search-input" oninput="renderList()" aria-label="Поиск" data-i18n-aria="ariaSearch">
                     </div>
                 </div>
                 <div class="stats-bar" id="stats-bar"></div>
@@ -536,7 +536,7 @@
                 </div>
 
                 <div id="import-panel-json">
-                    <p class="import-hint">
+                    <p class="import-hint" data-i18n-html="importJsonHint">
                         Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.
                     </p>
                     <label class="import-area" for="import-file">
@@ -548,7 +548,7 @@
                         <strong data-i18n="addImportDropLabel">
                             Выберите файл или перетащите сюда
                         </strong>
-                        <p>
+                        <p data-i18n-html="importJsonFieldsHint">
                             Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code>
                         </p>
                         <input type="file" id="import-file" accept=".json" class="import-file-input" onchange="importJSON(event)">
@@ -558,7 +558,7 @@
                         <p class="json-example-label" data-i18n="addJsonExampleLabel">
                             Пример структуры JSON:
                         </p>
-                        <pre class="json-example">[
+                        <pre class="json-example" data-i18n="addJsonExampleContent">[
   {
     "text": "Текст цитаты",
     "author": "Имя автора",
@@ -744,12 +744,26 @@
                             </span>
                         </button>
                     </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4 data-i18n="settingsLanguageTitle">
+                                Язык интерфейса
+                            </h4>
+                            <p data-i18n="settingsLanguageDesc">
+                                Переключить язык интерфейса приложения.
+                            </p>
+                        </div>
+                        <div class="import-source-toggle" data-lang-toggle-settings role="group" aria-label="Переключить язык" data-i18n-aria="ariaToggleLanguage">
+                            <button type="button" class="import-source-tab" data-lang-option="ru">RU</button>
+                            <button type="button" class="import-source-tab" data-lang-option="en">EN</button>
+                        </div>
+                    </div>
                     </div>
                 </div>
 
                 <!-- NOTIFICATIONS -->
                 <div class="settings-group" id="settings-notif-group">
-                    <div class="settings-group-title">
+                    <div class="settings-group-title" data-i18n="settingsNotifTitle">
                         Уведомления
                     </div>
                     <div class="settings-card">
@@ -760,7 +774,7 @@
                             <h4>
                                 iPhone / iPad
                             </h4>
-                            <p>
+                            <p data-i18n-html="settingsNotifIosHint">
                                 Для уведомлений: Safari → <strong>Поделиться</strong> → <strong>«На экран "Домой"»</strong> → запустите приложение оттуда.
                             </p>
                         </div>
@@ -775,10 +789,10 @@
                                 Push-уведомление с цитатой. Работает даже с закрытой вкладкой.
                             </p>
                         </div>
-                        <label class="toggle-switch" aria-label="Уведомления о цитате дня" data-i18n-aria="ariaNotificationsToggle">
-                            <input type="checkbox" id="notif-toggle" onchange="handleNotifToggle(this.checked)">
-                            <span class="toggle-slider"></span>
-                        </label>
+                        <div class="import-source-toggle" id="notif-toggle" role="group" aria-label="Уведомления о цитате дня" data-i18n-aria="ariaNotificationsToggle">
+                            <button type="button" class="import-source-tab" data-notif-toggle-value="off" onclick="handleNotifToggle(false)" data-i18n="toggleOff">Выкл</button>
+                            <button type="button" class="import-source-tab" data-notif-toggle-value="on" onclick="handleNotifToggle(true)" data-i18n="toggleOn">Вкл</button>
+                        </div>
                     </div>
 
                     <div class="settings-item" id="notif-interval-row">

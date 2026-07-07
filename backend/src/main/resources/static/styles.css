@@ -1209,6 +1209,10 @@ body.modal-lock-scroll {
     color: var(--color-text-inverse);
 }
 
+.settings-item .import-source-toggle {
+    margin-bottom: 0;
+}
+
 .import-benefit-banner {
     display: flex;
     gap: var(--space-3);

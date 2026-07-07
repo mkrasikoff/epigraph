@@ -9,7 +9,7 @@
  * - editingId        {number}   — defined in index.html CONSTANTS
  * - QOD_ANIMATION_DEBOUNCE_MS  {number} — defined in index.html CONSTANTS
  * - FAVORITE_RERENDER_DELAY_MS {number} — defined in index.html CONSTANTS
- * - GUEST_QUOTES     {Array}    — defined in index.html CONSTANTS
+ * - currentLanguage  {string}   — defined in i18n.js
  * - isGuest          {boolean}  — defined in auth.js
  * - currentTags      {Array}    — defined in tags.js
  * - Api              {Object}   — defined in api.js
@@ -74,7 +74,8 @@ function renderQod(qodOrIdx) {
     currentQodIndex = idx;
     const q = quotes[idx];
     const now = new Date();
-    const dateStr = now.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'});
+    const dateLocale = currentLanguage === 'ru' ? 'ru-RU' : 'en-US';
+    const dateStr = now.toLocaleDateString(dateLocale, {weekday: 'long', day: 'numeric', month: 'long'});
     document.getElementById('qod-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
     const textEl = document.getElementById('qod-text');
@@ -148,9 +149,9 @@ function applyQodAdaptiveSize(text) {
  */
 function setQodActionsDisabled(disabled) {
     const actions = [
-        {selector: '.qod-actions .btn-primary', msg: 'Сначала добавьте хотя бы одну цитату'},
-        {selector: '.qod-actions .btn-secondary:not(#btn-fav-qod)', msg: 'Сначала добавьте хотя бы одну цитату'},
-        {selector: '#btn-fav-qod', msg: 'Сначала добавьте хотя бы одну цитату'},
+        {selector: '.qod-actions .btn-primary', msg: t('toastNoQuotesYet')},
+        {selector: '.qod-actions .btn-secondary:not(#btn-fav-qod)', msg: t('toastNoQuotesYet')},
+        {selector: '#btn-fav-qod', msg: t('toastNoQuotesYet')},
     ];
 
     actions.forEach(({selector, msg}) => {
@@ -585,7 +586,7 @@ async function addQuote(e) {
 
         if (!res.ok) {
             const err = await res.json();
-            const message = err.text || err.error || 'Ошибка валидации';
+            const message = err.text || err.error || t('toastValidationError');
             toast(message, 'error');
             return;
         }
@@ -696,7 +697,7 @@ function editQuote(id) {
 
     const body = `
     <div class="edit-form-group">
-    <label for="editQuoteText">Текст цитаты <span>(обязательно)</span></label>
+    <label for="editQuoteText">${t('addLabelText')} <span>${t('addRequired')}</span></label>
     <div class="edit-textarea-wrap">
         <textarea class="edit-textarea" id="editQuoteText" rows="4"
                   placeholder="${t('placeholderEditQuoteText')}"
@@ -706,14 +707,14 @@ function editQuote(id) {
     </div>
     <div class="edit-form-row">
       <div class="edit-form-group">
-        <label for="edit-author">Автор <span>(необязательно)</span></label>
+        <label for="edit-author">${t('addLabelAuthor')} <span>${t('addOptional')}</span></label>
         <div class="edit-input-wrap">
             <input class="edit-input" type="text" id="edit-author" value="${escHtml(q.author || '')}" placeholder="${t('placeholderEditAuthor')}" maxlength="100">
             <div class="char-counter" id="editAuthorCounter">${(q.author || '').length} / 100</div>
         </div>
       </div>
       <div class="edit-form-group">
-        <label for="edit-source">Источник <span>(необязательно)</span></label>
+        <label for="edit-source">${t('addLabelSource')} <span>${t('addOptional')}</span></label>
         <div class="edit-input-wrap">
             <input class="edit-input" type="text" id="edit-source" value="${escHtml(q.source || '')}" placeholder="${t('placeholderEditSource')}" maxlength="200">
             <div class="char-counter" id="editSourceCounter">${(q.source || '').length} / 200</div>
@@ -721,7 +722,7 @@ function editQuote(id) {
       </div>
     </div>
     <div class="edit-form-group">
-      <label>Теги <span>(необязательно)</span></label>
+      <label>${t('addLabelTags')} <span>${t('addOptional')}</span></label>
       <div class="tag-input-wrap" id="edit-tags-wrap"></div>
     </div>
   `;
