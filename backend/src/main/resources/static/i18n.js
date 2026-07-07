@@ -24,6 +24,12 @@ const TRANSLATIONS = {
         authPlaceholderPasswordRegister:'Минимум 8 символов',
         authLoading:                    'Подождите...',
         authTagline:                    'Ваши цитаты. Каждый день.',
+        authRegisterQuote1Text:         'Не важно, как медленно ты идёшь, главное — не останавливаться.',
+        authRegisterQuote1Author:       '— Конфуций',
+        authRegisterQuote2Text:         'Жизнь — это то, что происходит, пока ты строишь другие планы.',
+        authRegisterQuote2Author:       '— Джон Леннон',
+        authRegisterQuote3Text:         'Начало — это половина всего.',
+        authRegisterQuote3Author:       '— Аристотель',
         authRegisterHeading:            'Создайте аккаунт',
         authRegisterSub:                'Это бесплатно. Навсегда.',
         authEmailLabel:                 'Email',
@@ -118,6 +124,8 @@ const TRANSLATIONS = {
         navAdd:                         'Добавить',
         navSettings:                    'Настройки',
         ariaToggleTheme:                'Переключить тему',
+        ariaSwitchToLightTheme:         'Переключить на светлую тему',
+        ariaSwitchToDarkTheme:          'Переключить на тёмную тему',
         ariaToggleLanguage:             'Переключить язык',
         ariaLogout:                     'Выйти из аккаунта',
         ariaBannerClose:                'Закрыть',
@@ -127,6 +135,7 @@ const TRANSLATIONS = {
         qodProgress:                    'Цитата {current} из {total}',
         qodRandomBtn:                   'Случайная',
         qodCopyBtn:                     'Копировать',
+        toastNoQuotesYet:               'Сначала добавьте хотя бы одну цитату',
 
         // ── Quote list ────────────────────────────────────────────────────────
         ariaFavorite:                   'В избранное',
@@ -171,7 +180,10 @@ const TRANSLATIONS = {
         addImportTabJson:               'Файл JSON',
         addImportTabYandex:             'Яндекс.Книги',
         addImportDropLabel:             'Выберите файл или перетащите сюда',
+        importJsonHint:                 'Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.',
+        importJsonFieldsHint:           'Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code>',
         addJsonExampleLabel:            'Пример структуры JSON:',
+        addJsonExampleContent:          '[\n  {\n    "text": "Текст цитаты",\n    "author": "Имя автора",\n    "source": "Название книги"\n  }\n]',
         placeholderTagInput:            'тег…',
         tagAddButtonLabel:              'тег',
         ariaTagRemove:                  'Убрать тег',
@@ -180,6 +192,7 @@ const TRANSLATIONS = {
         toastQuoteAdded:                'Цитата добавлена!',
         toastQuoteSaveError:            'Ошибка сохранения',
         toastQuoteLimitReached:         'Достигнут лимит в {limit} цитат. Удалите часть цитат, чтобы добавить новые.',
+        toastValidationError:           'Ошибка валидации',
 
         // ── Edit quote modal ──────────────────────────────────────────────────
         editModalTitle:                 'Редактировать цитату',
@@ -269,7 +282,10 @@ const TRANSLATIONS = {
         settingsAccountEditAria:        'Изменить имя пользователя',
         settingsAccountAvatarAria:      'Изменить иконку',
         settingsLogoutBtn:              'Выйти',
+        settingsLanguageTitle:          'Язык интерфейса',
+        settingsLanguageDesc:           'Переключить язык интерфейса приложения.',
         settingsNotifTitle:             'Уведомления',
+        settingsNotifIosHint:           'Для уведомлений: Safari → <strong>Поделиться</strong> → <strong>«На экран "Домой"»</strong> → запустите приложение оттуда.',
         settingsNotifQodTitle:          'Цитата дня',
         settingsNotifQodDesc:           'Push-уведомление с цитатой. Работает даже с закрытой вкладкой.',
         settingsNotifFreqTitle:         'Частота',
@@ -319,6 +335,10 @@ const TRANSLATIONS = {
         favActive:                      'В избранном',
         favInactive:                    'В избранное',
 
+        // ── Generic segmented-toggle labels ─────────────────────────────────────────
+        toggleOff:                      'Выкл',
+        toggleOn:                       'Вкл',
+
         // ── Notification interval labels ──────────────────────────────────────────
         notifInterval6h:                'Каждые 6 часов',
         notifInterval12h:               'Каждые 12 часов',
@@ -343,6 +363,12 @@ const TRANSLATIONS = {
         authPlaceholderPasswordRegister:'At least 8 characters',
         authLoading:                    'Loading...',
         authTagline:                    'Your quotes. Every day.',
+        authRegisterQuote1Text:         'It does not matter how slowly you go as long as you do not stop.',
+        authRegisterQuote1Author:       '— Confucius',
+        authRegisterQuote2Text:         "Life is what happens to you while you're busy making other plans.",
+        authRegisterQuote2Author:       '— John Lennon',
+        authRegisterQuote3Text:         'Well begun is half done.',
+        authRegisterQuote3Author:       '— Aristotle',
         authRegisterHeading:            'Create an account',
         authRegisterSub:                "It's free. Forever.",
         authEmailLabel:                 'Email',
@@ -437,6 +463,8 @@ const TRANSLATIONS = {
         navAdd:                         'Add',
         navSettings:                    'Settings',
         ariaToggleTheme:                'Toggle theme',
+        ariaSwitchToLightTheme:         'Switch to light theme',
+        ariaSwitchToDarkTheme:          'Switch to dark theme',
         ariaToggleLanguage:             'Switch language',
         ariaLogout:                     'Sign out',
         ariaBannerClose:                'Close',
@@ -446,6 +474,7 @@ const TRANSLATIONS = {
         qodProgress:                    'Quote {current} of {total}',
         qodRandomBtn:                   'Random',
         qodCopyBtn:                     'Copy',
+        toastNoQuotesYet:               'Add at least one quote first',
 
         // ── Quote list ────────────────────────────────────────────────────────
         ariaFavorite:                   'Add to favorites',
@@ -490,7 +519,10 @@ const TRANSLATIONS = {
         addImportTabJson:               'JSON file',
         addImportTabYandex:             'Yandex Books',
         addImportDropLabel:             'Choose a file or drop it here',
+        importJsonHint:                 'Upload a <code class="inline-code">.json</code> file with your quotes.',
+        importJsonFieldsHint:           'Format: an array of objects with the fields <code>text</code>, <code>author</code>, <code>source</code>',
         addJsonExampleLabel:            'Example JSON structure:',
+        addJsonExampleContent:          '[\n  {\n    "text": "Quote text",\n    "author": "Author name",\n    "source": "Book title"\n  }\n]',
         placeholderTagInput:            'tag…',
         tagAddButtonLabel:              'tag',
         ariaTagRemove:                  'Remove tag',
@@ -499,6 +531,7 @@ const TRANSLATIONS = {
         toastQuoteAdded:                'Quote added!',
         toastQuoteSaveError:            'Failed to save',
         toastQuoteLimitReached:         'You have reached the {limit}-quote limit. Delete some quotes to add new ones.',
+        toastValidationError:           'Validation error',
 
         // ── Edit quote modal ──────────────────────────────────────────────────
         editModalTitle:                 'Edit quote',
@@ -588,7 +621,10 @@ const TRANSLATIONS = {
         settingsAccountEditAria:        'Change username',
         settingsAccountAvatarAria:      'Change icon',
         settingsLogoutBtn:              'Sign out',
+        settingsLanguageTitle:          'Interface language',
+        settingsLanguageDesc:           'Switch the app interface language.',
         settingsNotifTitle:             'Notifications',
+        settingsNotifIosHint:           'For notifications: Safari → <strong>Share</strong> → <strong>"Add to Home Screen"</strong> → launch the app from there.',
         settingsNotifQodTitle:          'Quote of the day',
         settingsNotifQodDesc:           'A push notification with a quote. Works even with the tab closed.',
         settingsNotifFreqTitle:         'Frequency',
@@ -637,6 +673,10 @@ const TRANSLATIONS = {
         // ── Favorite button tooltip ───────────────────────────────────────────────
         favActive:                      'In favorites',
         favInactive:                    'Add to favorites',
+
+        // ── Generic segmented-toggle labels ─────────────────────────────────────────
+        toggleOff:                      'Off',
+        toggleOn:                       'On',
 
         // ── Notification interval labels ──────────────────────────────────────────
         notifInterval6h:                'Every 6 hours',
@@ -739,6 +779,7 @@ function t(key, variables) {
  *
  * Supported attributes:
  *   data-i18n="key"             → el.textContent
+ *   data-i18n-html="key"        → el.innerHTML (for strings with embedded inline markup, e.g. <code>)
  *   data-i18n-placeholder="key" → el.placeholder
  *   data-i18n-aria="key"        → el.setAttribute('aria-label', ...)
  *   data-i18n-title="key"       → el.setAttribute('title', ...)
@@ -748,6 +789,9 @@ function t(key, variables) {
 function applyI18n(root = document) {
     root.querySelectorAll('[data-i18n]').forEach(el => {
         el.textContent = t(el.dataset.i18n);
+    });
+    root.querySelectorAll('[data-i18n-html]').forEach(el => {
+        el.innerHTML = t(el.dataset.i18nHtml);
     });
     root.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         el.placeholder = t(el.dataset.i18nPlaceholder);

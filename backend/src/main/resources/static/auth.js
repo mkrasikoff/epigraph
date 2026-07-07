@@ -2,7 +2,7 @@
  * auth.js — Authentication state and UI for Epigraph.
  *
  * Depends on:
- * - GUEST_QUOTES     {Array}    — preset quotes for guest mode, defined in index.html CONSTANTS
+ * - getGuestQuotes() {fn}       — preset quotes for guest mode, defined in guest-quotes.js
  * - quotes           {Array}    — global mutable quotes array, defined in index.html CONSTANTS
  * - currentQodIndex  {number}   — defined in index.html CONSTANTS
  * - loadData()       {fn}       — defined in api.js
@@ -75,10 +75,11 @@ function hideLoadingOverlay() {
 
 function showGuestMode() {
     isGuest = true;
-    quotes = GUEST_QUOTES;
+    quotes = getGuestQuotes();
 
     document.getElementById('logout-btn').style.display = 'none';
     document.getElementById('login-btn').style.display = '';
+    document.querySelector('[data-lang-toggle]')?.style.removeProperty('display');
 
     ['list', 'add', 'settings'].forEach(id => {
         document.getElementById('tab-' + id)?.classList.add('guest-locked');
@@ -98,6 +99,7 @@ function hideGuestMode() {
 
     document.getElementById('logout-btn').style.display = '';
     document.getElementById('login-btn').style.display = 'none';
+    document.querySelector('[data-lang-toggle]')?.style.setProperty('display', 'none');
 
     ['list', 'add', 'settings'].forEach(id => {
         document.getElementById('tab-' + id)?.classList.remove('guest-locked');
