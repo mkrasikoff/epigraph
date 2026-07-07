@@ -156,7 +156,7 @@ async function handleNotifToggle(enabled) {
     }
 
     const intervalHours = parseInt(
-        document.querySelector('#notif-interval-menu .sort-menu-item.active')?.dataset.value || '24', 10
+        document.querySelector('#notif-interval-toggle .import-source-tab.is-active')?.dataset.intervalValue || '24', 10
     );
 
     if (enabled) {
@@ -166,46 +166,16 @@ async function handleNotifToggle(enabled) {
     }
 }
 
-/** Toggles the notification interval dropdown menu. */
-function toggleNotifIntervalMenu() {
-    const btn = document.getElementById('notif-interval-btn');
-    const menu = document.getElementById('notif-interval-menu');
-    const isOpen = menu.classList.contains('open');
-
-    if (isOpen) {
-        closeNotifIntervalMenu();
-    } else {
-        btn.classList.add('open');
-        menu.classList.add('open');
-        btn.setAttribute('aria-expanded', 'true');
-    }
-}
-
-/** Closes the notification interval dropdown. */
-function closeNotifIntervalMenu() {
-    const btn = document.getElementById('notif-interval-btn');
-    const menu = document.getElementById('notif-interval-menu');
-    btn?.classList.remove('open');
-    menu?.classList.remove('open');
-    btn?.setAttribute('aria-expanded', 'false');
-}
-
 /**
- * Handles selection from the notification interval dropdown.
- * @param {HTMLElement} el - The clicked menu item.
+ * Handles selection from the notification interval segmented toggle.
+ * @param {HTMLElement} el - The clicked tab.
  */
 function selectNotifInterval(el) {
-    const value = el.dataset.value;
-    const label = document.getElementById('notif-interval-label');
-
-    if (label) label.textContent = el.textContent.trim();
-
-    document.querySelectorAll('#notif-interval-menu .sort-menu-item').forEach(item => {
-        item.classList.toggle('active', item === el);
+    document.querySelectorAll('#notif-interval-toggle .import-source-tab').forEach(tab => {
+        tab.classList.toggle('is-active', tab === el);
     });
 
-    closeNotifIntervalMenu();
-    handleNotifIntervalChange(value);
+    handleNotifIntervalChange(el.dataset.intervalValue);
 }
 
 function handleNotifIntervalChange(value) {
@@ -251,11 +221,8 @@ function updateNotifUI(subscribed, intervalHours) {
     setNotifToggleState(subscribed);
 
     if (intervalHours) {
-        const labels = { '6': t('notifInterval6h'), '12': t('notifInterval12h'), '24': t('notifInterval24h') };
-        const label = document.getElementById('notif-interval-label');
-        if (label) label.textContent = labels[String(intervalHours)] || t('notifInterval24h');
-        document.querySelectorAll('#notif-interval-menu .sort-menu-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.value === String(intervalHours));
+        document.querySelectorAll('#notif-interval-toggle .import-source-tab').forEach(tab => {
+            tab.classList.toggle('is-active', tab.dataset.intervalValue === String(intervalHours));
         });
     }
 }

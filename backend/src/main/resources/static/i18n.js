@@ -21,7 +21,7 @@ const TRANSLATIONS = {
         authSwitchBtnRegister:          'Зарегистрироваться',
         authPlaceholderEmail:           'you@example.com',
         authPlaceholderPasswordLogin:   'Ваш пароль',
-        authPlaceholderPasswordRegister:'Минимум 8 символов',
+        authPlaceholderPasswordRegister:'••••••••',
         authLoading:                    'Подождите...',
         authTagline:                    'Ваши цитаты. Каждый день.',
         authRegisterQuote1Text:         'Не важно, как медленно ты идёшь, главное — не останавливаться.',
@@ -348,6 +348,9 @@ const TRANSLATIONS = {
         notifInterval6h:                'Каждые 6 часов',
         notifInterval12h:               'Каждые 12 часов',
         notifInterval24h:               'Раз в день',
+        notifIntervalShort6h:           '6ч',
+        notifIntervalShort12h:          '12ч',
+        notifIntervalShort24h:          '24ч',
 
         // ── General ───────────────────────────────────────────────────────────
         toastLoginRequired:             'Войдите в аккаунт для доступа к этому разделу',
@@ -365,7 +368,7 @@ const TRANSLATIONS = {
         authSwitchBtnRegister:          'Sign up',
         authPlaceholderEmail:           'you@example.com',
         authPlaceholderPasswordLogin:   'Your password',
-        authPlaceholderPasswordRegister:'At least 8 characters',
+        authPlaceholderPasswordRegister:'••••••••',
         authLoading:                    'Loading...',
         authTagline:                    'Your quotes. Every day.',
         authRegisterQuote1Text:         'It does not matter how slowly you go as long as you do not stop.',
@@ -692,6 +695,9 @@ const TRANSLATIONS = {
         notifInterval6h:                'Every 6 hours',
         notifInterval12h:               'Every 12 hours',
         notifInterval24h:               'Once a day',
+        notifIntervalShort6h:           '6h',
+        notifIntervalShort12h:          '12h',
+        notifIntervalShort24h:          '24h',
 
         // ── General ───────────────────────────────────────────────────────────
         toastLoginRequired:             'Sign in to access this section',
