@@ -34,9 +34,12 @@ public class AuthService {
     /**
      * Initiates registration: saves an unverified user and sends a verification code.
      * Does NOT return a JWT — the client must call verify() to complete registration.
+     * Username is no longer collected at this step (see TASK-81) — a default derived from
+     * the email local part is set here, and the client offers to change it (along with the
+     * avatar icon) in a profile-setup modal shown right after verify() succeeds.
      */
     @Transactional
-    public void register(String email, String rawPassword, String username) {
+    public void register(String email, String rawPassword) {
         userRepository.findByEmail(email).ifPresent(existing -> {
             if (existing.isEmailVerified()) {
                 throw new IllegalArgumentException("Этот email уже зарегистрирован");
@@ -52,12 +55,32 @@ public class AuthService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setProvider("local");
-        user.setUsername(username);
+        user.setUsername(deriveUsername(email));
         user.setCreatedAt(System.currentTimeMillis());
         user.setEmailVerified(false);
         userRepository.save(user);
 
         emailVerificationService.sendCode(email);
+    }
+
+    /**
+     * Derives a default username from the local part of an email address (before the "@"),
+     * stripped to the allowed charset and padded/truncated to fit the 3–20 char bound —
+     * always produces a valid username per {@code UpdateUsernameRequest}'s pattern, even for
+     * short or punctuation-heavy local parts (e.g. "a@x.com" -&gt; "a__").
+     */
+    private String deriveUsername(String email) {
+        String localPart = email.substring(0, email.indexOf('@'));
+        String sanitized = localPart.replaceAll("[^a-zA-Z0-9_]", "");
+
+        if (sanitized.length() > 20) {
+            sanitized = sanitized.substring(0, 20);
+        }
+        while (sanitized.length() < 3) {
+            sanitized += "_";
+        }
+
+        return sanitized;
     }
 
     /**

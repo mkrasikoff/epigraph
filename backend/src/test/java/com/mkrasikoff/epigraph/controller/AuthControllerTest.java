@@ -55,16 +55,15 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("user@example.com");
         request.setPassword("password1");
-        request.setUsername("testuser");
 
-        doNothing().when(authService).register(eq("user@example.com"), anyString(), anyString());
+        doNothing().when(authService).register(eq("user@example.com"), anyString());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted());
 
-        verify(authService).register(eq("user@example.com"), anyString(), eq("testuser"));
+        verify(authService).register(eq("user@example.com"), anyString());
     }
 
     @Test
@@ -73,7 +72,6 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("not-an-email");
         request.setPassword("password1");
-        request.setUsername("testuser");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +85,6 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("user@example.com");
         request.setPassword("abc");
-        request.setUsername("testuser");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,34 +98,6 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("user@example.com");
         request.setPassword("onlyletters");
-        request.setUsername("testuser");
-
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("POST /api/auth/register: returns 400 when username is blank")
-    void register_returnsBadRequest_whenUsernameBlank() throws Exception {
-        RegisterRequest request = new RegisterRequest();
-        request.setEmail("user@example.com");
-        request.setPassword("password1");
-
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("POST /api/auth/register: returns 400 when username has invalid characters")
-    void register_returnsBadRequest_whenUsernameInvalidChars() throws Exception {
-        RegisterRequest request = new RegisterRequest();
-        request.setEmail("user@example.com");
-        request.setPassword("password1");
-        request.setUsername("bad name!");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
