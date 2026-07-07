@@ -73,17 +73,17 @@ const GUEST_QUOTES = {
         },
         {
             id: -8,
-            text: 'Будь собой — остальные роли уже заняты.',
+            text: 'Мы все в канаве, но некоторые из нас смотрят на звёзды.',
             author: 'Оскар Уайльд',
-            source: '',
+            source: '«Веер леди Уиндермир»',
             fav: false,
             tags: []
         },
         {
             id: -9,
-            text: 'Два самых важных дня в твоей жизни — день, когда ты родился, и день, когда ты понял зачем.',
+            text: 'Морщины должны лишь напоминать о том, где сияли улыбки.',
             author: 'Марк Твен',
-            source: '',
+            source: '«По экватору»',
             fav: false,
             tags: []
         },
@@ -146,7 +146,7 @@ const GUEST_QUOTES = {
         {
             id: -17,
             text: 'Сомнение — начало мудрости.',
-            author: 'Аристотель',
+            author: 'Рене Декарт',
             source: '',
             fav: false,
             tags: []
@@ -178,16 +178,16 @@ const GUEST_QUOTES = {
         {
             id: -21,
             text: 'Лучше зажечь одну свечу, чем проклинать темноту.',
-            author: 'Конфуций',
+            author: 'Китайская пословица',
             source: '',
             fav: false,
             tags: []
         },
         {
             id: -22,
-            text: 'Всё гениальное просто.',
+            text: 'Железо ржавеет без использования, вода портится или замерзает на холоде — так же и ум чахнет без дела.',
             author: 'Леонардо да Винчи',
-            source: '',
+            source: '«Дневники»',
             fav: false,
             tags: []
         },
@@ -210,7 +210,7 @@ const GUEST_QUOTES = {
         {
             id: -25,
             text: 'Падать — не страшно. Страшно — не подниматься.',
-            author: 'Конфуций',
+            author: 'Оливер Голдсмит',
             source: '',
             fav: false,
             tags: []
@@ -276,17 +276,17 @@ const GUEST_QUOTES = {
         },
         {
             id: -8,
-            text: 'Be yourself; everyone else is already taken.',
+            text: 'We are all in the gutter, but some of us are looking at the stars.',
             author: 'Oscar Wilde',
-            source: '',
+            source: "Lady Windermere's Fan",
             fav: false,
             tags: []
         },
         {
             id: -9,
-            text: 'The two most important days in your life are the day you are born and the day you find out why.',
+            text: 'Wrinkles should merely indicate where the smiles have been.',
             author: 'Mark Twain',
-            source: '',
+            source: 'Following the Equator',
             fav: false,
             tags: []
         },
@@ -349,7 +349,7 @@ const GUEST_QUOTES = {
         {
             id: -17,
             text: 'Doubt is the beginning of wisdom.',
-            author: 'Aristotle',
+            author: 'René Descartes',
             source: '',
             fav: false,
             tags: []
@@ -381,16 +381,16 @@ const GUEST_QUOTES = {
         {
             id: -21,
             text: 'Better to light a candle than to curse the darkness.',
-            author: 'Confucius',
+            author: 'Chinese proverb',
             source: '',
             fav: false,
             tags: []
         },
         {
             id: -22,
-            text: 'Simplicity is the ultimate sophistication.',
+            text: 'Just as iron rusts unless it is used, and water putrefies or, in cold, turns to ice, so our intellect spoils unless it is kept in use.',
             author: 'Leonardo da Vinci',
-            source: '',
+            source: 'Notebooks',
             fav: false,
             tags: []
         },
@@ -413,7 +413,7 @@ const GUEST_QUOTES = {
         {
             id: -25,
             text: 'Our greatest glory is not in never falling, but in rising every time we fall.',
-            author: 'Confucius',
+            author: 'Oliver Goldsmith',
             source: '',
             fav: false,
             tags: []
