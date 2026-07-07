@@ -49,16 +49,31 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("pass123")).thenReturn("encoded");
 
-        authService.register("test@mail.com", "pass123", "testuser");
+        authService.register("test@mail.com", "pass123");
 
         verify(userRepository).save(argThat(u ->
                 "test@mail.com".equals(u.getEmail()) &&
                         "encoded".equals(u.getPassword()) &&
                         !u.isEmailVerified() &&
                         "local".equals(u.getProvider()) &&
-                        "testuser".equals(u.getUsername())
+                        "test".equals(u.getUsername())
         ));
         verify(emailVerificationService).sendCode("test@mail.com");
+    }
+
+    @Test
+    @DisplayName("register: derives username from email local part, sanitized and padded")
+    void register_derivesUsernameFromEmail() {
+        when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(any())).thenReturn("encoded");
+
+        authService.register("ivan.petrov+news@mail.com", "pass123");
+        authService.register("a@x.com", "pass123");
+        authService.register("ThisIsAVeryLongLocalPartOfAnEmail@mail.com", "pass123");
+
+        verify(userRepository).save(argThat(u -> "ivanpetrovnews".equals(u.getUsername())));
+        verify(userRepository).save(argThat(u -> "a__".equals(u.getUsername())));
+        verify(userRepository).save(argThat(u -> "ThisIsAVeryLongLocal".equals(u.getUsername())));
     }
 
     @Test
@@ -67,7 +82,7 @@ class AuthServiceTest {
         User existing = buildUser(1L, "test@mail.com", true);
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> authService.register("test@mail.com", "pass", "testuser"))
+        assertThatThrownBy(() -> authService.register("test@mail.com", "pass"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("уже зарегистрирован");
     }
@@ -79,7 +94,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(stale));
         when(passwordEncoder.encode(any())).thenReturn("encoded");
 
-        authService.register("test@mail.com", "newpass", "testuser");
+        authService.register("test@mail.com", "newpass");
 
         verify(userRepository).delete(stale);
         verify(userRepository).flush();

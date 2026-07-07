@@ -34,20 +34,25 @@ public class GeoBlockFilter extends OncePerRequestFilter {
 
         if (enabled) {
             String uri = request.getRequestURI();
-            String ip = request.getRemoteAddr();
-            String country = geoIpService.getCountryCode(ip);
+            boolean isGoogleOAuth = uri.equals("/oauth2/authorization/google");
+            boolean isYandexOAuth = uri.equals("/oauth2/authorization/yandex");
 
-            // Google — block for RU
-            if (uri.equals("/oauth2/authorization/google")) {
-                if (country != null && blockedCountries.contains(country)) {
+            // Only the two OAuth entry points need a geo lookup — every other request
+            // (including every API call from an already-logged-in session) used to pay for
+            // a synchronous call to ip-api.com here regardless of the URI, which is the
+            // likely cause of intermittent slow page loads.
+            if (isGoogleOAuth || isYandexOAuth) {
+                String ip = request.getRemoteAddr();
+                String country = geoIpService.getCountryCode(ip);
+
+                // Google — block for RU
+                if (isGoogleOAuth && country != null && blockedCountries.contains(country)) {
                     response.sendRedirect("/?error=geo_blocked");
                     return;
                 }
-            }
 
-            // Yandex — block for every region, except RU
-            if (uri.equals("/oauth2/authorization/yandex")) {
-                if (country == null || !blockedCountries.contains(country)) {
+                // Yandex — block for every region, except RU
+                if (isYandexOAuth && (country == null || !blockedCountries.contains(country))) {
                     response.sendRedirect("/?error=geo_blocked_yandex");
                     return;
                 }

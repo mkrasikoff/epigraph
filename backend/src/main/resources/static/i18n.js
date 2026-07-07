@@ -39,7 +39,7 @@ const TRANSLATIONS = {
         authGoogleButton:               'Войти через Google',
         authYandexButton:               'Войти через Яндекс',
         authUsernameLabel:              'Имя пользователя',
-        authUsernamePlaceholder:        'ivan_petrov',
+        authUsernamePlaceholder:        'chitatel_42',
 
         // Auth validation errors ────────────────────────────────────────────────────────
         authErrorFillAllFields:         'Заполните все поля',
@@ -69,6 +69,11 @@ const TRANSLATIONS = {
         verifyResendError:      'Не удалось отправить код',
         verifyBack:             'Назад',
 
+        // ── Profile setup modal (shown right after email verification) ─────────
+        profileSetupTitle:      'Настройте профиль',
+        profileSetupDesc:       'Выберите значок и имя пользователя — это только для вас внутри приложения, реальное имя указывать не обязательно. Изменить можно в любой момент в Настройках.',
+        profileSetupSkip:       'Пропустить',
+
         // ── Change password ───────────────────────────────────────────────────
         changePasswordTitle:              'Сменить пароль',
         changePasswordSettingsDesc:       'Установить или изменить пароль для входа по email.',
@@ -84,7 +89,7 @@ const TRANSLATIONS = {
         // ── Edit username modal ───────────────────────────────────────────────
         editUsernameTitle:                'Изменить имя пользователя',
         editUsernameLabel:                'Имя пользователя',
-        editUsernamePlaceholder:          'ivan_petrov',
+        editUsernamePlaceholder:          'chitatel_42',
         editUsernameErrorRequired:        'Введите имя пользователя',
         editUsernameErrorLength:          'От 3 до 20 символов',
         editUsernameErrorChars:           'Только латинские буквы, цифры и подчёркивание',
@@ -378,7 +383,7 @@ const TRANSLATIONS = {
         authGoogleButton:               'Sign in with Google',
         authYandexButton:               'Sign in with Yandex',
         authUsernameLabel:              'Username',
-        authUsernamePlaceholder:        'john_smith',
+        authUsernamePlaceholder:        'bookworm42',
 
         // Auth validation errors ────────────────────────────────────────────────────────
         authErrorFillAllFields:         'Fill in all fields',
@@ -408,6 +413,11 @@ const TRANSLATIONS = {
         verifyResendError:      'Failed to send the code',
         verifyBack:             'Back',
 
+        // ── Profile setup modal (shown right after email verification) ─────────
+        profileSetupTitle:      'Set up your profile',
+        profileSetupDesc:       "Pick an icon and a username — it's just for you inside the app, no need to use your real name. You can change it anytime in Settings.",
+        profileSetupSkip:       'Skip',
+
         // ── Change password ───────────────────────────────────────────────────
         changePasswordTitle:              'Change password',
         changePasswordSettingsDesc:       'Set or change your password for email sign-in.',
@@ -423,7 +433,7 @@ const TRANSLATIONS = {
         // ── Edit username modal ───────────────────────────────────────────────
         editUsernameTitle:                'Change username',
         editUsernameLabel:                'Username',
-        editUsernamePlaceholder:          'john_smith',
+        editUsernamePlaceholder:          'bookworm42',
         editUsernameErrorRequired:        'Enter a username',
         editUsernameErrorLength:          '3 to 20 characters',
         editUsernameErrorChars:           'Latin letters, digits, and underscores only',
