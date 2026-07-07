@@ -2,6 +2,7 @@ package com.mkrasikoff.epigraph.controller;
 
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.UpdateAvatarRequest;
+import com.mkrasikoff.epigraph.dto.UpdatePreferredLanguageRequest;
 import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
@@ -321,6 +322,62 @@ class UserControllerTest {
         request.setAvatarIcon("");
 
         mockMvc.perform(patch("/api/user/me/avatar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/language: returns 200 on success")
+    void updatePreferredLanguage_returnsOk() throws Exception {
+        UpdatePreferredLanguageRequest request = new UpdatePreferredLanguageRequest();
+        request.setPreferredLanguage("en");
+        doNothing().when(userService).updatePreferredLanguage(isNull(), eq("en"));
+
+        mockMvc.perform(patch("/api/user/me/language")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Язык обновлён"));
+
+        verify(userService).updatePreferredLanguage(isNull(), eq("en"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/language: returns 400 when service throws")
+    void updatePreferredLanguage_returnsBadRequest_whenServiceThrows() throws Exception {
+        UpdatePreferredLanguageRequest request = new UpdatePreferredLanguageRequest();
+        request.setPreferredLanguage("en");
+        doThrow(new IllegalArgumentException("Пользователь не найден"))
+                .when(userService).updatePreferredLanguage(isNull(), eq("en"));
+
+        mockMvc.perform(patch("/api/user/me/language")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/language: returns 400 when language is not ru/en")
+    void updatePreferredLanguage_returnsBadRequest_whenLanguageInvalid() throws Exception {
+        UpdatePreferredLanguageRequest request = new UpdatePreferredLanguageRequest();
+        request.setPreferredLanguage("fr");
+
+        mockMvc.perform(patch("/api/user/me/language")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/language: returns 400 when language is blank")
+    void updatePreferredLanguage_returnsBadRequest_whenBlank() throws Exception {
+        UpdatePreferredLanguageRequest request = new UpdatePreferredLanguageRequest();
+        request.setPreferredLanguage("");
+
+        mockMvc.perform(patch("/api/user/me/language")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

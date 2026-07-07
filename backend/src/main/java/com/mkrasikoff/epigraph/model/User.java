@@ -64,4 +64,12 @@ public class User {
      */
     @Column(nullable = false, length = 20)
     private String avatarIcon = "neutral";
+
+    /**
+     * Interface language ("ru" or "en"). Defaults to "ru"; updated when the
+     * user switches languages in the UI, or seeded from the guest-selected
+     * language at registration/login.
+     */
+    @Column(nullable = false, length = 5)
+    private String preferredLanguage = "ru";
 }
