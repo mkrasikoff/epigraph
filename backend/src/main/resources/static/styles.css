@@ -529,6 +529,31 @@ body.modal-lock-scroll {
     margin-top: var(--space-8);
 }
 
+.qod-actions button {
+    transition: transform 90ms ease;
+}
+
+.qod-actions button:active {
+    transform: scale(0.94);
+}
+
+#btn-fav-qod {
+    /* min-width is set precisely by syncFavButtonWidth() in quotes.js — a fixed guess here
+       can't reliably fit both label variants across languages/fonts. */
+    justify-content: center;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+#btn-fav-qod.is-active {
+    background: var(--color-primary-highlight);
+    color: var(--color-primary);
+    border-color: var(--color-primary-highlight);
+}
+
+#qod-fav-label {
+    transition: opacity 140ms ease;
+}
+
 .qod-progress {
     margin-top: var(--space-6);
     font-size: var(--text-xs);
