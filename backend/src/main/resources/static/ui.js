@@ -198,6 +198,37 @@ function updateLangToggleLabel() {
 // Logic for switching between the main application views.
 // =============================================================================
 /**
+ * Slides the shared nav-tab-indicator pill under whichever `.nav-tab` currently
+ * has the `active` class. If no tab is active — the QoD tab loses `active` while
+ * browsing away from today's actual quote via Random/swipe, see renderQod() in
+ * quotes.js — the pill fades out in place instead of collapsing, so it reads as
+ * the highlight quietly letting go rather than shrinking away.
+ * The first call positions it instantly (no transition yet) and then marks
+ * `.nav-tabs` ready, so later calls animate smoothly instead of sliding in from
+ * the left edge on initial page load.
+ */
+function moveNavIndicator() {
+    const nav = document.querySelector('.nav-tabs');
+    const indicator = document.getElementById('nav-tab-indicator');
+    if (!nav || !indicator) return;
+
+    const active = document.querySelector('.nav-tab.active');
+
+    if (!active) {
+        indicator.style.opacity = '0';
+        nav.classList.add('indicator-ready');
+        return;
+    }
+
+    indicator.style.left = active.offsetLeft + 'px';
+    indicator.style.width = active.offsetWidth + 'px';
+    indicator.style.opacity = '1';
+    nav.classList.add('indicator-ready');
+}
+
+window.addEventListener('resize', moveNavIndicator);
+
+/**
  * Switches the currently active view and tab, and triggers per-view rendering.
  * For guests block everything except qod
  * @param {string} id - View identifier ('qod', 'list', 'add', 'settings').
@@ -212,6 +243,7 @@ function switchView(id) {
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('view-' + id).classList.add('active');
     document.getElementById('tab-' + id).classList.add('active');
+    moveNavIndicator();
 
     if (id !== 'qod') document.body.classList.remove('no-scroll');
     if (id === 'list') renderList();
