@@ -23,6 +23,9 @@
  * - editingId                   {number}
  * - currentSort                 {string}  — default sort
  * - currentUser                 {Object|null} — {id, email, username} of the logged-in user
+ * - LIST_PAGE_SIZE              {number}  — quote-list "show more" batch size
+ * - listVisibleCount            {number}  — how many of the filtered/sorted quotes are shown
+ * - listRenderedCount           {number}  — how many cards are actually in the DOM right now
  */
 
 const API = '/api/quotes';
@@ -32,6 +35,7 @@ const TOAST_DISPLAY_DURATION_MS = 2500;
 const TOAST_FADE_DURATION_MS = 300;
 const QOD_ANIMATION_DEBOUNCE_MS = 60;
 const FAVORITE_RERENDER_DELAY_MS = 220;
+const LIST_PAGE_SIZE = 100;
 
 let quotes = [];
 let currentFilter = 'all';
@@ -39,6 +43,8 @@ let currentQodIndex = -1;
 let qodAnchorId = null;
 let editingId = null;
 let currentSort = 'date_desc'; // default sort
+let listVisibleCount = LIST_PAGE_SIZE;
+let listRenderedCount = 0;
 
 /** Cached profile of the logged-in user, loaded via Api.getMe(). Null for guests. */
 let currentUser = null;
