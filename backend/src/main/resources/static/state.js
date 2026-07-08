@@ -18,6 +18,8 @@
  * - FAVORITE_RERENDER_DELAY_MS  {number}
  * - AVATAR_SELECT_CLOSE_DELAY_MS {number} — delay before closeModal() after picking an avatar,
  *     so the selection bounce/badge animation has time to play
+ * - AUTH_SUCCESS_FLASH_MS       {number}  — how long the login/register button shows a
+ *     checkmark before hideAuthModal() runs
  * - quotes                      {Array}   — mutable quotes array
  * - currentFilter               {string}
  * - currentQodIndex             {number}
@@ -39,6 +41,7 @@ const QOD_ANIMATION_DEBOUNCE_MS = 60;
 const FAVORITE_RERENDER_DELAY_MS = 220;
 const LIST_PAGE_SIZE = 100;
 const AVATAR_SELECT_CLOSE_DELAY_MS = 340;
+const AUTH_SUCCESS_FLASH_MS = 450;
 
 let quotes = [];
 let currentFilter = 'all';

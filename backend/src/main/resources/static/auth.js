@@ -13,6 +13,7 @@
  * - TRANSLATIONS     {Object}   — defined in i18n.js
  * - AUTH_API         {string}   — defined in index.html CONSTANTS
  * - AVATAR_SELECT_CLOSE_DELAY_MS {number} — defined in state.js
+ * - AUTH_SUCCESS_FLASH_MS {number} — defined in state.js
  */
 
 // Cache the original register form HTML to restore it when user goes back from verify screen
@@ -742,6 +743,9 @@ async function authSubmit() {
         }
 
         setToken(data.token);
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> ${t('authLoading')}`;
+        await new Promise(resolve => setTimeout(resolve, AUTH_SUCCESS_FLASH_MS));
+
         hideAuthModal();
         hideGuestMode();
         await loadData();
