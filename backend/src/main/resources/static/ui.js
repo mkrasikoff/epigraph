@@ -25,12 +25,14 @@
             localStorage.setItem('theme', currentTheme);
         } catch (e) {
         }
-        updateThemeIcon(themeToggleBtn, currentTheme);
+        animateThemeIcon(themeToggleBtn, currentTheme);
         updateThemeColorMeta(currentTheme);
     });
 
     /**
      * Updates the theme toggle button icon and aria-label for the current theme.
+     * Instant swap, no animation — used for the initial render, and internally
+     * by animateThemeIcon() once its "out" transition has finished.
      * @param {HTMLElement|null} btn - Theme toggle button.
      * @param {string} mode - Either 'dark' or 'light'.
      */
@@ -44,6 +46,57 @@
             btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
             btn.setAttribute('aria-label', t('ariaSwitchToDarkTheme'));
         }
+    }
+
+    /**
+     * Rotates the current theme icon out, swaps it (via updateThemeIcon), then
+     * rotates the new one in with an overshoot — used only on user-initiated
+     * toggles. The swap deliberately waits for the "out" transition to finish
+     * (setTimeout at OUT_MS) rather than firing in parallel with it — starting
+     * both at once reads as a generic cross-fade, not a coin-flip morph.
+     * @param {HTMLElement|null} btn - Theme toggle button.
+     * @param {string} mode - Either 'dark' or 'light'.
+     */
+    function animateThemeIcon(btn, mode) {
+        if (!btn) return;
+
+        const oldSvg = btn.querySelector('svg');
+
+        if (!oldSvg) {
+            updateThemeIcon(btn, mode);
+            return;
+        }
+
+        const OUT_MS = 180;
+        const IN_ROTATE_MS = 420;
+        const IN_FADE_MS = 220;
+
+        oldSvg.style.transition = `transform ${OUT_MS}ms ease, opacity ${OUT_MS}ms ease`;
+        oldSvg.style.transform = 'rotate(180deg) scale(0.6)';
+        oldSvg.style.opacity = '0';
+
+        setTimeout(() => {
+            updateThemeIcon(btn, mode);
+
+            const newSvg = btn.querySelector('svg');
+            if (!newSvg) return;
+
+            newSvg.style.transition = 'none';
+            newSvg.style.transform = 'rotate(-180deg) scale(0.6)';
+            newSvg.style.opacity = '0';
+
+            requestAnimationFrame(() => {
+                newSvg.style.transition = `transform ${IN_ROTATE_MS}ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity ${IN_FADE_MS}ms ease`;
+                newSvg.style.transform = 'rotate(0deg) scale(1)';
+                newSvg.style.opacity = '1';
+            });
+
+            setTimeout(() => {
+                newSvg.style.transition = '';
+                newSvg.style.transform = '';
+                newSvg.style.opacity = '';
+            }, IN_ROTATE_MS + 20);
+        }, OUT_MS);
     }
 })();
 

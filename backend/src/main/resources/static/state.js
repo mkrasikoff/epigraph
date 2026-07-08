@@ -16,6 +16,8 @@
  * - TOAST_FADE_DURATION_MS      {number}
  * - QOD_ANIMATION_DEBOUNCE_MS   {number}
  * - FAVORITE_RERENDER_DELAY_MS  {number}
+ * - AVATAR_SELECT_CLOSE_DELAY_MS {number} — delay before closeModal() after picking an avatar,
+ *     so the selection bounce/badge animation has time to play
  * - quotes                      {Array}   — mutable quotes array
  * - currentFilter               {string}
  * - currentQodIndex             {number}
@@ -36,6 +38,7 @@ const TOAST_FADE_DURATION_MS = 300;
 const QOD_ANIMATION_DEBOUNCE_MS = 60;
 const FAVORITE_RERENDER_DELAY_MS = 220;
 const LIST_PAGE_SIZE = 100;
+const AVATAR_SELECT_CLOSE_DELAY_MS = 340;
 
 let quotes = [];
 let currentFilter = 'all';

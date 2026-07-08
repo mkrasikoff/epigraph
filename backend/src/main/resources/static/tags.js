@@ -40,12 +40,24 @@ function renderTagEditor(opts) {
     const wrap = document.getElementById(wrapId);
     if (!wrap) return null;
 
-    wrap.innerHTML = '';
+    // Diff against the tags array instead of wiping and rebuilding every chip on every
+    // render — otherwise adding or removing one tag replayed the pop-in animation on every
+    // other already-settled chip too, making the whole row visibly jump.
+    wrap.querySelectorAll('.tag').forEach(chip => {
+        if (!tags.includes(chip.dataset.tag)) chip.remove();
+    });
+
+    wrap.querySelectorAll('.tag-input, .tag-add-btn').forEach(el => el.remove());
+
+    const existingTags = new Set([...wrap.querySelectorAll('.tag')].map(chip => chip.dataset.tag));
 
     tags.forEach(tag => {
+        if (existingTags.has(tag)) return;
+
         const chip = document.createElement('span');
         chip.className = 'tag';
-        chip.innerHTML = `${escHtml(tag)}<button type="button" onclick="${removeFnName}('${escHtml(tag)}')" aria-label="${t('ariaTagRemove')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+        chip.dataset.tag = tag;
+        chip.innerHTML = `${escHtml(tag)}<button type="button" onclick="popOutTagChip(this, '${removeFnName}', '${escHtml(tag)}')" aria-label="${t('ariaTagRemove')}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
         wrap.appendChild(chip);
     });
 
@@ -102,6 +114,33 @@ function renderTagEditor(opts) {
     wrap.appendChild(btn);
 
     return null;
+}
+
+/**
+ * Shrinks and fades out a tag chip, then (after the exit finishes) actually
+ * removes the tag and re-renders — renderTagEditor() only touches chips whose
+ * tag is genuinely new or genuinely gone, so this is the only animation that
+ * plays; already-settled chips are left alone. Clears any still-running
+ * entrance animation first, since a `both`-filled animation would otherwise
+ * keep overriding the transform/opacity we're about to set here.
+ * @param {HTMLElement} btn - The chip's remove button (`this` from the inline onclick).
+ * @param {string} removeFnName - Global fn name that actually removes the tag ('removeTag' or 'removeEditTag').
+ * @param {string} tag - Tag value to remove.
+ */
+function popOutTagChip(btn, removeFnName, tag) {
+    const chip = btn.closest('.tag');
+
+    if (!chip) {
+        window[removeFnName](tag);
+        return;
+    }
+
+    chip.style.animation = 'none';
+    chip.style.transition = 'transform 180ms ease, opacity 180ms ease';
+    chip.style.transform = 'scale(0.5)';
+    chip.style.opacity = '0';
+
+    setTimeout(() => window[removeFnName](tag), 180);
 }
 
 // =============================================================================
