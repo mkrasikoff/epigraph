@@ -12,6 +12,7 @@
  * - setLanguage()    {fn}       — defined in i18n.js
  * - TRANSLATIONS     {Object}   — defined in i18n.js
  * - AUTH_API         {string}   — defined in index.html CONSTANTS
+ * - AVATAR_SELECT_CLOSE_DELAY_MS {number} — defined in state.js
  */
 
 // Cache the original register form HTML to restore it when user goes back from verify screen
@@ -180,12 +181,31 @@ function showAvatarPickerModal() {
                     <button type="button" class="avatar-picker-option${selected}"
                             aria-label="${label}" onclick="submitAvatarIcon('${key}')">
                         ${avatarIconMarkup(key, 1.8)}
+                        <span class="avatar-picker-badge" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
                     </button>
                     <span class="avatar-picker-label">${label}</span>
                 </div>`;
     }).join('');
 
     showModal('', `<div class="avatar-picker-grid">${optionsHtml}</div>`, [], true);
+}
+
+/**
+ * Fires a brief scale-bounce on a just-selected avatar option. The checkmark
+ * badge itself is pure CSS (`.avatar-picker-option--selected .avatar-picker-badge`),
+ * so this only needs to handle the one-off bounce; callers still toggle the
+ * `--selected` class themselves.
+ * @param {HTMLElement} [btn] - The avatar option button element.
+ */
+function bounceAvatarOption(btn) {
+    if (!btn) return;
+
+    btn.style.transition = 'transform 140ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+    btn.style.transform = 'scale(1.18)';
+    setTimeout(() => {
+        btn.style.transform = '';
+        btn.style.transition = '';
+    }, 150);
 }
 
 /**
@@ -208,10 +228,16 @@ async function submitAvatarIcon(key) {
         }
 
         if (currentUser) currentUser.avatarIcon = key;
-        closeModal();
         updateSettingsAccount();
         toast(t('avatarPickerSuccess'));
 
+        const btn = document.querySelector(`.avatar-picker-option[onclick="submitAvatarIcon('${key}')"]`);
+        document.querySelectorAll('.avatar-picker-grid .avatar-picker-option--selected')
+            .forEach(b => b.classList.remove('avatar-picker-option--selected'));
+        btn?.classList.add('avatar-picker-option--selected');
+        bounceAvatarOption(btn);
+
+        setTimeout(closeModal, AVATAR_SELECT_CLOSE_DELAY_MS);
     } catch {
         toast(t('authErrorConnection'));
     }
@@ -339,6 +365,7 @@ function showProfileSetupModal(defaultUsername) {
                     <button type="button" class="avatar-picker-option${selected}" id="profile-setup-avatar-${key}"
                             aria-label="${label}" onclick="selectProfileSetupAvatar('${key}')">
                         ${avatarIconMarkup(key, 1.8)}
+                        <span class="avatar-picker-badge" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
                     </button>
                     <span class="avatar-picker-label">${label}</span>
                 </div>`;
@@ -391,7 +418,10 @@ function selectProfileSetupAvatar(key) {
     document.querySelectorAll('#profile-setup-avatar-grid .avatar-picker-option').forEach(btn => {
         btn.classList.remove('avatar-picker-option--selected');
     });
-    document.getElementById('profile-setup-avatar-' + key)?.classList.add('avatar-picker-option--selected');
+
+    const btn = document.getElementById('profile-setup-avatar-' + key);
+    btn?.classList.add('avatar-picker-option--selected');
+    bounceAvatarOption(btn);
 }
 
 /**
