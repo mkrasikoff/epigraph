@@ -160,6 +160,7 @@ const TRANSLATIONS = {
         emptyStateNoResultsHint:        'Попробуйте другой запрос',
         statsTotal:                     '{total} цитат всего',
         statsFavorites:                 '{count} в избранном',
+        listShowMore:                   'Показать ещё ({remaining})',
 
         // ── Sort ──────────────────────────────────────────────────────────────
         sortDateDesc:                   'Сначала новые',
@@ -507,6 +508,7 @@ const TRANSLATIONS = {
         emptyStateNoResultsHint:        'Try a different search',
         statsTotal:                     '{total} quotes total',
         statsFavorites:                 '{count} favorited',
+        listShowMore:                   'Show more ({remaining})',
 
         // ── Sort ──────────────────────────────────────────────────────────────
         sortDateDesc:                   'Newest first',

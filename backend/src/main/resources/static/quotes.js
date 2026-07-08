@@ -9,6 +9,9 @@
  * - editingId        {number}   — defined in index.html CONSTANTS
  * - QOD_ANIMATION_DEBOUNCE_MS  {number} — defined in index.html CONSTANTS
  * - FAVORITE_RERENDER_DELAY_MS {number} — defined in index.html CONSTANTS
+ * - LIST_PAGE_SIZE   {number}   — defined in state.js
+ * - listVisibleCount {number}   — defined in state.js
+ * - listRenderedCount {number}  — defined in state.js
  * - currentLanguage  {string}   — defined in i18n.js
  * - isGuest          {boolean}  — defined in auth.js
  * - currentTags      {Array}    — defined in tags.js
@@ -307,36 +310,14 @@ function updateFavQodButton() {
 // Filtering, search, and rendering for the list-of-all-quotes view.
 // =============================================================================
 /**
- * Renders the list view, applying the current search query and filter.
+ * Renders a single quote card's markup.
+ * @param {Object} q - Quote object.
+ * @param {number} index - Position within the currently rendered list (drives the entrance animation delay).
+ * @param {Map<number, number>} rankMap - Quote id -> display rank (order added), shared across all cards.
+ * @returns {string}
  */
-function renderList() {
-    const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
-
-    let filteredQuotes = quotes.filter(q => {
-        if (currentFilter === 'fav' && !q.fav) return false;
-        if (!query) return true;
-
-        return (q.text + ' ' + (q.author || '') + ' ' + (q.source || '') + ' ' + (q.tags || []).join(' ')).toLowerCase().includes(query);
-    });
-
-    filteredQuotes = sortQuotes(filteredQuotes);
-
-    const grid = document.getElementById('quotes-grid');
-    const total = quotes.length;
-    const favCount = quotes.filter(q => q.fav).length;
-
-    document.getElementById('stats-bar').innerHTML =
-        `<span>${t('statsTotal', {total: `<strong>${total}</strong>`})}</span><span>${t('statsFavorites', {count: `<strong>${favCount}</strong>`})}</span>`;
-
-    if (!filteredQuotes.length) {
-        grid.innerHTML = `<div class="empty-state"><h3>${query ? t('emptyStateNoResults') : t('emptyStateNoQuotes')}</h3><p>${query ? t('emptyStateNoResultsHint') : t('emptyStateNoQuotesHint')}</p></div>`;
-        return;
-    }
-
-    const sortedByAdd = [...quotes].sort((a, b) => (a.id || 0) - (b.id || 0));
-    const rankMap = new Map(sortedByAdd.map((q, i) => [q.id, i + 1]));
-
-    grid.innerHTML = filteredQuotes.map((q, index) => `
+function renderQuoteCard(q, index, rankMap) {
+    return `
         <article class="quote-card" style="animation-delay: ${Math.min(index * 40, 300)}ms">
           <span class="quote-card-num">${rankMap.get(q.id) ?? '—'}</span>
           <div class="quote-card-text-wrap">
@@ -365,22 +346,108 @@ function renderList() {
             </div>
           </div>
         </article>
-      `).join('');
+      `;
+}
+
+/**
+ * Renders the list view, applying the current search query and filter.
+ * Only the first `listVisibleCount` matching quotes are put in the DOM — the rest load
+ * incrementally via loadMoreQuotes() — so opening the tab on a large collection doesn't
+ * force a synchronous layout over every single card.
+ * @param {boolean} [resetPage=true] - Whether to jump back to the first page (any search/filter/
+ *   sort/data change) or keep the current page and only append newly-revealed cards (loadMoreQuotes()).
+ */
+function renderList(resetPage = true) {
+    const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
+    let filteredQuotes = quotes.filter(q => {
+        if (currentFilter === 'fav' && !q.fav) return false;
+        if (!query) return true;
+
+        return (q.text + ' ' + (q.author || '') + ' ' + (q.source || '') + ' ' + (q.tags || []).join(' ')).toLowerCase().includes(query);
+    });
+
+    filteredQuotes = sortQuotes(filteredQuotes);
+
+    const grid = document.getElementById('quotes-grid');
+    const total = quotes.length;
+    const favCount = quotes.filter(q => q.fav).length;
+
+    document.getElementById('stats-bar').innerHTML =
+        `<span>${t('statsTotal', {total: `<strong>${total}</strong>`})}</span><span>${t('statsFavorites', {count: `<strong>${favCount}</strong>`})}</span>`;
+
+    if (resetPage) listVisibleCount = LIST_PAGE_SIZE;
+
+    if (!filteredQuotes.length) {
+        grid.innerHTML = `<div class="empty-state"><h3>${query ? t('emptyStateNoResults') : t('emptyStateNoQuotes')}</h3><p>${query ? t('emptyStateNoResultsHint') : t('emptyStateNoQuotesHint')}</p></div>`;
+        listRenderedCount = 0;
+        renderShowMoreButton(0, 0);
+        return;
+    }
+
+    const sortedByAdd = [...quotes].sort((a, b) => (a.id || 0) - (b.id || 0));
+    const rankMap = new Map(sortedByAdd.map((q, i) => [q.id, i + 1]));
+
+    const visibleQuotes = filteredQuotes.slice(0, listVisibleCount);
+    const startIndex = resetPage ? 0 : listRenderedCount;
+    const newCardsHtml = visibleQuotes.slice(startIndex).map((q, i) => renderQuoteCard(q, startIndex + i, rankMap)).join('');
+
+    if (resetPage) {
+        grid.innerHTML = newCardsHtml;
+    } else {
+        grid.insertAdjacentHTML('beforeend', newCardsHtml);
+    }
+
+    listRenderedCount = visibleQuotes.length;
 
     markClippedCards();
     initExpandableCards();
+    renderShowMoreButton(visibleQuotes.length, filteredQuotes.length);
+}
+
+/**
+ * Loads the next page of quotes into the currently filtered/sorted list view.
+ */
+function loadMoreQuotes() {
+    listVisibleCount += LIST_PAGE_SIZE;
+    renderList(false);
+}
+
+/**
+ * Renders (or hides) the "show more" control below the grid.
+ * @param {number} shownCount - Quotes currently rendered.
+ * @param {number} totalCount - Quotes matching the current search/filter.
+ */
+function renderShowMoreButton(shownCount, totalCount) {
+    const container = document.getElementById('list-load-more');
+    if (!container) return;
+
+    const remaining = totalCount - shownCount;
+    if (remaining <= 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = `<button class="btn-secondary" onclick="loadMoreQuotes()">${t('listShowMore', {remaining})}</button>`;
 }
 
 /**
  * Adds the is-clipped class to cards whose text overflows its container.
+ * Reads scrollHeight/clientHeight for every card first (forcing at most one synchronous
+ * layout total), then applies the resulting classes in a separate pass — interleaving
+ * reads and writes here would force a fresh layout recalculation on every single card.
  */
 function markClippedCards() {
-    document.querySelectorAll('.quote-card-text').forEach(el => {
-        const wrap = el.closest('.quote-card-text-wrap');
-        if (!wrap) return;
+    const wraps = [...document.querySelectorAll('.quote-card-text')]
+        .map(el => el.closest('.quote-card-text-wrap'))
+        .filter(Boolean);
 
-        wrap.classList.toggle('is-clipped', el.scrollHeight > el.clientHeight + 2);
+    const clipped = wraps.map(wrap => {
+        const el = wrap.querySelector('.quote-card-text');
+        return el.scrollHeight > el.clientHeight + 2;
     });
+
+    wraps.forEach((wrap, i) => wrap.classList.toggle('is-clipped', clipped[i]));
 }
 
 /**
