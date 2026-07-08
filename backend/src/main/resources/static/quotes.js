@@ -261,8 +261,25 @@ function copyQod() {
     const text = formatQuoteAsText(q);
 
     navigator.clipboard.writeText(text)
-        .then(() => toast(t('toastCopied')))
+        .then(() => {
+            toast(t('toastCopied'));
+            peelCopyIcon();
+        })
         .catch(() => toast(t('toastCopyError')));
+}
+
+/**
+ * Lifts and tilts the copy icon's front sheet, as if it peels off the stack
+ * behind it, then settles back — a one-off flourish on successful copy.
+ */
+function peelCopyIcon() {
+    const front = document.getElementById('qod-copy-front');
+    if (!front) return;
+
+    front.style.transform = 'translate(-3px, -3px) rotate(-6deg)';
+    setTimeout(() => {
+        front.style.transform = '';
+    }, 260);
 }
 
 /**
@@ -281,7 +298,7 @@ async function favQod() {
 
     try {
         await Api.update(q.id, {...q, tags: tagsToCsv(q.tags)});
-        updateFavQodButton();
+        updateFavQodButton(true);
     } catch (e) {
         q.fav = !q.fav;
         toast(t('toastError'));
@@ -290,21 +307,63 @@ async function favQod() {
 
 /**
  * Updates the QoD "favourite" button to reflect the current quote's fav state.
+ * @param {boolean} [animate=false] - Crossfade the label instead of swapping it instantly —
+ *   used when the user just toggled favourite on the same quote (favQod()). Left instant when
+ *   a new quote is loading (renderQod()), since the label update there is one of many things
+ *   changing at once and doesn't need its own separate transition.
  */
-function updateFavQodButton() {
+function updateFavQodButton(animate = false) {
     const q = quotes[currentQodIndex];
     const btn = document.getElementById('btn-fav-qod');
+    const icon = document.getElementById('qod-fav-icon');
+    const label = document.getElementById('qod-fav-label');
 
-    if (!btn || !q) return;
+    if (!btn || !q || !icon || !label) return;
+
+    if (btn.dataset.widthSyncLang !== currentLanguage) {
+        syncFavButtonWidth(btn, label);
+        btn.dataset.widthSyncLang = currentLanguage;
+    }
 
     const isFav = !!q.fav;
-    btn.innerHTML = `
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" style="color:${isFav ? 'var(--color-gold)' : 'inherit'}">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-    ${isFav ? t('favActive') : t('favInactive')}
-  `;
-    btn.style.color = isFav ? 'var(--color-gold)' : '';
+    icon.setAttribute('fill', isFav ? 'currentColor' : 'none');
+    btn.classList.toggle('is-active', isFav);
+
+    const newText = isFav ? t('favActive') : t('favInactive');
+
+    if (!animate || label.textContent.trim() === newText) {
+        label.textContent = newText;
+        return;
+    }
+
+    label.style.opacity = '0';
+    setTimeout(() => {
+        label.textContent = newText;
+        label.style.opacity = '1';
+    }, 140);
+}
+
+/**
+ * Measures the button's rendered width under both possible labels (favActive/favInactive)
+ * in the current language, and pins min-width to the wider of the two — a fixed guess can't
+ * reliably survive translation or font differences (English "Add to favorites" vs "In
+ * favorites" differ by a lot more than the Russian pair do), so this measures the real
+ * layout instead. Swaps the label text twice synchronously (no paint happens in between,
+ * so nothing flashes) then restores whatever was showing.
+ * @param {HTMLElement} btn
+ * @param {HTMLElement} label
+ */
+function syncFavButtonWidth(btn, label) {
+    const originalText = label.textContent;
+
+    btn.style.minWidth = '';
+    label.textContent = t('favActive');
+    const activeWidth = btn.getBoundingClientRect().width;
+    label.textContent = t('favInactive');
+    const inactiveWidth = btn.getBoundingClientRect().width;
+
+    btn.style.minWidth = Math.ceil(Math.max(activeWidth, inactiveWidth)) + 'px';
+    label.textContent = originalText;
 }
 
 // =============================================================================
