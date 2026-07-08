@@ -584,10 +584,16 @@ async function loadQod() {
     try {
         const cachedId = sessionStorage.getItem(CACHE_KEY);
         if (cachedId !== null) {
-            const quote = quotes.find(q => q.id === Number(cachedId)) || null;
-            qodAnchorId = quote ? quote.id : null;
-            renderQod(quote);
-            return;
+            const quote = quotes.find(q => q.id === Number(cachedId));
+            if (quote) {
+                qodAnchorId = quote.id;
+                renderQod(quote);
+                return;
+            }
+            // Cached id no longer matches a local quote (deleted/edited since caching) —
+            // fall through to a fresh fetch instead of rendering with no anchor at all,
+            // which used to permanently strip the "Today" tab highlight for the rest of
+            // the session once the cache went stale.
         }
     } catch { /* corrupted cache — proceed to fetch */ }
 
