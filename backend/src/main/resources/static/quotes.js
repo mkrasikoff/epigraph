@@ -12,6 +12,7 @@
  * - LIST_PAGE_SIZE   {number}   — defined in state.js
  * - listVisibleCount {number}   — defined in state.js
  * - listRenderedCount {number}  — defined in state.js
+ * - moveNavIndicator() {fn}     — defined in ui.js
  * - currentLanguage  {string}   — defined in i18n.js
  * - isGuest          {boolean}  — defined in auth.js
  * - currentTags      {Array}    — defined in tags.js
@@ -78,8 +79,9 @@ function renderQod(qodOrIdx) {
     const q = quotes[idx];
 
     // The "На сегодня" tab only stays highlighted while looking at today's actual
-    // quote — browsing away via Random/swipe fades it out (see .nav-tab transition in styles.css).
+    // quote — browsing away via Random/swipe fades it out (see moveNavIndicator() in ui.js).
     document.getElementById('tab-qod')?.classList.toggle('active', q.id === qodAnchorId);
+    moveNavIndicator();
 
     const now = new Date();
     const dateLocale = currentLanguage === 'ru' ? 'ru-RU' : 'en-US';
