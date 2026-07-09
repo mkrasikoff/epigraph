@@ -14,6 +14,7 @@
  * - AUTH_API         {string}   — defined in index.html CONSTANTS
  * - AVATAR_SELECT_CLOSE_DELAY_MS {number} — defined in state.js
  * - AUTH_SUCCESS_FLASH_MS {number} — defined in state.js
+ * - drawLogoIcon()   {fn}       — defined in ui.js
  */
 
 // Cache the original register form HTML to restore it when user goes back from verify screen
@@ -73,6 +74,7 @@ function hideAuthModal() {
 
 function hideLoadingOverlay() {
     document.getElementById('app-loading-overlay')?.classList.add('hidden');
+    drawLogoIcon();
 }
 
 function showGuestMode() {
