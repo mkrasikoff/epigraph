@@ -250,6 +250,7 @@ function updateLangToggleLabel() {
     document.querySelectorAll('[data-lang-toggle-settings] [data-lang-option]').forEach(btn => {
         btn.classList.toggle('is-active', btn.dataset.langOption === currentLanguage);
     });
+    moveToggleIndicator(document.querySelector('[data-lang-toggle-settings]'));
 }
 
 // =============================================================================
@@ -296,6 +297,33 @@ window.addEventListener('resize', moveNavIndicator);
 document.fonts.ready.then(moveNavIndicator);
 
 /**
+ * Slides a single `.import-source-indicator` pill under whichever `.import-source-tab`
+ * inside `container` currently has `is-active` — same measure-and-transform approach as
+ * moveNavIndicator(), reused here because this segmented-toggle look now appears in
+ * several places (import source, language, notification on/off, notification frequency).
+ * `container` may be hidden (e.g. its view isn't the active one yet), in which case
+ * offsetLeft/offsetWidth read as 0 — callers re-invoke this once the view becomes visible.
+ */
+function moveToggleIndicator(container) {
+    if (!container) return;
+    const indicator = container.querySelector('.import-source-indicator');
+    const active = container.querySelector('.import-source-tab.is-active');
+    if (!indicator || !active) return;
+
+    indicator.style.left = active.offsetLeft + 'px';
+    indicator.style.width = active.offsetWidth + 'px';
+    container.classList.add('indicator-ready');
+}
+
+/** Re-syncs every segmented-toggle indicator on the page — see moveToggleIndicator(). */
+function moveAllToggleIndicators() {
+    document.querySelectorAll('.import-source-toggle').forEach(moveToggleIndicator);
+}
+
+window.addEventListener('resize', moveAllToggleIndicators);
+document.fonts.ready.then(moveAllToggleIndicators);
+
+/**
  * Switches the currently active view and tab, and triggers per-view rendering.
  * For guests block everything except qod
  * @param {string} id - View identifier ('qod', 'list', 'add', 'settings').
@@ -323,10 +351,11 @@ function switchView(id) {
         if (isGuest) renderQod();
         else loadQod();
     }
-    if (id === 'add') renderTags();
+    if (id === 'add') { renderTags(); moveAllToggleIndicators(); }
     if (id === 'settings') {
         updateSettingsAccount();
         loadAppVersion();
+        moveAllToggleIndicators();
     }
 
     // Update URL hash to reflect the current section (enables back button and bookmarking)

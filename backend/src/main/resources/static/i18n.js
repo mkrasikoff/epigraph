@@ -821,12 +821,13 @@ function applyI18n(root = document) {
         el.setAttribute('title', t(el.dataset.i18nTitle));
     });
 
-    // Nav-tab labels just changed width (this is the only i18n consumer whose text
-    // feeds a layout measurement) — re-sync the sliding pill so it isn't sized against
-    // whatever text happened to be there before applyI18n() ran. bootstrap.js's guest
-    // branch has an `await` before it calls renderQod()/moveNavIndicator() for the first
-    // time, so there's no guaranteed order between that first measurement and this
-    // (possibly DOMContentLoaded-deferred) call — this makes the outcome correct
-    // regardless of which one actually runs first.
+    // Nav-tab and segmented-toggle labels just changed width (these are the only i18n
+    // consumers whose text feeds a layout measurement) — re-sync the sliding pills so
+    // they aren't sized against whatever text happened to be there before applyI18n()
+    // ran. bootstrap.js's guest branch has an `await` before it calls
+    // renderQod()/moveNavIndicator() for the first time, so there's no guaranteed order
+    // between that first measurement and this (possibly DOMContentLoaded-deferred) call
+    // — this makes the outcome correct regardless of which one actually runs first.
     if (typeof moveNavIndicator === 'function') moveNavIndicator();
+    if (typeof moveAllToggleIndicators === 'function') moveAllToggleIndicators();
 }

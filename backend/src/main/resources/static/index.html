@@ -520,6 +520,7 @@
                 </h3>
 
                 <div class="import-source-toggle">
+                    <span class="import-source-indicator" aria-hidden="true"></span>
                     <button type="button" id="import-tab-json" class="import-source-tab is-active" onclick="switchImportSource('json')" data-i18n="addImportTabJson">
                         Файл JSON
                     </button>
@@ -671,18 +672,13 @@
                     <div class="settings-card">
                     <div class="settings-item">
                         <div class="settings-item-info settings-account-info">
-                            <span class="settings-account-avatar-wrap">
-                                <button type="button" id="settings-account-avatar" class="settings-account-avatar"
-                                        onclick="showAvatarPickerModal()" aria-label="Изменить иконку" data-i18n-aria="settingsAccountAvatarAria">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                        <circle cx="12" cy="7" r="4"/>
-                                    </svg>
-                                </button>
-                                <span class="settings-account-avatar-pencil" aria-hidden="true">
-                                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                </span>
-                            </span>
+                            <button type="button" id="settings-account-avatar" class="settings-account-avatar"
+                                    onclick="showAvatarPickerModal()" aria-label="Изменить иконку" data-i18n-aria="settingsAccountAvatarAria">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </button>
                             <div>
                                 <h4 class="settings-account-name">
                                     <span id="settings-account-username">—</span>
@@ -752,6 +748,7 @@
                             </p>
                         </div>
                         <div class="import-source-toggle" data-lang-toggle-settings role="group" aria-label="Переключить язык" data-i18n-aria="ariaToggleLanguage">
+                            <span class="import-source-indicator" aria-hidden="true"></span>
                             <button type="button" class="import-source-tab" data-lang-option="ru">RU</button>
                             <button type="button" class="import-source-tab" data-lang-option="en">EN</button>
                         </div>
@@ -788,6 +785,7 @@
                             </p>
                         </div>
                         <div class="import-source-toggle" id="notif-toggle" role="group" aria-label="Уведомления о цитате дня" data-i18n-aria="ariaNotificationsToggle">
+                            <span class="import-source-indicator" aria-hidden="true"></span>
                             <button type="button" class="import-source-tab" data-notif-toggle-value="off" onclick="handleNotifToggle(false)" data-i18n="toggleOff">Выкл</button>
                             <button type="button" class="import-source-tab" data-notif-toggle-value="on" onclick="handleNotifToggle(true)" data-i18n="toggleOn">Вкл</button>
                         </div>
@@ -803,6 +801,7 @@
                             </p>
                         </div>
                         <div class="import-source-toggle" id="notif-interval-toggle" role="group" data-i18n-aria="settingsNotifFreqTitle" aria-label="Частота">
+                            <span class="import-source-indicator" aria-hidden="true"></span>
                             <button type="button" class="import-source-tab" data-interval-value="6"
                                     data-i18n="notifIntervalShort6h" data-i18n-aria="notifInterval6h"
                                     onclick="selectNotifInterval(this)">6ч</button>

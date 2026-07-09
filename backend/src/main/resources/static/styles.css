@@ -234,11 +234,16 @@ header {
     align-items: center;
     justify-content: center;
     color: var(--color-text-muted);
+    transition: transform 90ms ease;
 }
 
 .btn-icon:hover {
     background: var(--color-surface-offset);
     color: var(--color-text);
+}
+
+.btn-icon:active {
+    transform: scale(0.94);
 }
 
 [data-lang-toggle] {
@@ -316,10 +321,15 @@ header {
     border-radius: var(--radius-full);
     font-size: var(--text-sm);
     font-weight: 500;
+    transition: transform 90ms ease;
 }
 
 .btn-primary:hover {
     background: var(--color-primary-hover);
+}
+
+.btn-primary:active {
+    transform: scale(0.94);
 }
 
 .btn-primary:disabled,
@@ -341,10 +351,15 @@ header {
     font-size: var(--text-sm);
     font-weight: 500;
     border: 1px solid var(--color-border);
+    transition: transform 90ms ease;
 }
 
 .btn-secondary:hover {
     background: var(--color-surface-dynamic);
+}
+
+.btn-secondary:active {
+    transform: scale(0.94);
 }
 
 .btn-danger {
@@ -359,7 +374,7 @@ header {
     background: #c0392b;
     color: #fff;
     border: 1.5px solid transparent;
-    transition: background var(--transition), opacity var(--transition);
+    transition: background var(--transition), opacity var(--transition), transform 90ms ease;
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -370,6 +385,7 @@ header {
 
 .btn-danger:active {
     opacity: 0.85;
+    transform: scale(0.94);
 }
 
 /* =============================================================================
@@ -861,11 +877,16 @@ body.modal-lock-scroll {
     align-items: center;
     justify-content: center;
     color: var(--color-text-muted);
+    transition: transform 90ms ease;
 }
 
 .card-btn:hover {
     background: var(--color-surface-offset);
     color: var(--color-primary);
+}
+
+.card-btn:active {
+    transform: scale(0.9);
 }
 
 .card-btn.fav.active {
@@ -999,13 +1020,17 @@ body.modal-lock-scroll {
     color: var(--color-text-muted);
     background: none;
     white-space: nowrap;
-    transition: border-color var(--transition), color var(--transition), background var(--transition);
+    transition: border-color var(--transition), color var(--transition), background var(--transition), transform 90ms ease;
     user-select: none;
 }
 
 .sort-btn:hover {
     border-color: var(--color-primary);
     color: var(--color-text);
+}
+
+.sort-btn:active {
+    transform: scale(0.94);
 }
 
 .sort-btn.open {
@@ -1295,6 +1320,7 @@ body.modal-lock-scroll {
 }
 
 .import-source-toggle {
+    position: relative;
     display: inline-flex;
     background: var(--color-surface-offset);
     border: 1px solid var(--color-border);
@@ -1303,7 +1329,27 @@ body.modal-lock-scroll {
     margin-bottom: var(--space-6);
 }
 
+/* Slides under whichever tab is active — same measure-and-transform approach as
+   .nav-tab-indicator, see moveToggleIndicator() in ui.js. */
+.import-source-indicator {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: 0;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.import-source-toggle.indicator-ready .import-source-indicator {
+    transition: left 280ms cubic-bezier(0.16, 1, 0.3, 1), width 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .import-source-tab {
+    position: relative;
+    z-index: 1;
     padding: var(--space-2) var(--space-5);
     border: none;
     border-radius: var(--radius-full);
@@ -1312,11 +1358,10 @@ body.modal-lock-scroll {
     background: transparent;
     color: var(--color-text-muted);
     cursor: pointer;
-    transition: background var(--transition), color var(--transition);
+    transition: color var(--transition);
 }
 
 .import-source-tab.is-active {
-    background: var(--color-primary);
     color: var(--color-text-inverse);
 }
 
@@ -1698,40 +1743,15 @@ body.modal-lock-scroll {
     border: none;
     padding: 0;
     cursor: pointer;
-    transition: box-shadow var(--transition);
+    transition: box-shadow var(--transition), transform 90ms ease;
 }
 
 .settings-account-avatar:hover {
     box-shadow: 0 0 0 2px var(--color-primary);
 }
 
-.settings-account-avatar-wrap {
-    position: relative;
-    display: inline-flex;
-    flex-shrink: 0;
-}
-
-.settings-account-avatar-pencil {
-    position: absolute;
-    right: -3px;
-    bottom: -3px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    color: var(--color-text-inverse);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transform: scale(0.5);
-    transition: opacity 180ms ease, transform 180ms ease;
-    pointer-events: none;
-}
-
-.settings-account-avatar-wrap:hover .settings-account-avatar-pencil {
-    opacity: 1;
-    transform: scale(1);
+.settings-account-avatar:active {
+    transform: scale(0.94);
 }
 
 .avatar-picker-grid {
@@ -1849,12 +1869,16 @@ body.modal-lock-scroll {
     background: none;
     color: var(--color-text-faint);
     cursor: pointer;
-    transition: color var(--transition), background var(--transition);
+    transition: color var(--transition), background var(--transition), transform 90ms ease;
 }
 
 .account-edit-btn:hover {
     color: var(--color-primary);
     background: var(--color-primary-highlight);
+}
+
+.account-edit-btn:active {
+    transform: scale(0.94);
 }
 
 .settings-version-badge {
@@ -1879,11 +1903,16 @@ body.modal-lock-scroll {
     color: var(--color-text);
     background: var(--color-surface);
     white-space: nowrap;
+    transition: transform 90ms ease;
 }
 
 .export-btn:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
+}
+
+.export-btn:active {
+    transform: scale(0.94);
 }
 
 /* =============================================================================
@@ -2688,12 +2717,16 @@ body.modal-lock-scroll {
     font-size: var(--text-sm);
     font-family: var(--font-body);
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s, border-color 0.15s, transform 90ms ease;
 }
 
 .btn-google:hover {
     background: var(--color-surface-offset);
     border-color: var(--color-primary);
+}
+
+.btn-google:active {
+    transform: scale(0.96);
 }
 
 /* Yandex OAuth button — mirrors .btn-google */
@@ -2710,12 +2743,16 @@ body.modal-lock-scroll {
     font-size: var(--text-sm);
     font-family: var(--font-body);
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s, border-color 0.15s, transform 90ms ease;
 }
 
 .btn-yandex:hover {
     background: var(--color-surface-offset);
     border-color: var(--color-primary);
+}
+
+.btn-yandex:active {
+    transform: scale(0.96);
 }
 
 /* Inactive tabs fro guest */
@@ -2829,11 +2866,15 @@ body.modal-lock-scroll {
     border: none;
     cursor: pointer;
     padding: 0;
-    transition: color 0.15s;
+    transition: color 0.15s, transform 90ms ease;
 }
 
 .auth-back-btn:hover {
     color: var(--color-text);
+}
+
+.auth-back-btn:active {
+    transform: scale(0.94);
 }
 
 /* Modifier: verify-code screen back button needs extra spacing */
