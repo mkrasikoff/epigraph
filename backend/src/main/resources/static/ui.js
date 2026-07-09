@@ -111,6 +111,65 @@ function updateThemeColorMeta(mode) {
 }
 
 // =============================================================================
+// LOGO
+// One-time stroke "draw-in" on the header quote-mark icon, plus a 3D flip
+// whenever the logo is clicked to go home.
+// =============================================================================
+/**
+ * Plays the logo icon's one-time stroke "draw-in". Called from
+ * hideLoadingOverlay() (auth.js) rather than at script load — #app-loading-overlay
+ * fully covers the header until then, so playing it any earlier would just
+ * run out unseen behind an opaque overlay.
+ */
+function drawLogoIcon() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const paths = document.querySelectorAll('#logo-icon path');
+    if (!paths.length) return;
+
+    // getTotalLength() reads the real, exact length of each curved path — a hand-measured
+    // guess (like the one that first shipped for the favourite star, see quotes.js history)
+    // isn't reliable for anything more complex than straight polygon segments.
+    const lengths = [...paths].map(path => path.getTotalLength());
+
+    paths.forEach((path, i) => {
+        path.style.strokeDasharray = String(lengths[i]);
+        path.style.strokeDashoffset = String(lengths[i]);
+    });
+
+    requestAnimationFrame(() => {
+        paths.forEach((path, i) => {
+            path.style.transition = `stroke-dashoffset 600ms ease ${i * 100}ms`;
+            path.style.strokeDashoffset = '0';
+        });
+    });
+
+    setTimeout(() => {
+        paths.forEach(path => {
+            path.style.transition = '';
+            path.style.strokeDasharray = '';
+            path.style.strokeDashoffset = '';
+        });
+    }, 600 + paths.length * 100 + 20);
+}
+
+/**
+ * Rotates the header logo icon a further 180° around the Y axis — a "turning
+ * the page" flourish on every click through to the QoD view, independent of
+ * switchView() itself (purely decorative, doesn't gate navigation).
+ */
+function flipLogoIcon() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const icon = document.getElementById('logo-icon');
+    if (!icon) return;
+
+    const deg = (parseFloat(icon.dataset.flipDeg) || 0) + 180;
+    icon.dataset.flipDeg = String(deg);
+    icon.style.transform = `rotateY(${deg}deg)`;
+}
+
+// =============================================================================
 // LANGUAGE
 // Two toggle controls, shown in different states:
 // - [data-lang-toggle] in the header — guests only (hidden once signed in,
