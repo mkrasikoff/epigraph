@@ -174,6 +174,7 @@ function selectNotifInterval(el) {
     document.querySelectorAll('#notif-interval-toggle .import-source-tab').forEach(tab => {
         tab.classList.toggle('is-active', tab === el);
     });
+    moveToggleIndicator(document.getElementById('notif-interval-toggle'));
 
     handleNotifIntervalChange(el.dataset.intervalValue);
 }
@@ -195,6 +196,7 @@ function setNotifToggleState(enabled) {
     document.querySelectorAll('#notif-toggle [data-notif-toggle-value]').forEach(btn => {
         btn.classList.toggle('is-active', (btn.dataset.notifToggleValue === 'on') === enabled);
     });
+    moveToggleIndicator(document.getElementById('notif-toggle'));
 }
 
 /**
@@ -224,6 +226,7 @@ function updateNotifUI(subscribed, intervalHours) {
         document.querySelectorAll('#notif-interval-toggle .import-source-tab').forEach(tab => {
             tab.classList.toggle('is-active', tab.dataset.intervalValue === String(intervalHours));
         });
+        moveToggleIndicator(document.getElementById('notif-interval-toggle'));
     }
 }
 
