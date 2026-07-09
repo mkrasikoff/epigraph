@@ -304,4 +304,5 @@ function switchImportSource(source) {
     document.getElementById('import-panel-yandex').classList.toggle('is-hidden', source !== 'yandex');
     document.getElementById('import-tab-json').classList.toggle('is-active', source === 'json');
     document.getElementById('import-tab-yandex').classList.toggle('is-active', source === 'yandex');
+    moveToggleIndicator(document.getElementById('import-tab-json').closest('.import-source-toggle'));
 }
