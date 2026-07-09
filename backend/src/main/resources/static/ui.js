@@ -287,6 +287,14 @@ function moveNavIndicator() {
 
 window.addEventListener('resize', moveNavIndicator);
 
+// The very first measurement can run before Inter finishes loading (the <link> uses
+// display=swap), so it's briefly taken against the fallback system font's metrics —
+// once the real font swaps in, short labels like "Today" can end up a visibly
+// different width than what the pill was sized for. Re-measure once fonts actually
+// settle to correct that drift (matches the document.fonts.ready pattern already used
+// for QoD card sizing in quotes.js).
+document.fonts.ready.then(moveNavIndicator);
+
 /**
  * Switches the currently active view and tab, and triggers per-view rendering.
  * For guests block everything except qod
@@ -306,7 +314,15 @@ function switchView(id) {
 
     if (id !== 'qod') document.body.classList.remove('no-scroll');
     if (id === 'list') renderList();
-    if (id === 'qod') loadQod();
+    // loadQod() talks to the authenticated /api/quotes/qod endpoint, which 204s for
+    // guests (no account to resolve a QoD for) — that would reset qodAnchorId to null
+    // and incorrectly clear the "Today" highlight even though the same guest anchor
+    // quote is still on screen. Guests already have their anchor (quotes[0], set in
+    // showGuestMode()), so just re-render it instead of hitting the backend.
+    if (id === 'qod') {
+        if (isGuest) renderQod();
+        else loadQod();
+    }
     if (id === 'add') renderTags();
     if (id === 'settings') {
         updateSettingsAccount();
