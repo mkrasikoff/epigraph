@@ -116,4 +116,17 @@ public class UserService {
         user.setPreferredLanguage(preferredLanguage);
         userRepository.save(user);
     }
+
+    /**
+     * Sets the user's visual theme style. Value is restricted to a fixed set
+     * of presets, validated at the controller-level DTO.
+     */
+    @Transactional
+    public void updateThemeStyle(Long userId, String themeStyle) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+
+        user.setThemeStyle(themeStyle);
+        userRepository.save(user);
+    }
 }
