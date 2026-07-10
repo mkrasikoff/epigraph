@@ -262,6 +262,7 @@ class AuthControllerTest {
         user.setAvatarIcon("cat");
         user.setPreferredLanguage("en");
         user.setThemeStyle("forest");
+        user.setEquippedBadge("chronicler");
         when(userService.findById(null)).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/auth/me"))
@@ -272,7 +273,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.username").value("testuser"))
                 .andExpect(jsonPath("$.avatarIcon").value("cat"))
                 .andExpect(jsonPath("$.preferredLanguage").value("en"))
-                .andExpect(jsonPath("$.themeStyle").value("forest"));
+                .andExpect(jsonPath("$.themeStyle").value("forest"))
+                .andExpect(jsonPath("$.equippedBadge").value("chronicler"));
     }
 
     @Test
@@ -301,6 +303,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.username").doesNotExist())
                 .andExpect(jsonPath("$.avatarIcon").value("neutral"))
                 .andExpect(jsonPath("$.preferredLanguage").value("ru"))
-                .andExpect(jsonPath("$.themeStyle").value("classic"));
+                .andExpect(jsonPath("$.themeStyle").value("classic"))
+                .andExpect(jsonPath("$.equippedBadge").doesNotExist());
     }
 }

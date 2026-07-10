@@ -16,4 +16,5 @@ public class MeResponse {
     private String avatarIcon;
     private String preferredLanguage;
     private String themeStyle;
+    private String equippedBadge;
 }

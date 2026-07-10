@@ -2,6 +2,7 @@ package com.mkrasikoff.epigraph.controller;
 
 import com.mkrasikoff.epigraph.dto.BatchImportResult;
 import com.mkrasikoff.epigraph.model.Quote;
+import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.QuoteService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -28,9 +29,11 @@ public class QuoteController {
     private static final Logger log = LoggerFactory.getLogger(QuoteController.class);
 
     private final QuoteService service;
+    private final AchievementService achievementService;
 
-    public QuoteController(QuoteService service) {
+    public QuoteController(QuoteService service, AchievementService achievementService) {
         this.service = service;
+        this.achievementService = achievementService;
     }
 
     @GetMapping
@@ -65,6 +68,10 @@ public class QuoteController {
                         @AuthenticationPrincipal Long userId) {
         Quote saved = service.save(quote, userId);
 
+        achievementService.recordAction(userId, "add_quote");
+        achievementService.markActiveToday(userId);
+        achievementService.evaluate(userId);
+
         log.info("Quote created — id = {}", saved.getId());
 
         return saved;
@@ -76,6 +83,12 @@ public class QuoteController {
                                          @AuthenticationPrincipal Long userId) {
         BatchImportResult result = service.saveAll(quotes, userId);
 
+        if (!result.getSaved().isEmpty()) {
+            achievementService.recordAction(userId, "import_quotes");
+            achievementService.markActiveToday(userId);
+            achievementService.evaluate(userId);
+        }
+
         log.info("Batch quotes created — saved = {}, rejected = {}", result.getSaved().size(), result.getRejected().size());
 
         return result;
@@ -86,6 +99,12 @@ public class QuoteController {
                         @Valid @RequestBody Quote quote,
                         @AuthenticationPrincipal Long userId) {
         Quote updated = service.update(id, quote, userId);
+
+        if (updated.isFav()) {
+            achievementService.recordAction(userId, "favorite_quote");
+        }
+        achievementService.markActiveToday(userId);
+        achievementService.evaluate(userId);
 
         log.info("Quote updated — id = {}, fav = {}", id, updated.isFav());
 

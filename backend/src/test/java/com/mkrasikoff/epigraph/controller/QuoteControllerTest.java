@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.BatchImportResult;
 import com.mkrasikoff.epigraph.dto.RejectedQuote;
 import com.mkrasikoff.epigraph.model.Quote;
+import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.QuoteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,12 +39,15 @@ class QuoteControllerTest {
     @Mock
     private QuoteService quoteService;
 
+    @Mock
+    private AchievementService achievementService;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        QuoteController controller = new QuoteController(quoteService);
+        QuoteController controller = new QuoteController(quoteService, achievementService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         objectMapper = new ObjectMapper();
     }

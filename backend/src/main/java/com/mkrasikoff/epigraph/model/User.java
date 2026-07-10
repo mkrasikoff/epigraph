@@ -81,4 +81,12 @@ public class User {
      */
     @Column(nullable = false, length = 20)
     private String themeStyle = "classic";
+
+    /**
+     * Currently displayed badge key (see AchievementCatalog's badge ladder).
+     * Not user-chosen — AchievementService.evaluate() always resets it to
+     * the highest badge the user has unlocked. Null until "Новичок" unlocks.
+     */
+    @Column(length = 30)
+    private String equippedBadge;
 }

@@ -147,6 +147,17 @@ class QuoteServiceTest {
     }
 
     @Test
+    @DisplayName("save: marks quote as manually added")
+    void save_marksManuallyAdded() {
+        Quote quote = buildQuote(null, "New quote");
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Quote saved = quoteService.save(quote, USER_ID);
+
+        assertThat(saved.isManuallyAdded()).isTrue();
+    }
+
+    @Test
     @DisplayName("save: preserves existing added timestamp")
     void save_preservesAddedTimestamp_whenAlreadySet() {
         Quote quote = buildQuote(null, "Quote with timestamp");
@@ -229,6 +240,17 @@ class QuoteServiceTest {
     }
 
     @Test
+    @DisplayName("saveAll: leaves manuallyAdded false — bulk import doesn't count as hand-curated")
+    void saveAll_leavesManuallyAddedFalse() {
+        List<Quote> quotes = List.of(buildQuote(null, "First"));
+        when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        List<Quote> saved = quoteService.saveAll(quotes, USER_ID).getSaved();
+
+        assertThat(saved).allMatch(q -> !q.isManuallyAdded());
+    }
+
+    @Test
     @DisplayName("update: updates fields of existing quote")
     void update_updatesFields() {
         Quote existing = buildQuote(1L, "Old text");
@@ -303,5 +325,15 @@ class QuoteServiceTest {
         quoteService.createDefaultQuotes(USER_ID);
 
         verify(repo, times(3)).save(argThat(q -> USER_ID.equals(q.getUserId())));
+    }
+
+    @Test
+    @DisplayName("createDefaultQuotes: leaves manuallyAdded false — onboarding seed quotes aren't hand-curated")
+    void createDefaultQuotes_leavesManuallyAddedFalse() {
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        quoteService.createDefaultQuotes(USER_ID);
+
+        verify(repo, times(3)).save(argThat(q -> !q.isManuallyAdded()));
     }
 }
