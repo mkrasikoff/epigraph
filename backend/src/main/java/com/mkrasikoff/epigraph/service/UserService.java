@@ -143,7 +143,12 @@ public class UserService {
         user.setThemeStyle(themeStyle);
         userRepository.save(user);
 
-        achievementService.recordAction(userId, "change_theme");
+        // "explorer"'s change_theme action fires from the light/dark toggle instead
+        // (see AchievementController.recordAppearanceToggle) — every non-classic
+        // theme style is locked until an achievement unlocks it, so recording this
+        // action here would be unreachable for a brand-new user: they can't switch
+        // away from classic (nothing else is unlocked yet), and switching from
+        // classic to classic is a client-side no-op that never even calls this method.
         achievementService.markActiveToday(userId);
     }
 }
