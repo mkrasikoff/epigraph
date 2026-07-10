@@ -142,7 +142,18 @@ const Api = {
      * @returns {Promise<Object[]>}
      */
     getAchievements: () =>
-        fetch('/api/achievements/me', { headers: authHeaders() }).then(r => r.json())
+        fetch('/api/achievements/me', { headers: authHeaders() }).then(r => r.json()),
+
+    /**
+     * Records the "explorer" achievement's change_theme action from the
+     * light/dark appearance toggle. No body — see AchievementController.
+     * @returns {Promise<Response>}
+     */
+    recordAppearanceToggle: () =>
+        fetch('/api/achievements/appearance-toggle', {
+            method: 'POST',
+            headers: authHeaders()
+        })
 
 };
 

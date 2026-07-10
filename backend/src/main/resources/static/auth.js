@@ -296,11 +296,11 @@ function showAchievementUnlockModal(status) {
 
     const meta = ACHIEVEMENT_META[status.key] || {};
     const actions = [{label: t('achievementUnlockedLaterBtn'), cls: 'btn-secondary', action: closeModal}];
-    let rewardHtml = '';
+    let rewardText = '';
 
     if (status.rewardType === 'theme') {
         const themeName = t(themeStyleLabelKey(status.rewardKey));
-        rewardHtml = `<p class="achievement-unlock-reward">${t('achievementUnlockedRewardTheme', {theme: themeName})}</p>`;
+        rewardText = t('achievementUnlockedRewardTheme', {theme: themeName});
         actions.unshift({
             label: t('achievementsApplyThemeBtn', {theme: themeName}),
             cls: 'btn-primary',
@@ -308,14 +308,18 @@ function showAchievementUnlockModal(status) {
         });
     } else if (status.rewardType === 'badge') {
         const badgeName = t(badgeLabelKey(status.rewardKey));
-        rewardHtml = `<p class="achievement-unlock-reward">${t('achievementUnlockedRewardBadge', {badge: badgeName})}</p>`;
+        rewardText = t('achievementUnlockedRewardBadge', {badge: badgeName});
     }
 
+    const rewardIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
+
     const body = `
-        <div class="achievement-unlock-icon">${meta.icon || ''}</div>
+        <div class="achievement-unlock-icon-wrap">
+            <div class="achievement-unlock-icon">${meta.icon || ''}</div>
+        </div>
         <p class="achievement-unlock-title">${t(achievementTitleKey(status.key))}</p>
         <p class="achievement-unlock-desc">${t(achievementDescKey(status.key))}</p>
-        ${rewardHtml}
+        ${rewardText ? `<div class="achievement-unlock-reward-box">${rewardIcon}<span>${rewardText}</span></div>` : ''}
     `;
 
     showModal(t('achievementUnlockedHeading'), body, actions, false);
@@ -416,40 +420,157 @@ async function showAchievementsModal() {
         }
     }
 
-    const unlocked = achievementStatuses.filter(a => a.unlocked);
-    const inProgress = achievementStatuses.filter(a => !a.unlocked);
-    const pct = achievementStatuses.length ? Math.round((unlocked.length / achievementStatuses.length) * 100) : 0;
+    renderFocusedAchievementsModal();
+}
 
-    const renderCard = (a, isUnlocked) => {
+/**
+ * Default achievements view — only the current/next badge and the 2 locked
+ * theme achievements closest to completion, not the full 13-item catalog.
+ * "Показать все" swaps to renderAllAchievementsModal() for anyone who wants
+ * to browse the whole thing.
+ */
+function renderFocusedAchievementsModal() {
+    const statuses = achievementStatuses || [];
+    const unlockedCount = statuses.filter(a => a.unlocked).length;
+
+    const badges = statuses.filter(a => a.rewardType === 'badge');
+    const currentBadgeIndex = badges.reduce((acc, a, i) => a.unlocked ? i : acc, -1);
+    const currentBadge = currentBadgeIndex >= 0 ? badges[currentBadgeIndex] : null;
+    const nextBadge = badges[currentBadgeIndex + 1] || null;
+
+    const nearestThemes = statuses
+        .filter(a => a.rewardType === 'theme' && !a.unlocked)
+        .sort((a, b) => (b.progress / b.threshold) - (a.progress / a.threshold))
+        .slice(0, 2);
+
+    let badgeCardHtml = '';
+    if (nextBadge) {
+        const pct = nextBadge.threshold ? Math.min(100, Math.round((nextBadge.progress / nextBadge.threshold) * 100)) : 0;
+        const currentIcon = currentBadge ? (ACHIEVEMENT_META[currentBadge.key]?.icon || '') : '';
+        const nextIcon = ACHIEVEMENT_META[nextBadge.key]?.icon || '';
+
+        badgeCardHtml = `
+            <div class="achievement-focus-card">
+                <div class="achievement-focus-top">
+                    <div class="achievement-focus-side">
+                        <div class="achievement-focus-icon">${currentIcon}</div>
+                        <div>
+                            <div class="achievement-focus-label">${t('achievementsCurrentBadge')}</div>
+                            <div class="achievement-focus-name">${currentBadge ? t(achievementTitleKey(currentBadge.key)) : '—'}</div>
+                        </div>
+                    </div>
+                    <div class="achievement-focus-side achievement-focus-side--right">
+                        <div>
+                            <div class="achievement-focus-label">${t('achievementsNextBadge')}</div>
+                            <div class="achievement-focus-name">${t(achievementTitleKey(nextBadge.key))}</div>
+                        </div>
+                        <div class="achievement-focus-icon achievement-focus-icon--muted">${nextIcon}</div>
+                    </div>
+                </div>
+                <div class="achievement-focus-progress-track"><div class="achievement-focus-progress-fill" style="width:${pct}%"></div></div>
+                <div class="achievement-focus-fraction">${nextBadge.progress}/${nextBadge.threshold}</div>
+            </div>
+        `;
+    }
+
+    const body = `
+        <p class="achievements-focus-summary">${t('achievementsSummary', {unlocked: unlockedCount, total: statuses.length})}</p>
+        ${badgeCardHtml}
+        ${nearestThemes.length ? `<div class="settings-group-title">${t('achievementsNearestThemesSection')}</div>
+        <div class="achievements-list">${nearestThemes.map(renderNearestThemeRow).join('')}</div>` : ''}
+        <button type="button" class="achievements-expand-btn" onclick="renderAllAchievementsModal()">${t('achievementsShowAllBtn', {total: statuses.length})}</button>
+    `;
+
+    showModal(t('settingsAchievementsTitle'), body, [], true);
+}
+
+/**
+ * Compact "condition + reward" line for a row — e.g. "25 избранных вручную ·
+ * тема «Океан»" for theme achievements, or just the condition for badges
+ * (the badge itself already *is* the reward, so restating it would be
+ * redundant clutter).
+ * @param {Object} a - One entry from GET /api/achievements/me.
+ * @returns {string}
+ */
+function achievementConditionWithReward(a) {
+    const desc = t(achievementDescKey(a.key));
+    if (a.rewardType !== 'theme') return desc;
+
+    return `${desc} · ${t(themeStyleLabelKey(a.rewardKey))}`;
+}
+
+function renderNearestThemeRow(a) {
+    const meta = ACHIEVEMENT_META[a.key] || {};
+    const pct = a.threshold ? Math.min(100, Math.round((a.progress / a.threshold) * 100)) : 0;
+
+    return `<div class="achievement-row">
+                <div class="achievement-row-icon">${meta.icon || ''}</div>
+                <div class="achievement-row-body">
+                    <div class="achievement-row-top">
+                        <span class="achievement-row-title">${t(achievementTitleKey(a.key))}</span>
+                        <span class="achievement-row-fraction">${a.progress}/${a.threshold}</span>
+                    </div>
+                    <div class="achievement-row-condition">${achievementConditionWithReward(a)}</div>
+                    <div class="achievement-row-progress-track"><div class="achievement-row-progress-fill" style="width:${pct}%"></div></div>
+                </div>
+            </div>`;
+}
+
+/**
+ * Full catalog view (all 13), grouped by reward type — themes and badges
+ * are two distinct reward tracks (see AchievementCatalog), and the badge
+ * group is a literal prestige ladder, so it reads better as one ordered
+ * list than split across unlocked/in-progress sections.
+ */
+function renderAllAchievementsModal() {
+    const statuses = achievementStatuses || [];
+    const unlockedCount = statuses.filter(a => a.unlocked).length;
+    const pct = statuses.length ? Math.round((unlockedCount / statuses.length) * 100) : 0;
+
+    const themes = statuses.filter(a => a.rewardType === 'theme');
+    const badges = statuses.filter(a => a.rewardType === 'badge');
+
+    const renderRow = (a) => {
         const meta = ACHIEVEMENT_META[a.key] || {};
         const title = t(achievementTitleKey(a.key));
-        const desc = t(achievementDescKey(a.key));
+        const desc = achievementConditionWithReward(a);
 
-        let extra = '';
-        if (isUnlocked) {
+        let statusHtml;
+        let progressHtml = '';
+
+        if (a.unlocked) {
             if (a.rewardType === 'theme' && currentUser?.themeStyle !== a.rewardKey) {
                 const themeName = t(themeStyleLabelKey(a.rewardKey));
-                extra = `<button type="button" class="achievement-card-apply-btn" onclick="applyAchievementTheme('${a.rewardKey}')">${t('achievementsApplyThemeBtn', {theme: themeName})}</button>`;
+                statusHtml = `<button type="button" class="achievement-row-apply-btn" onclick="applyAchievementTheme('${a.rewardKey}')">${t('achievementsApplyThemeBtn', {theme: themeName})}</button>`;
+            } else {
+                statusHtml = `<span class="achievement-row-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`;
             }
         } else {
+            statusHtml = `<span class="achievement-row-fraction">${a.progress}/${a.threshold}</span>`;
             const progressPct = a.threshold ? Math.min(100, Math.round((a.progress / a.threshold) * 100)) : 0;
-            extra = `<div class="achievement-card-progress-track"><div class="achievement-card-progress-fill" style="width:${progressPct}%"></div></div>`;
+            progressHtml = `<div class="achievement-row-progress-track"><div class="achievement-row-progress-fill" style="width:${progressPct}%"></div></div>`;
         }
 
-        return `<div class="achievement-card${isUnlocked ? ' achievement-card--unlocked' : ''}">
-                    <div class="achievement-card-icon">${meta.icon || ''}</div>
-                    <div class="achievement-card-title">${title}</div>
-                    <div class="achievement-card-desc">${desc}</div>
-                    ${extra}
+        return `<div class="achievement-row${a.unlocked ? ' achievement-row--unlocked' : ''}">
+                    <div class="achievement-row-icon">${meta.icon || ''}</div>
+                    <div class="achievement-row-body">
+                        <div class="achievement-row-top">
+                            <span class="achievement-row-title">${title}</span>
+                            ${statusHtml}
+                        </div>
+                        <div class="achievement-row-condition">${desc}</div>
+                        ${progressHtml}
+                    </div>
                 </div>`;
     };
 
     const body = `
         <div class="achievements-summary-bar"><div class="achievements-summary-fill" style="width:${pct}%"></div></div>
-        ${unlocked.length ? `<div class="settings-group-title">${t('achievementsUnlockedSection')}</div>
-        <div class="achievements-grid">${unlocked.map(a => renderCard(a, true)).join('')}</div>` : ''}
-        ${inProgress.length ? `<div class="settings-group-title">${t('achievementsInProgressSection')}</div>
-        <div class="achievements-grid">${inProgress.map(a => renderCard(a, false)).join('')}</div>` : ''}
+        <div class="settings-group-title">${t('achievementsThemesSection')}</div>
+        <div class="achievements-list">${themes.map(renderRow).join('')}</div>
+        <div class="settings-group-title">${t('achievementsBadgesSection')}</div>
+        <div class="achievements-list">${badges.map(renderRow).join('')}</div>
+        <button type="button" class="achievements-expand-btn" onclick="renderFocusedAchievementsModal()">${t('achievementsBackBtn')}</button>
     `;
 
     showModal(t('settingsAchievementsTitle'), body, [], true);

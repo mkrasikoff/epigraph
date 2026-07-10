@@ -35,6 +35,10 @@
         }
         animateThemeIcon(themeToggleBtn, currentTheme);
         updateThemeColorMeta(currentTheme);
+
+        if (!isGuest) {
+            Api.recordAppearanceToggle().then(() => checkForNewAchievements()).catch(() => {});
+        }
     });
 
     /**
@@ -195,14 +199,16 @@ function updateThemeColorMeta(mode) {
 
 /**
  * Whether the given theme style is locked for the current user — always
- * false for "classic" and for guests/before achievements have loaded (the
- * grid renders unlocked-looking until refreshAchievementsUi() resolves,
- * rather than flashing every card as locked on first paint).
+ * false for "classic". Pessimistic before achievements have loaded: every
+ * other style renders locked (and un-clickable, see .theme-style-card--locked
+ * pointer-events:none) until refreshAchievementsUi() resolves, so there's no
+ * window on first paint where an unearned theme is clickable.
  * @param {string} key
  * @returns {boolean}
  */
 function isThemeStyleLocked(key) {
-    if (key === 'classic' || !achievementStatuses) return false;
+    if (key === 'classic') return false;
+    if (!achievementStatuses) return true;
 
     const match = achievementStatuses.find(a => a.rewardType === 'theme' && a.rewardKey === key);
     return match ? !match.unlocked : true;

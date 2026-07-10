@@ -14,10 +14,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,5 +64,15 @@ class AchievementControllerTest {
                 .andExpect(jsonPath("$[1].progress").value(3));
 
         verify(achievementService).getStatusForUser(isNull());
+    }
+
+    @Test
+    @DisplayName("POST /api/achievements/appearance-toggle: records change_theme and marks activity")
+    void recordAppearanceToggle_recordsActionAndActivity() throws Exception {
+        mockMvc.perform(post("/api/achievements/appearance-toggle"))
+                .andExpect(status().isOk());
+
+        verify(achievementService).recordAction(isNull(), eq("change_theme"));
+        verify(achievementService).markActiveToday(isNull());
     }
 }
