@@ -121,6 +121,18 @@ const Api = {
             method: 'PATCH',
             headers: authHeaders(),
             body: JSON.stringify({ preferredLanguage })
+        }),
+
+    /**
+     * Updates the authenticated user's visual theme style (one of a fixed set of presets).
+     * @param {string} themeStyle
+     * @returns {Promise<Response>}
+     */
+    updateThemeStyle: (themeStyle) =>
+        fetch('/api/user/me/theme', {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ themeStyle })
         })
 
 };

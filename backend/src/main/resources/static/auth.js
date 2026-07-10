@@ -504,6 +504,40 @@ async function syncPreferredLanguage() {
 }
 
 /**
+ * Reconciles the app's active theme style with the authenticated user's
+ * account right after login/register/reset — same "guest choice wins" shape
+ * as syncPreferredLanguage() above, applied to the theme-style picker
+ * instead of the language toggle. No page reload needed here since a style
+ * switch is a pure CSS variable swap, not a text-reflow change.
+ */
+async function syncPreferredTheme() {
+    if (!currentUser) return;
+
+    let explicit = null;
+    try {
+        explicit = localStorage.getItem('themeStyle');
+    } catch (e) {
+    }
+
+    const serverStyle = currentUser.themeStyle;
+
+    if (explicit && THEME_STYLE_KEYS.includes(explicit) && explicit !== serverStyle) {
+        try {
+            await Api.updateThemeStyle(explicit);
+            currentUser.themeStyle = explicit;
+        } catch (e) {
+        }
+    } else if (!explicit && serverStyle) {
+        document.documentElement.setAttribute('data-theme-style', serverStyle);
+        try {
+            localStorage.setItem('themeStyle', serverStyle);
+        } catch (e) {
+        }
+        updateThemeStyleGrid();
+    }
+}
+
+/**
  * Fetches the latest release tag from GitHub and displays it as the app version.
  * Caches the result in sessionStorage to avoid redundant API calls within the same session.
  */
@@ -753,6 +787,7 @@ async function authSubmit() {
         await loadData();
         await loadCurrentUser();
         await syncPreferredLanguage();
+        await syncPreferredTheme();
         renderQod();
 
     } catch (e) {
@@ -962,6 +997,7 @@ async function submitVerifyCode(email) {
         await loadData();
         await loadCurrentUser();
         await syncPreferredLanguage();
+        await syncPreferredTheme();
         await loadQod();
         showProfileSetupModal(currentUser?.username || '');
 
@@ -1245,6 +1281,7 @@ async function submitPasswordReset(resetToken) {
         await loadData();
         await loadCurrentUser();
         await syncPreferredLanguage();
+        await syncPreferredTheme();
         switchView('settings');
         toast(t('changePasswordSuccess'));
 

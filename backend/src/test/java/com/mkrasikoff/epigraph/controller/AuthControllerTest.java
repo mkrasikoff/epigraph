@@ -261,6 +261,7 @@ class AuthControllerTest {
         user.setUsername("testuser");
         user.setAvatarIcon("cat");
         user.setPreferredLanguage("en");
+        user.setThemeStyle("forest");
         when(userService.findById(null)).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/auth/me"))
@@ -270,7 +271,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.email").value("user@example.com"))
                 .andExpect(jsonPath("$.username").value("testuser"))
                 .andExpect(jsonPath("$.avatarIcon").value("cat"))
-                .andExpect(jsonPath("$.preferredLanguage").value("en"));
+                .andExpect(jsonPath("$.preferredLanguage").value("en"))
+                .andExpect(jsonPath("$.themeStyle").value("forest"));
     }
 
     @Test
@@ -298,6 +300,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.email").value("nouser@example.com"))
                 .andExpect(jsonPath("$.username").doesNotExist())
                 .andExpect(jsonPath("$.avatarIcon").value("neutral"))
-                .andExpect(jsonPath("$.preferredLanguage").value("ru"));
+                .andExpect(jsonPath("$.preferredLanguage").value("ru"))
+                .andExpect(jsonPath("$.themeStyle").value("classic"));
     }
 }

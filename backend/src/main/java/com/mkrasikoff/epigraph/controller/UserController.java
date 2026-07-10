@@ -5,6 +5,7 @@ import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
 import com.mkrasikoff.epigraph.dto.UpdateAvatarRequest;
 import com.mkrasikoff.epigraph.dto.UpdatePreferredLanguageRequest;
+import com.mkrasikoff.epigraph.dto.UpdateThemeStyleRequest;
 import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
@@ -108,6 +109,22 @@ public class UserController {
             log.info("Preferred language updated — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse("Язык обновлён"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Updates the authenticated user's visual theme style (one of a fixed set of presets).
+     */
+    @PatchMapping("/me/theme")
+    public ResponseEntity<?> updateThemeStyle(@AuthenticationPrincipal Long userId,
+                                              @Valid @RequestBody UpdateThemeStyleRequest request) {
+        try {
+            userService.updateThemeStyle(userId, request.getThemeStyle());
+            log.info("Theme style updated — userId = {}", userId);
+
+            return ResponseEntity.ok(new ErrorResponse("Тема обновлена"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }

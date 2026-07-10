@@ -72,4 +72,13 @@ public class User {
      */
     @Column(nullable = false, length = 5)
     private String preferredLanguage = "ru";
+
+    /**
+     * Visual theme style key chosen from a fixed set of 5 presets (see
+     * UpdateThemeStyleRequest for the allowed keys). Independent of
+     * light/dark mode. Always has a value — "classic" until the user picks
+     * something else.
+     */
+    @Column(nullable = false, length = 20)
+    private String themeStyle = "classic";
 }

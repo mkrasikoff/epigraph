@@ -14,7 +14,15 @@
     } catch (e) {
     }
 
+    let currentThemeStyle = 'classic';
+    try {
+        const s = localStorage.getItem('themeStyle');
+        if (s && THEME_STYLE_KEYS.includes(s)) currentThemeStyle = s;
+    } catch (e) {
+    }
+
     htmlElement.setAttribute('data-theme', currentTheme);
+    htmlElement.setAttribute('data-theme-style', currentThemeStyle);
     updateThemeIcon(themeToggleBtn, currentTheme);
     updateThemeColorMeta(currentTheme);
 
@@ -108,6 +116,70 @@
 function updateThemeColorMeta(mode) {
     const meta = document.getElementById('theme-color-meta');
     if (meta) meta.setAttribute('content', mode === 'dark' ? '#18160f' : '#f5f2ec');
+}
+
+// =============================================================================
+// THEME STYLE
+// Settings picker for the 5 visual theme styles (TASK-119). Unlike the
+// light/dark toggle, switching a style is a pure CSS variable swap with no
+// text reflow, so it applies instantly with no loading-overlay flash and no
+// page reload. Persists to localStorage always, and to the account when
+// signed in — mirrors updateThemeStyle()/syncPreferredTheme() in auth.js.
+// =============================================================================
+(function () {
+    const grid = document.getElementById('theme-style-grid');
+    if (!grid) return;
+
+    grid.innerHTML = THEME_STYLE_KEYS.map(key => {
+        const preview = THEME_STYLE_PREVIEWS[key];
+        return `
+            <button type="button" class="theme-style-card" data-theme-style-option="${key}">
+                <span class="theme-style-swatch">
+                    <span class="swatch-primary" style="background:${preview.light.bg}"></span>
+                    <span class="swatch-accent" style="background:${preview.light.primary}"></span>
+                </span>
+                <span class="theme-style-card-label" data-i18n="${themeStyleLabelKey(key)}"></span>
+            </button>
+        `;
+    }).join('');
+
+    applyI18n();
+    updateThemeStyleGrid();
+
+    grid.querySelectorAll('[data-theme-style-option]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const style = btn.dataset.themeStyleOption;
+            if (style === document.documentElement.getAttribute('data-theme-style')) return;
+
+            document.documentElement.setAttribute('data-theme-style', style);
+            updateThemeStyleGrid();
+
+            try {
+                localStorage.setItem('themeStyle', style);
+            } catch (e) {
+            }
+
+            if (!isGuest) {
+                try {
+                    await Api.updateThemeStyle(style);
+                    if (currentUser) currentUser.themeStyle = style;
+                } catch (e) {
+                }
+            }
+        });
+    });
+})();
+
+/**
+ * Marks the theme-style card matching the currently active data-theme-style
+ * attribute as active. Called after the initial grid render and on every
+ * style switch.
+ */
+function updateThemeStyleGrid() {
+    const active = document.documentElement.getAttribute('data-theme-style');
+    document.querySelectorAll('#theme-style-grid [data-theme-style-option]').forEach(btn => {
+        btn.classList.toggle('is-active', btn.dataset.themeStyleOption === active);
+    });
 }
 
 // =============================================================================
