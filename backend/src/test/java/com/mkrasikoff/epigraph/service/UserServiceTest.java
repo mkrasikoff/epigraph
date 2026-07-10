@@ -255,4 +255,28 @@ class UserServiceTest {
 
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("updateThemeStyle: sets theme style and saves user")
+    void updateThemeStyle_setsThemeAndSaves() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updateThemeStyle(USER_ID, "forest");
+
+        assertThat(user.getThemeStyle()).isEqualTo("forest");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("updateThemeStyle: throws when user not found")
+    void updateThemeStyle_throws_whenUserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updateThemeStyle(99L, "forest"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("не найден");
+
+        verify(userRepository, never()).save(any());
+    }
 }

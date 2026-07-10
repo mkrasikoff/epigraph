@@ -55,6 +55,57 @@
 </head>
 <body>
 
+<!-- THEME DECOR — fixed animated background, one group per theme style (TASK-119) -->
+<div id="theme-decor" aria-hidden="true">
+    <div class="decor decor-classic">
+        <span class="decor-glyph" style="--x:6%; --dur:34s; --delay:-4s;">&ldquo;</span>
+        <span class="decor-glyph" style="--x:22%; --dur:29s; --delay:-14s;">&rdquo;</span>
+        <span class="decor-glyph" style="--x:40%; --dur:38s; --delay:-2s;">&rdquo;</span>
+        <span class="decor-glyph" style="--x:58%; --dur:26s; --delay:-18s;">&ldquo;</span>
+        <span class="decor-glyph" style="--x:76%; --dur:33s; --delay:-9s;">&ldquo;</span>
+        <span class="decor-glyph" style="--x:90%; --dur:31s; --delay:-22s;">&rdquo;</span>
+    </div>
+    <div class="decor decor-forest">
+        <span class="decor-leaf" style="--x:4%; --dur:13s; --delay:-3s;"></span>
+        <span class="decor-leaf" style="--x:16%; --dur:17s; --delay:-9s;"></span>
+        <span class="decor-leaf" style="--x:30%; --dur:14s; --delay:-1s;"></span>
+        <span class="decor-leaf" style="--x:45%; --dur:19s; --delay:-11s;"></span>
+        <span class="decor-leaf" style="--x:60%; --dur:15s; --delay:-6s;"></span>
+        <span class="decor-leaf" style="--x:74%; --dur:18s; --delay:-14s;"></span>
+        <span class="decor-leaf" style="--x:87%; --dur:16s; --delay:-4s;"></span>
+        <span class="decor-leaf" style="--x:96%; --dur:20s; --delay:-8s;"></span>
+    </div>
+    <div class="decor decor-cosmos">
+        <span class="decor-star" style="--x:5%; --y:10%; --dur:3.2s; --delay:-1s;"></span>
+        <span class="decor-star" style="--x:14%; --y:32%; --dur:4.1s; --delay:-2s;"></span>
+        <span class="decor-star" style="--x:24%; --y:60%; --dur:3.6s; --delay:-3s;"></span>
+        <span class="decor-star" style="--x:33%; --y:18%; --dur:4.6s; --delay:-1.5s;"></span>
+        <span class="decor-star" style="--x:44%; --y:75%; --dur:3.9s; --delay:-2.5s;"></span>
+        <span class="decor-star" style="--x:53%; --y:40%; --dur:4.3s; --delay:-0.5s;"></span>
+        <span class="decor-star" style="--x:63%; --y:12%; --dur:3.4s; --delay:-3.5s;"></span>
+        <span class="decor-star" style="--x:71%; --y:55%; --dur:4.8s; --delay:-1.8s;"></span>
+        <span class="decor-star" style="--x:80%; --y:28%; --dur:3.7s; --delay:-2.2s;"></span>
+        <span class="decor-star" style="--x:90%; --y:68%; --dur:4.2s; --delay:-0.8s;"></span>
+        <span class="decor-star" style="--x:96%; --y:20%; --dur:3.9s; --delay:-3.2s;"></span>
+        <span class="decor-shooting"></span>
+    </div>
+    <div class="decor decor-ocean">
+        <span class="decor-bubble" style="--x:6%; --size:10px; --dur:15s; --delay:-2s;"></span>
+        <span class="decor-bubble" style="--x:18%; --size:16px; --dur:19s; --delay:-8s;"></span>
+        <span class="decor-bubble" style="--x:31%; --size:8px; --dur:13s; --delay:-4s;"></span>
+        <span class="decor-bubble" style="--x:47%; --size:13px; --dur:17s; --delay:-11s;"></span>
+        <span class="decor-bubble" style="--x:61%; --size:9px; --dur:14s; --delay:-6s;"></span>
+        <span class="decor-bubble" style="--x:74%; --size:18px; --dur:20s; --delay:-13s;"></span>
+        <span class="decor-bubble" style="--x:86%; --size:11px; --dur:16s; --delay:-3s;"></span>
+        <span class="decor-bubble" style="--x:95%; --size:14px; --dur:18s; --delay:-9s;"></span>
+    </div>
+    <div class="decor decor-sunset">
+        <span class="decor-blob decor-blob-1"></span>
+        <span class="decor-blob decor-blob-2"></span>
+        <span class="decor-blob decor-blob-3"></span>
+    </div>
+</div>
+
 <!-- LOADING OVERLAY — shown on app start until data is ready -->
 <div id="app-loading-overlay" class="app-loading-overlay">
     <div class="app-loading-spinner"></div>
@@ -753,6 +804,17 @@
                             <button type="button" class="import-source-tab" data-lang-option="en">EN</button>
                         </div>
                     </div>
+                    <div class="settings-item settings-item--stack">
+                        <div class="settings-item-info">
+                            <h4 data-i18n="settingsThemeTitle">
+                                Тема оформления
+                            </h4>
+                            <p data-i18n="settingsThemeDesc">
+                                Выберите оформление приложения. Светлый и тёмный режим переключаются отдельно.
+                            </p>
+                        </div>
+                        <div class="theme-style-grid" id="theme-style-grid" role="group" aria-label="Выбрать тему оформления" data-i18n-aria="ariaChooseThemeStyle"></div>
+                    </div>
                     </div>
                 </div>
 
@@ -1010,6 +1072,7 @@
 
 <script src="/i18n.js"></script>
 <script src="/avatars.js"></script>
+<script src="/themes.js"></script>
 <script src="/yandex-import.js"></script>
 <script src="/api.js"></script>
 <script src="/auth.js"></script>

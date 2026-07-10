@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.UpdateAvatarRequest;
 import com.mkrasikoff.epigraph.dto.UpdatePreferredLanguageRequest;
+import com.mkrasikoff.epigraph.dto.UpdateThemeStyleRequest;
 import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
@@ -378,6 +379,62 @@ class UserControllerTest {
         request.setPreferredLanguage("");
 
         mockMvc.perform(patch("/api/user/me/language")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/theme: returns 200 on success")
+    void updateThemeStyle_returnsOk() throws Exception {
+        UpdateThemeStyleRequest request = new UpdateThemeStyleRequest();
+        request.setThemeStyle("forest");
+        doNothing().when(userService).updateThemeStyle(isNull(), eq("forest"));
+
+        mockMvc.perform(patch("/api/user/me/theme")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Тема обновлена"));
+
+        verify(userService).updateThemeStyle(isNull(), eq("forest"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/theme: returns 400 when service throws")
+    void updateThemeStyle_returnsBadRequest_whenServiceThrows() throws Exception {
+        UpdateThemeStyleRequest request = new UpdateThemeStyleRequest();
+        request.setThemeStyle("forest");
+        doThrow(new IllegalArgumentException("Пользователь не найден"))
+                .when(userService).updateThemeStyle(isNull(), eq("forest"));
+
+        mockMvc.perform(patch("/api/user/me/theme")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/theme: returns 400 when theme is not one of the presets")
+    void updateThemeStyle_returnsBadRequest_whenThemeInvalid() throws Exception {
+        UpdateThemeStyleRequest request = new UpdateThemeStyleRequest();
+        request.setThemeStyle("dragon");
+
+        mockMvc.perform(patch("/api/user/me/theme")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/user/me/theme: returns 400 when theme is blank")
+    void updateThemeStyle_returnsBadRequest_whenBlank() throws Exception {
+        UpdateThemeStyleRequest request = new UpdateThemeStyleRequest();
+        request.setThemeStyle("");
+
+        mockMvc.perform(patch("/api/user/me/theme")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

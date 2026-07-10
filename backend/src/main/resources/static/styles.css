@@ -106,6 +106,362 @@
 }
 
 /* =============================================================================
+// THEME STYLES
+// Five selectable visual styles (TASK-119), independent of the light/dark
+// toggle above. "classic" reuses the default palette already defined in
+// :root/[data-theme] — only the other four need overrides here. Typography,
+// spacing and radius tokens are intentionally NOT overridden per style, only
+// colors — see the [data-theme-style] + [data-theme] compound selectors.
+// ============================================================================= */
+[data-theme-style="forest"][data-theme="light"] {
+    --color-bg: #eef3e6;
+    --color-surface: #f7faf1;
+    --color-surface-2: #fbfdf7;
+    --color-surface-offset: #e2ead6;
+    --color-surface-dynamic: #d3e0c2;
+    --color-divider: #c4d2b3;
+    --color-border: #b0c19c;
+    --color-text: #1f2e17;
+    --color-text-muted: #5c6e4d;
+    --color-text-faint: #8a9a7a;
+    --color-text-inverse: #f7faf1;
+    --color-primary: #4d7c3f;
+    --color-primary-hover: #3d6431;
+    --color-primary-active: #2e4d25;
+    --color-primary-highlight: #dbe8cd;
+    --color-banner-highlight: #cfe0ba;
+    --color-accent: #7fa563;
+    --color-gold: #a8b23a;
+}
+
+[data-theme-style="forest"][data-theme="dark"] {
+    --color-bg: #10160d;
+    --color-surface: #161d11;
+    --color-surface-2: #1b2415;
+    --color-surface-offset: #131a0f;
+    --color-surface-dynamic: #212b19;
+    --color-divider: #263420;
+    --color-border: #33452a;
+    --color-text: #e2ecd8;
+    --color-text-muted: #8ba379;
+    --color-text-faint: #566b48;
+    --color-text-inverse: #10160d;
+    --color-primary: #7fbf5f;
+    --color-primary-hover: #93d072;
+    --color-primary-active: #a8e087;
+    --color-primary-highlight: #24361c;
+    --color-banner-highlight: #24361c;
+    --color-accent: #8fc46f;
+    --color-gold: #c3d24a;
+}
+
+[data-theme-style="cosmos"][data-theme="light"] {
+    --color-bg: #eef0fb;
+    --color-surface: #f7f8fd;
+    --color-surface-2: #fbfbfe;
+    --color-surface-offset: #e2e5f5;
+    --color-surface-dynamic: #d1d6ee;
+    --color-divider: #c3c9e6;
+    --color-border: #adb5db;
+    --color-text: #1a1a2e;
+    --color-text-muted: #5c5f7a;
+    --color-text-faint: #8c8fac;
+    --color-text-inverse: #f7f8fd;
+    --color-primary: #5b4fc4;
+    --color-primary-hover: #4a3fb0;
+    --color-primary-active: #392f8c;
+    --color-primary-highlight: #e0ddf7;
+    --color-banner-highlight: #d6d1f2;
+    --color-accent: #8a7fd8;
+    --color-gold: #c9a227;
+}
+
+[data-theme-style="cosmos"][data-theme="dark"] {
+    --color-bg: #0a0a1a;
+    --color-surface: #101020;
+    --color-surface-2: #141428;
+    --color-surface-offset: #0d0d1c;
+    --color-surface-dynamic: #191934;
+    --color-divider: #22224a;
+    --color-border: #2c2c5c;
+    --color-text: #e4e2f7;
+    --color-text-muted: #9490c2;
+    --color-text-faint: #5e5a8f;
+    --color-text-inverse: #0a0a1a;
+    --color-primary: #a78bfa;
+    --color-primary-hover: #bda3fc;
+    --color-primary-active: #d0bcfe;
+    --color-primary-highlight: #2a2158;
+    --color-banner-highlight: #2a2158;
+    --color-accent: #c084fc;
+    --color-gold: #f0c94a;
+}
+
+[data-theme-style="ocean"][data-theme="light"] {
+    --color-bg: #e4f2f3;
+    --color-surface: #f2fafa;
+    --color-surface-2: #f8fdfd;
+    --color-surface-offset: #d4e9ea;
+    --color-surface-dynamic: #c0dcdd;
+    --color-divider: #b0d0d1;
+    --color-border: #9bc0c2;
+    --color-text: #0f2a2c;
+    --color-text-muted: #4c7679;
+    --color-text-faint: #7fa5a7;
+    --color-text-inverse: #f2fafa;
+    --color-primary: #1c7d8c;
+    --color-primary-hover: #146373;
+    --color-primary-active: #0e4c59;
+    --color-primary-highlight: #cdeaec;
+    --color-banner-highlight: #bfe4e6;
+    --color-accent: #4fa6b5;
+    --color-gold: #c9a227;
+}
+
+[data-theme-style="ocean"][data-theme="dark"] {
+    --color-bg: #071a1d;
+    --color-surface: #0c2427;
+    --color-surface-2: #102c30;
+    --color-surface-offset: #091f22;
+    --color-surface-dynamic: #143339;
+    --color-divider: #1a3d43;
+    --color-border: #22505a;
+    --color-text: #d9f0f2;
+    --color-text-muted: #7cabb0;
+    --color-text-faint: #4a747a;
+    --color-text-inverse: #071a1d;
+    --color-primary: #4fd3e8;
+    --color-primary-hover: #6fddef;
+    --color-primary-active: #93e6f4;
+    --color-primary-highlight: #123a41;
+    --color-banner-highlight: #123a41;
+    --color-accent: #5fc6d8;
+    --color-gold: #e0c860;
+}
+
+[data-theme-style="sunset"][data-theme="light"] {
+    --color-bg: #fce8e4;
+    --color-surface: #fef4f0;
+    --color-surface-2: #fff8f5;
+    --color-surface-offset: #f7d9d0;
+    --color-surface-dynamic: #f0c2b4;
+    --color-divider: #eab5a5;
+    --color-border: #e0a08d;
+    --color-text: #3a1a14;
+    --color-text-muted: #8a5245;
+    --color-text-faint: #b3877a;
+    --color-text-inverse: #fef4f0;
+    --color-primary: #d9634a;
+    --color-primary-hover: #c14e37;
+    --color-primary-active: #a03c28;
+    --color-primary-highlight: #f8d5c8;
+    --color-banner-highlight: #f4c3b0;
+    --color-accent: #e88a6a;
+    --color-gold: #e0a527;
+}
+
+[data-theme-style="sunset"][data-theme="dark"] {
+    --color-bg: #1a0f16;
+    --color-surface: #23141d;
+    --color-surface-2: #2b1924;
+    --color-surface-offset: #1e1119;
+    --color-surface-dynamic: #331e2c;
+    --color-divider: #3d2534;
+    --color-border: #4d2e40;
+    --color-text: #f5dfe8;
+    --color-text-muted: #b1809a;
+    --color-text-faint: #78506a;
+    --color-text-inverse: #1a0f16;
+    --color-primary: #ef7fa8;
+    --color-primary-hover: #f397b8;
+    --color-primary-active: #f7afc8;
+    --color-primary-highlight: #3d1f34;
+    --color-banner-highlight: #3d1f34;
+    --color-accent: #d97fa3;
+    --color-gold: #f0b860;
+}
+
+/* =============================================================================
+// THEME DECOR
+// Fixed, full-viewport, non-interactive animated background per theme style.
+// Every item derives its color from the active theme's own custom
+// properties (--color-primary/--color-accent/--color-gold/--color-text), so
+// switching light/dark automatically restyles the decoration too — no
+// duplicate per-mode rules needed here. Only the group matching the current
+// [data-theme-style] is shown; the rest stay display:none.
+// ============================================================================= */
+#theme-decor {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.decor {
+    position: absolute;
+    inset: 0;
+    display: none;
+}
+
+[data-theme-style="classic"] .decor-classic,
+[data-theme-style="forest"] .decor-forest,
+[data-theme-style="cosmos"] .decor-cosmos,
+[data-theme-style="ocean"] .decor-ocean,
+[data-theme-style="sunset"] .decor-sunset {
+    display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #theme-decor {
+        display: none;
+    }
+}
+
+/* -- classic: quote glyphs drifting upward -- */
+.decor-glyph {
+    position: absolute;
+    top: 100%;
+    left: var(--x, 10%);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1;
+    color: var(--color-primary);
+    opacity: 0;
+    user-select: none;
+    animation: decorRise var(--dur, 30s) linear var(--delay, 0s) infinite;
+}
+
+@keyframes decorRise {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    8%   { opacity: 0.10; }
+    92%  { opacity: 0.10; }
+    100% { transform: translateY(-120vh) translateX(24px) rotate(6deg); opacity: 0; }
+}
+
+/* -- forest: leaves falling and swaying -- */
+.decor-leaf {
+    position: absolute;
+    top: -8%;
+    left: var(--x, 10%);
+    width: 10px;
+    height: 14px;
+    background: var(--color-accent);
+    border-radius: 0 70% 0 70%;
+    opacity: 0;
+    animation: decorFall var(--dur, 16s) linear var(--delay, 0s) infinite;
+}
+
+@keyframes decorFall {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.35; }
+    90%  { opacity: 0.35; }
+    100% { transform: translateY(115vh) translateX(40px) rotate(200deg); opacity: 0; }
+}
+
+/* -- cosmos: twinkling stars + an occasional shooting star -- */
+.decor-star {
+    position: absolute;
+    top: var(--y, 20%);
+    left: var(--x, 10%);
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--color-text);
+    box-shadow: 0 0 4px var(--color-gold);
+    opacity: 0.1;
+    animation: decorTwinkle var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+}
+
+@keyframes decorTwinkle {
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50%      { opacity: 0.9; transform: scale(1.6); }
+}
+
+.decor-shooting {
+    position: absolute;
+    top: 15%;
+    left: -5%;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--color-gold);
+    box-shadow: 0 0 6px 1px var(--color-gold);
+    opacity: 0;
+    animation: decorShoot 9s linear infinite;
+}
+
+@keyframes decorShoot {
+    0%, 92% { opacity: 0; transform: translate(0, 0); }
+    93%     { opacity: 1; }
+    97%     { opacity: 1; transform: translate(60vw, 30vh); }
+    100%    { opacity: 0; transform: translate(65vw, 32vh); }
+}
+
+/* -- ocean: bubbles rising -- */
+.decor-bubble {
+    position: absolute;
+    bottom: -5%;
+    left: var(--x, 10%);
+    width: var(--size, 12px);
+    height: var(--size, 12px);
+    border-radius: 50%;
+    border: 1.5px solid var(--color-accent);
+    opacity: 0;
+    animation: decorBubble var(--dur, 16s) ease-in var(--delay, 0s) infinite;
+}
+
+@keyframes decorBubble {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: 0.5; }
+    90%  { opacity: 0.35; }
+    100% { transform: translateY(-115vh) translateX(30px); opacity: 0; }
+}
+
+/* -- sunset: slow-drifting soft glow blobs -- */
+.decor-blob {
+    position: absolute;
+    width: 45vmax;
+    height: 45vmax;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.16;
+    animation: decorBlobDrift 40s ease-in-out infinite alternate;
+}
+
+.decor-blob-1 {
+    top: -10%;
+    left: -10%;
+    background: radial-gradient(circle, var(--color-primary), transparent 70%);
+    animation-duration: 38s;
+}
+
+.decor-blob-2 {
+    bottom: -15%;
+    right: -10%;
+    background: radial-gradient(circle, var(--color-accent), transparent 70%);
+    animation-duration: 46s;
+    animation-delay: -8s;
+}
+
+.decor-blob-3 {
+    top: 30%;
+    right: 20%;
+    width: 30vmax;
+    height: 30vmax;
+    background: radial-gradient(circle, var(--color-gold), transparent 70%);
+    animation-duration: 52s;
+    animation-delay: -20s;
+}
+
+@keyframes decorBlobDrift {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(6%, -4%) scale(1.08); }
+    100% { transform: translate(-4%, 5%) scale(0.96); }
+}
+
+/* =============================================================================
 // BASE RESET
 // Global element resets, default typography, focus styles, and motion prefs.
 // ============================================================================= */
@@ -1690,6 +2046,77 @@ body.modal-lock-scroll {
 
 .settings-item:last-child {
     border-bottom: none;
+}
+
+.settings-item--stack {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.theme-style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-1);
+}
+
+.theme-style-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-2);
+    background: var(--color-surface-2);
+    border: 1.5px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.theme-style-card:hover {
+    border-color: var(--color-border);
+    transform: translateY(-1px);
+}
+
+.theme-style-card.is-active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.theme-style-swatch {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid var(--color-divider);
+}
+
+.theme-style-swatch span {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.theme-style-swatch .swatch-primary {
+    inset: 0;
+}
+
+.theme-style-swatch .swatch-accent {
+    width: 55%;
+    height: 55%;
+    right: -8%;
+    bottom: -8%;
+}
+
+.theme-style-card-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.theme-style-card.is-active .theme-style-card-label {
+    color: var(--color-text);
+    font-weight: 600;
 }
 
 .settings-item-info h4 {
