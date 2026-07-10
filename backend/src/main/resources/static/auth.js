@@ -195,6 +195,17 @@ async function refreshAchievementsUi() {
         return;
     }
 
+    applyAchievementStatusesToUi();
+}
+
+/**
+ * Refreshes the summary line, badge pill, and theme-grid lock overlays from
+ * the current achievementStatuses cache — shared by refreshAchievementsUi()
+ * and checkForNewAchievements() so both update the same set of UI pieces.
+ */
+function applyAchievementStatusesToUi() {
+    if (!achievementStatuses) return;
+
     const summaryEl = document.getElementById('settings-achievements-summary');
     if (summaryEl) {
         const unlocked = achievementStatuses.filter(a => a.unlocked).length;
@@ -226,6 +237,88 @@ function renderBadgePill() {
     el.className = 'badge-pill badge-pill--r' + rank;
     el.textContent = t(badgeLabelKey(badgeKey));
     el.style.display = '';
+}
+
+/**
+ * Re-fetches achievement status after an action that could plausibly unlock
+ * something (quote added/favorited/imported, profile edited, theme
+ * changed) and diffs it against the previous cache to find anything newly
+ * unlocked. Fire-and-forget from those actions' own success handlers —
+ * never awaited, never blocks the action's own toast/UI update.
+ *
+ * Silently does nothing on the very first call in a session (achievementStatuses
+ * still null) — there's nothing to diff against yet, and treating "just
+ * loaded the real state for the first time" as "everything unlocked just now"
+ * would flood a returning user with celebration modals for old progress.
+ */
+async function checkForNewAchievements() {
+    if (isGuest || !currentUser) return;
+
+    const previous = achievementStatuses;
+    let fresh;
+    try {
+        fresh = await Api.getAchievements();
+    } catch (e) {
+        return;
+    }
+
+    achievementStatuses = fresh;
+    applyAchievementStatusesToUi();
+
+    if (!previous) return;
+
+    const previouslyUnlocked = new Set(previous.filter(a => a.unlocked).map(a => a.key));
+    const newlyUnlocked = fresh.filter(a => a.unlocked && !previouslyUnlocked.has(a.key));
+    if (!newlyUnlocked.length) return;
+
+    // Badges auto-equip server-side — refetch so equippedBadge/themeStyle are current.
+    try {
+        currentUser = await Api.getMe();
+    } catch (e) {
+    }
+    renderBadgePill();
+
+    showAchievementUnlockModal(newlyUnlocked[0]);
+}
+
+/**
+ * Celebrates a single newly-unlocked achievement. If the shared modal is
+ * already showing something else (e.g. the bulk-import summary), defers to
+ * a toast instead of stealing that modal out from under it — achievements
+ * are auxiliary, not worth interrupting a primary flow for.
+ * @param {Object} status - One entry from GET /api/achievements/me.
+ */
+function showAchievementUnlockModal(status) {
+    if (document.getElementById('modal')?.classList.contains('open')) {
+        toast(t('achievementUnlockedToast', {title: t(achievementTitleKey(status.key))}));
+        return;
+    }
+
+    const meta = ACHIEVEMENT_META[status.key] || {};
+    const actions = [{label: t('achievementUnlockedLaterBtn'), cls: 'btn-secondary', action: closeModal}];
+    let rewardHtml = '';
+
+    if (status.rewardType === 'theme') {
+        const themeName = t(themeStyleLabelKey(status.rewardKey));
+        rewardHtml = `<p class="achievement-unlock-reward">${t('achievementUnlockedRewardTheme', {theme: themeName})}</p>`;
+        actions.unshift({
+            label: t('achievementsApplyThemeBtn', {theme: themeName}),
+            cls: 'btn-primary',
+            action: () => applyAchievementTheme(status.rewardKey)
+        });
+    } else if (status.rewardType === 'badge') {
+        const badgeName = t(badgeLabelKey(status.rewardKey));
+        rewardHtml = `<p class="achievement-unlock-reward">${t('achievementUnlockedRewardBadge', {badge: badgeName})}</p>`;
+    }
+
+    const body = `
+        <div class="achievement-unlock-icon">${meta.icon || ''}</div>
+        <p class="achievement-unlock-title">${t(achievementTitleKey(status.key))}</p>
+        <p class="achievement-unlock-desc">${t(achievementDescKey(status.key))}</p>
+        ${rewardHtml}
+    `;
+
+    showModal(t('achievementUnlockedHeading'), body, actions, false);
 }
 
 /**
@@ -290,6 +383,7 @@ async function submitAvatarIcon(key) {
 
         if (currentUser) currentUser.avatarIcon = key;
         updateSettingsAccount();
+        checkForNewAchievements();
         toast(t('avatarPickerSuccess'));
 
         const btn = document.querySelector(`.avatar-picker-option[onclick="submitAvatarIcon('${key}')"]`);
@@ -387,6 +481,7 @@ async function applyAchievementTheme(themeKey) {
         updateThemeStyleGrid();
         toast(t('achievementsThemeAppliedToast'));
         closeModal();
+        checkForNewAchievements();
     } catch (e) {
         toast(t('achievementsThemeErrorToast'));
     }
@@ -485,6 +580,7 @@ async function submitEditUsername() {
         if (currentUser) currentUser.username = username;
         closeModal();
         updateSettingsAccount();
+        checkForNewAchievements();
         toast(t('editUsernameSuccess'));
 
     } catch {
