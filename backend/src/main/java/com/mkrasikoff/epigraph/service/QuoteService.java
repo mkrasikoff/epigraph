@@ -70,6 +70,7 @@ public class QuoteService {
         }
 
         quote.setUserId(userId);
+        quote.setManuallyAdded(true);
 
         return repo.save(quote);
     }
