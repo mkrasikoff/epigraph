@@ -72,47 +72,47 @@ const ACHIEVEMENT_META = {
     badge_novice: {
         titleKey: 'badgeNoviceTitle',
         descKey: 'badgeNoviceDesc',
-        icon: '<svg width="16" height="18" viewBox="0 0 24 28" fill="currentColor"><rect x="4" y="2" width="16" height="24" rx="1.5"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 28" fill="currentColor"><rect x="4" y="2" width="16" height="24" rx="1.5"/></svg>'
     },
     badge_chronicler: {
         titleKey: 'badgeChroniclerTitle',
         descKey: 'badgeChroniclerDesc',
-        icon: '<svg width="16" height="18" viewBox="0 0 24 28" fill="currentColor"><path d="M4 3 L18 1 L20 25 L6 27 Z"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 28" fill="currentColor"><path d="M4 3 L18 1 L20 25 L6 27 Z"/></svg>'
     },
     badge_collector: {
         titleKey: 'badgeCollectorTitle',
         descKey: 'badgeCollectorDesc',
-        icon: '<svg width="18" height="16" viewBox="0 0 30 26" fill="currentColor"><path d="M15 5 C11 3 6 2 2 3 V22 C6 21 11 22 15 25 Z"/><path d="M15 5 C19 3 24 2 28 3 V22 C24 21 19 22 15 25 Z"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 30 26" fill="currentColor"><path d="M15 5 C11 3 6 2 2 3 V22 C6 21 11 22 15 25 Z"/><path d="M15 5 C19 3 24 2 28 3 V22 C24 21 19 22 15 25 Z"/></svg>'
     },
     badge_bibliophile: {
         titleKey: 'badgeBibliophileTitle',
         descKey: 'badgeBibliophileDesc',
-        icon: '<svg width="19" height="17" viewBox="0 0 32 26" fill="currentColor"><path d="M16 5 C11 3 5 2 1 3 V22 C5 21 11 22 16 25 Z"/><path d="M16 5 C21 3 27 2 31 3 V22 C27 21 21 22 16 25 Z"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 32 26" fill="currentColor"><path d="M16 5 C11 3 5 2 1 3 V22 C5 21 11 22 16 25 Z"/><path d="M16 5 C21 3 27 2 31 3 V22 C27 21 21 22 16 25 Z"/></svg>'
     },
     badge_keeper: {
         titleKey: 'badgeKeeperTitle',
         descKey: 'badgeKeeperDesc',
-        icon: '<svg width="20" height="17" viewBox="0 0 34 27" fill="currentColor"><path d="M17 6 C12 4 6 3 1 4 V23 C6 22 12 23 17 26 Z"/><path d="M17 6 C22 4 28 3 33 4 V23 C28 22 22 23 17 26 Z"/><path d="M5 9 C9 7 13 8 15 10M29 9 C25 7 21 8 19 10" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 34 27" fill="currentColor"><path d="M17 6 C12 4 6 3 1 4 V23 C6 22 12 23 17 26 Z"/><path d="M17 6 C22 4 28 3 33 4 V23 C28 22 22 23 17 26 Z"/><path d="M5 9 C9 7 13 8 15 10M29 9 C25 7 21 8 19 10" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
     },
     badge_interpreter: {
         titleKey: 'badgeInterpreterTitle',
         descKey: 'badgeInterpreterDesc',
-        icon: '<svg width="22" height="18" viewBox="0 0 36 28" fill="currentColor"><path d="M18 6 C13 4 7 3 2 4 V24 C7 23 13 24 18 27 Z"/><path d="M18 6 C23 4 29 3 34 4 V24 C29 23 23 24 18 27 Z"/><path d="M6 10 C10 8 14 9 16 11M6 15 C10 13 14 14 16 16M30 10 C26 8 22 9 20 11M30 15 C26 13 22 14 20 16" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 36 28" fill="currentColor"><path d="M18 6 C13 4 7 3 2 4 V24 C7 23 13 24 18 27 Z"/><path d="M18 6 C23 4 29 3 34 4 V24 C29 23 23 24 18 27 Z"/><path d="M6 10 C10 8 14 9 16 11M6 15 C10 13 14 14 16 16M30 10 C26 8 22 9 20 11M30 15 C26 13 22 14 20 16" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
     },
     badge_archivist: {
         titleKey: 'badgeArchivistTitle',
         descKey: 'badgeArchivistDesc',
-        icon: '<svg width="24" height="20" viewBox="0 0 38 30" fill="currentColor"><path d="M19 7 C13 5 7 4 2 5 V26 C7 25 13 26 19 29 Z"/><path d="M19 7 C25 5 31 4 36 5 V26 C31 25 25 26 19 29 Z"/><path d="M6 11 C11 9 15 10 17 12M6 16 C11 14 15 15 17 17M6 21 C11 19 15 20 17 22M32 11 C27 9 23 10 21 12M32 16 C27 14 23 15 21 17M32 21 C27 19 23 20 21 22" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 38 30" fill="currentColor"><path d="M19 7 C13 5 7 4 2 5 V26 C7 25 13 26 19 29 Z"/><path d="M19 7 C25 5 31 4 36 5 V26 C31 25 25 26 19 29 Z"/><path d="M6 11 C11 9 15 10 17 12M6 16 C11 14 15 15 17 17M6 21 C11 19 15 20 17 22M32 11 C27 9 23 10 21 12M32 16 C27 14 23 15 21 17M32 21 C27 19 23 20 21 22" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
     },
     badge_mentor: {
         titleKey: 'badgeMentorTitle',
         descKey: 'badgeMentorDesc',
-        icon: '<svg width="26" height="22" viewBox="0 0 40 32" fill="currentColor"><path d="M20 7 C13 5 7 4 2 5 V27 C7 26 13 27 20 30 Z"/><path d="M20 7 C27 5 33 4 38 5 V27 C33 26 27 27 20 30 Z"/><path d="M6 11 C12 9 16 10 18 12M6 16 C12 14 16 15 18 17M6 21 C12 19 16 20 18 22M34 11 C28 9 24 10 22 12M34 16 C28 14 24 15 22 17M34 21 C28 19 24 20 22 22" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 40 32" fill="currentColor"><path d="M20 7 C13 5 7 4 2 5 V27 C7 26 13 27 20 30 Z"/><path d="M20 7 C27 5 33 4 38 5 V27 C33 26 27 27 20 30 Z"/><path d="M6 11 C12 9 16 10 18 12M6 16 C12 14 16 15 18 17M6 21 C12 19 16 20 18 22M34 11 C28 9 24 10 22 12M34 16 C28 14 24 15 22 17M34 21 C28 19 24 20 22 22" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
     },
     badge_sage: {
         titleKey: 'badgeSageTitle',
         descKey: 'badgeSageDesc',
-        icon: '<svg width="26" height="22" viewBox="0 0 64 52" fill="currentColor"><path d="M32 10 C24 4 12 2 4 4 V44 C12 42 24 44 32 50 Z"/><path d="M32 10 C40 4 52 2 60 4 V44 C52 42 40 44 32 50 Z"/><rect x="30" y="8" width="4" height="42"/><path d="M10 12 C16 10 22 10 27 13M10 20 C16 18 22 18 27 21M10 28 C16 26 22 26 27 29M54 12 C48 10 42 10 37 13M54 20 C48 18 42 18 37 21M54 28 C48 26 42 26 37 29" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" fill="none"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 64 52" fill="currentColor"><path d="M32 10 C24 4 12 2 4 4 V44 C12 42 24 44 32 50 Z"/><path d="M32 10 C40 4 52 2 60 4 V44 C52 42 40 44 32 50 Z"/><rect x="30" y="8" width="4" height="42"/><path d="M10 12 C16 10 22 10 27 13M10 20 C16 18 22 18 27 21M10 28 C16 26 22 26 27 29M54 12 C48 10 42 10 37 13M54 20 C48 18 42 18 37 21M54 28 C48 26 42 26 37 29" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" fill="none"/></svg>'
     }
 };
 
@@ -142,4 +142,23 @@ function achievementDescKey(key) {
 function badgeLabelKey(rewardKey) {
     const achievementKey = 'badge_' + rewardKey;
     return achievementTitleKey(achievementKey);
+}
+
+/**
+ * Returns the CSS modifier class for a badge icon circle's prestige tier —
+ * ranks 0-2 get a muted outline, 3-5 a filled ring, 6-8 a filled double
+ * ring with glow (see .achievement-icon-tier-* in styles.css). Same 3-stage
+ * "visual weight" grammar approved for the icons, just applied to the
+ * circle instead of hand-picking 9 colors — reuses each theme's own
+ * --color-primary/--color-primary-highlight so it stays theme-safe with no
+ * extra CSS per theme style.
+ * @param {string} rewardKey
+ * @returns {string}
+ */
+function badgeIconTierClass(rewardKey) {
+    const rank = BADGE_REWARD_ORDER.indexOf(rewardKey);
+    if (rank < 0) return '';
+    if (rank <= 2) return 'achievement-icon-tier-1';
+    if (rank <= 5) return 'achievement-icon-tier-2';
+    return 'achievement-icon-tier-3';
 }
