@@ -19,15 +19,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final AchievementService achievementService;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       AchievementService achievementService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.achievementService = achievementService;
     }
 
     @Transactional
@@ -90,6 +93,8 @@ public class UserService {
 
         user.setUsername(username);
         userRepository.save(user);
+
+        achievementService.recordAction(userId, "edit_profile");
     }
 
     /**
@@ -103,6 +108,8 @@ public class UserService {
 
         user.setAvatarIcon(avatarIcon);
         userRepository.save(user);
+
+        achievementService.recordAction(userId, "edit_profile");
     }
 
     /**
@@ -119,14 +126,24 @@ public class UserService {
 
     /**
      * Sets the user's visual theme style. Value is restricted to a fixed set
-     * of presets, validated at the controller-level DTO.
+     * of presets, validated at the controller-level DTO. "classic" is always
+     * allowed; every other style must be unlocked via an achievement first
+     * (see AchievementCatalog's theme-reward entries) — the achievement
+     * table is the sole source of truth here, not a recomputation.
      */
     @Transactional
     public void updateThemeStyle(Long userId, String themeStyle) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
+        if (!themeStyle.equals("classic") && !achievementService.isRewardUnlocked(userId, "theme", themeStyle)) {
+            throw new IllegalArgumentException("Эта тема ещё не разблокирована");
+        }
+
         user.setThemeStyle(themeStyle);
         userRepository.save(user);
+
+        achievementService.recordAction(userId, "change_theme");
+        achievementService.markActiveToday(userId);
     }
 }

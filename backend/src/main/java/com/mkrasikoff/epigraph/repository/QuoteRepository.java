@@ -2,6 +2,8 @@ package com.mkrasikoff.epigraph.repository;
 
 import com.mkrasikoff.epigraph.model.Quote;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +23,12 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
     void deleteByIdAndUserId(Long id, Long userId);
 
     void deleteAllByUserId(Long userId);
+
+    long countByUserIdAndManuallyAddedTrue(Long userId);
+
+    long countByUserIdAndManuallyAddedTrueAndFavTrue(Long userId);
+
+    @Query("SELECT COUNT(DISTINCT q.author) FROM Quote q " +
+            "WHERE q.userId = :userId AND q.manuallyAdded = true AND q.author IS NOT NULL AND q.author <> ''")
+    long countDistinctManuallyAddedAuthors(@Param("userId") Long userId);
 }

@@ -28,6 +28,7 @@ class UserServiceTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtService jwtService;
     @Mock private EmailService emailService;
+    @Mock private AchievementService achievementService;
 
     @InjectMocks
     private UserService userService;
@@ -257,15 +258,43 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("updateThemeStyle: sets theme style and saves user")
-    void updateThemeStyle_setsThemeAndSaves() {
+    @DisplayName("updateThemeStyle: sets theme style and saves user when unlocked")
+    void updateThemeStyle_setsThemeAndSaves_whenUnlocked() {
         User user = buildUser(USER_ID, "user@mail.com", true);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(achievementService.isRewardUnlocked(USER_ID, "theme", "forest")).thenReturn(true);
 
         userService.updateThemeStyle(USER_ID, "forest");
 
         assertThat(user.getThemeStyle()).isEqualTo("forest");
         verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("updateThemeStyle: allows classic without any achievement unlocked")
+    void updateThemeStyle_allowsClassic_alwaysUnlocked() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updateThemeStyle(USER_ID, "classic");
+
+        assertThat(user.getThemeStyle()).isEqualTo("classic");
+        verify(userRepository).save(user);
+        verify(achievementService, never()).isRewardUnlocked(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("updateThemeStyle: throws when theme not unlocked")
+    void updateThemeStyle_throws_whenNotUnlocked() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(achievementService.isRewardUnlocked(USER_ID, "theme", "forest")).thenReturn(false);
+
+        assertThatThrownBy(() -> userService.updateThemeStyle(USER_ID, "forest"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("не разблокирована");
+
+        verify(userRepository, never()).save(any());
     }
 
     @Test

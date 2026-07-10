@@ -51,4 +51,16 @@ public class Quote {
      */
     @Column(updatable = false)
     private Long added;
+
+    /**
+     * True only for quotes created through the single "Add quote" form.
+     * Batch imports and the onboarding instruction quotes leave this false —
+     * achievement conditions that reward hand-curated content read only
+     * manuallyAdded = true rows (see AchievementService). @JsonIgnore so a
+     * client can't spoof it by including the field in a create/batch request
+     * body — QuoteService always sets it server-side per code path.
+     */
+    @JsonIgnore
+    @Column(name = "manually_added", updatable = false, nullable = false)
+    private boolean manuallyAdded;
 }
