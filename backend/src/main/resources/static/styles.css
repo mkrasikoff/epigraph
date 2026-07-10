@@ -2386,7 +2386,7 @@ body.modal-lock-scroll {
     transition: width var(--transition);
 }
 
-.achievements-focus-summary {
+.modal .achievements-focus-summary {
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     margin-bottom: var(--space-4);
@@ -2439,7 +2439,6 @@ body.modal-lock-scroll {
 .achievement-focus-icon--muted {
     opacity: 0.5;
     border-style: dashed;
-    box-shadow: none;
 }
 
 .achievement-focus-label {
@@ -2509,19 +2508,55 @@ body.modal-lock-scroll {
     justify-content: center;
 }
 
+/* -- badge icon prestige tiers (badgeIconTierClass() in achievements.js) --
+   Same 3-stage grammar as the icon-concept mockups: outline -> filled ring
+   -> filled double ring + glow. Built from each theme's own --color-primary
+   family, so it needs no per-theme overrides. */
+.achievement-row-icon.achievement-icon-tier-1,
+.achievement-focus-icon.achievement-icon-tier-1 {
+    background: var(--color-surface-2);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+}
+
+.achievement-row-icon.achievement-icon-tier-2,
+.achievement-focus-icon.achievement-icon-tier-2 {
+    background: var(--color-primary-highlight);
+    color: var(--color-primary);
+    border: 1.5px solid var(--color-primary);
+}
+
+.achievement-row-icon.achievement-icon-tier-3,
+.achievement-focus-icon.achievement-icon-tier-3 {
+    position: relative;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    border: 1.5px solid var(--color-primary-active);
+    box-shadow: 0 0 8px color-mix(in oklch, var(--color-primary) 50%, transparent);
+}
+
+.achievement-row-icon.achievement-icon-tier-3::before,
+.achievement-focus-icon.achievement-icon-tier-3::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px dashed color-mix(in oklch, var(--color-primary) 60%, transparent);
+}
+
 .achievement-row-body {
     flex: 1;
     min-width: 0;
 }
 
-.achievement-row-top {
+.achievement-row-status {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
 }
 
 .achievement-row-title {
+    display: block;
     font-size: var(--text-sm);
     font-weight: 500;
     color: var(--color-text);
@@ -2594,7 +2629,22 @@ body.modal-lock-scroll {
     color: var(--color-text);
 }
 
-/* -- unlock celebration modal (checkForNewAchievements() -> showAchievementUnlockModal()) -- */
+/* -- unlock celebration modal (checkForNewAchievements() -> showAchievementUnlockModal()) --
+   Selectors below are prefixed with .modal so their specificity (2 classes)
+   beats the shared ".modal p" rule (1 class + 1 element — same specificity
+   tier as 2 classes gets compared class-tier first, and .modal p's element
+   tier only matters as a tiebreaker, so plain ".achievement-unlock-title"
+   alone was actually losing to ".modal p"'s own margin-bottom). */
+.modal .achievement-unlock-heading {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-bottom: var(--space-4);
+}
+
 .achievement-unlock-icon-wrap {
     position: relative;
     width: 88px;
@@ -2627,7 +2677,7 @@ body.modal-lock-scroll {
     justify-content: center;
 }
 
-.achievement-unlock-title {
+.modal .achievement-unlock-title {
     font-family: var(--font-display);
     font-size: var(--text-lg);
     font-weight: 600;
@@ -2636,7 +2686,7 @@ body.modal-lock-scroll {
     margin-bottom: var(--space-1);
 }
 
-.achievement-unlock-desc {
+.modal .achievement-unlock-desc {
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     text-align: center;
@@ -2893,10 +2943,29 @@ body.modal-lock-scroll {
     line-height: 1.7;
 }
 
+/* #modal-body is itself a <p> (see index.html), so ".modal p" above always
+   gave it a trailing margin — harmless when .modal-actions follows with
+   buttons (reads as the gap before them), but for actionless modals (avatar
+   picker, achievements list) that margin became dead space stacked on top
+   of the modal's own bottom padding, making the bottom edge visibly taller
+   than the top. Move the gap onto .modal-actions instead, which only takes
+   up room when it actually has buttons in it. */
+#modal-body {
+    margin-bottom: 0;
+}
+
 .modal-actions {
     display: flex;
     gap: var(--space-3);
     justify-content: flex-end;
+}
+
+.modal-actions:not(:empty) {
+    margin-top: var(--space-6);
+}
+
+.modal--centered .modal-actions {
+    justify-content: center;
 }
 
 .modal .btn-primary {

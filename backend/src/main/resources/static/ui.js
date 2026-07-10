@@ -506,8 +506,10 @@ function goToImport() {
  * @param {string} body - HTML string rendered inside the modal body.
  * @param {Array<{label: string, cls: string, action: Function}>} actions - Buttons to render in the footer.
  * @param {boolean} [wide] - Use a wider dialog (e.g. for icon-grid pickers). Resets on every call.
+ * @param {boolean} [centered] - Center the footer action buttons instead of the default
+ *   right-alignment (e.g. for celebratory/single-focus modals). Resets on every call.
  */
-function showModal(title, body, actions, wide) {
+function showModal(title, body, actions, wide, centered) {
     const titleEl = document.getElementById('modal-title');
     titleEl.textContent = title;
     titleEl.style.display = title ? '' : 'none';
@@ -525,7 +527,9 @@ function showModal(title, body, actions, wide) {
         actEl.appendChild(btn);
     });
 
-    document.querySelector('#modal .modal').classList.toggle('modal--wide', !!wide);
+    const modalEl = document.querySelector('#modal .modal');
+    modalEl.classList.toggle('modal--wide', !!wide);
+    modalEl.classList.toggle('modal--centered', !!centered);
     document.getElementById('modal').classList.add('open');
     document.body.classList.add('modal-lock-scroll');
 }
