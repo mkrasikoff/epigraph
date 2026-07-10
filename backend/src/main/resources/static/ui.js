@@ -159,10 +159,9 @@ function updateThemeColorMeta(mode) {
             const previous = document.documentElement.getAttribute('data-theme-style');
             if (style === previous) return;
 
-            if (isThemeStyleLocked(style)) {
-                toast(t('achievementsThemeErrorToast'));
-                return;
-            }
+            // Locked cards get pointer-events:none in CSS so this shouldn't fire in
+            // practice — kept as a defensive no-op in case of a stale re-render.
+            if (isThemeStyleLocked(style)) return;
 
             document.documentElement.setAttribute('data-theme-style', style);
             updateThemeStyleGrid();
@@ -186,6 +185,7 @@ function updateThemeColorMeta(mode) {
                         return;
                     }
                     if (currentUser) currentUser.themeStyle = style;
+                    checkForNewAchievements();
                 } catch (e) {
                 }
             }

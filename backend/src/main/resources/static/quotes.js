@@ -736,6 +736,7 @@ async function addQuote(e) {
         quotes.push(saved);
         toast(t('toastQuoteAdded'));
         resetForm();
+        checkForNewAchievements();
     } catch (e) {
         toast(t('toastQuoteSaveError'));
     }
@@ -801,6 +802,9 @@ async function toggleFav(id) {
                 setTimeout(() => renderList(), FAVORITE_RERENDER_DELAY_MS);
             }
         }
+
+        // Only marking favorite (not un-marking) can move favorites_25 forward.
+        if (q.fav) checkForNewAchievements();
     } catch (e) {
         q.fav = !q.fav;
         toast(t('toastError'));
@@ -952,6 +956,7 @@ async function saveEditQuote() {
         editingId = null;
         renderList();
         toast(t('toastQuoteUpdated'));
+        checkForNewAchievements();
     } catch (e) {
         toast(t('toastConnectionError'), 'error');
     }
@@ -1220,6 +1225,10 @@ async function runImport(items) {
 
     modalBusy = false;
     showImportSummary(added, total, outcome, rejectedItems);
+
+    // Fires while the import-summary modal is still open — checkForNewAchievements()
+    // defers to a toast in that case rather than replacing it, see showAchievementUnlockModal().
+    if (added > 0) checkForNewAchievements();
 }
 
 /**

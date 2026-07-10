@@ -335,6 +335,11 @@ const TRANSLATIONS = {
         badgeMentorDesc:                '730 дней активности',
         badgeSageTitle:                 'Мудрец',
         badgeSageDesc:                  '1460 дней активности',
+        achievementUnlockedHeading:     'Достижение получено',
+        achievementUnlockedRewardTheme: 'Открыта тема «{theme}»',
+        achievementUnlockedRewardBadge: 'Новый бейдж: {badge}',
+        achievementUnlockedLaterBtn:    'Закрыть',
+        achievementUnlockedToast:       'Новое достижение: {title}',
 
         settingsNotifTitle:             'Уведомления',
         settingsNotifIosHint:           'Для уведомлений: Safari → <strong>Поделиться</strong> → <strong>«На экран "Домой"»</strong> → запустите приложение оттуда.',
@@ -729,6 +734,11 @@ const TRANSLATIONS = {
         badgeMentorDesc:                '730 days active',
         badgeSageTitle:                 'Sage',
         badgeSageDesc:                  '1460 days active',
+        achievementUnlockedHeading:     'Achievement unlocked',
+        achievementUnlockedRewardTheme: 'Unlocked the "{theme}" theme',
+        achievementUnlockedRewardBadge: 'New badge: {badge}',
+        achievementUnlockedLaterBtn:    'Close',
+        achievementUnlockedToast:       'New achievement: {title}',
 
         settingsNotifTitle:             'Notifications',
         settingsNotifIosHint:           'For notifications: Safari → <strong>Share</strong> → <strong>"Add to Home Screen"</strong> → launch the app from there.',
