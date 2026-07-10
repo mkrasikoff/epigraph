@@ -733,6 +733,7 @@
                             <div>
                                 <h4 class="settings-account-name">
                                     <span id="settings-account-username">—</span>
+                                    <span id="settings-account-badge" class="badge-pill" style="display:none"></span>
                                     <span id="settings-account-id" class="settings-account-id"></span>
                                     <button id="settings-account-edit-btn" class="account-edit-btn" onclick="showEditUsernameModal()" aria-label="Изменить имя пользователя" data-i18n-aria="settingsAccountEditAria">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -787,6 +788,21 @@
                             <span id="settings-change-password-btn-label">
                                 —
                             </span>
+                        </button>
+                    </div>
+                    <div class="settings-item" id="settings-achievements-item">
+                        <div class="settings-item-info">
+                            <h4 data-i18n="settingsAchievementsTitle">
+                                Достижения
+                            </h4>
+                            <p id="settings-achievements-summary">
+                                —
+                            </p>
+                        </div>
+                        <button class="export-btn" onclick="showAchievementsModal()" aria-label="Открыть достижения" data-i18n-aria="ariaOpenAchievements">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
                         </button>
                     </div>
                     <div class="settings-item">
@@ -1073,6 +1089,7 @@
 <script src="/i18n.js"></script>
 <script src="/avatars.js"></script>
 <script src="/themes.js"></script>
+<script src="/achievements.js"></script>
 <script src="/yandex-import.js"></script>
 <script src="/api.js"></script>
 <script src="/auth.js"></script>
