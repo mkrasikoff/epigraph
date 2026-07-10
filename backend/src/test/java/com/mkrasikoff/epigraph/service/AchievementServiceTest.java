@@ -102,10 +102,10 @@ class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("evaluate: unlocks favorites_25 once 25 manually-added favorites are reached")
+    @DisplayName("evaluate: unlocks favorites_25 once 50 manually-added favorites are reached")
     void evaluate_unlocksFavorites25() {
         when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
-        when(quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(USER_ID)).thenReturn(25L);
+        when(quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(USER_ID)).thenReturn(50L);
         when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
         when(activityDayRepo.countByUserId(USER_ID)).thenReturn(0L);
         when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());

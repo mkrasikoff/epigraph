@@ -312,17 +312,22 @@ function showAchievementUnlockModal(status) {
     }
 
     const rewardIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
+    const iconTier = status.rewardType === 'badge' ? badgeIconTierClass(status.rewardKey) : '';
 
     const body = `
+        <p class="achievement-unlock-heading">${t('achievementUnlockedHeading')}</p>
         <div class="achievement-unlock-icon-wrap">
-            <div class="achievement-unlock-icon">${meta.icon || ''}</div>
+            <div class="achievement-unlock-icon ${iconTier}">${meta.icon || ''}</div>
         </div>
         <p class="achievement-unlock-title">${t(achievementTitleKey(status.key))}</p>
         <p class="achievement-unlock-desc">${t(achievementDescKey(status.key))}</p>
         ${rewardText ? `<div class="achievement-unlock-reward-box">${rewardIcon}<span>${rewardText}</span></div>` : ''}
     `;
 
-    showModal(t('achievementUnlockedHeading'), body, actions, false);
+    // Title passed as '' hides the shared #modal-title heading (see showModal
+    // docs) — we render our own centered one in the body instead, and
+    // centered=true also centers the footer buttons (default is right-aligned).
+    showModal('', body, actions, false, true);
 }
 
 /**
@@ -448,12 +453,14 @@ function renderFocusedAchievementsModal() {
         const pct = nextBadge.threshold ? Math.min(100, Math.round((nextBadge.progress / nextBadge.threshold) * 100)) : 0;
         const currentIcon = currentBadge ? (ACHIEVEMENT_META[currentBadge.key]?.icon || '') : '';
         const nextIcon = ACHIEVEMENT_META[nextBadge.key]?.icon || '';
+        const currentTier = currentBadge ? badgeIconTierClass(currentBadge.rewardKey) : '';
+        const nextTier = badgeIconTierClass(nextBadge.rewardKey);
 
         badgeCardHtml = `
             <div class="achievement-focus-card">
                 <div class="achievement-focus-top">
                     <div class="achievement-focus-side">
-                        <div class="achievement-focus-icon">${currentIcon}</div>
+                        <div class="achievement-focus-icon ${currentTier}">${currentIcon}</div>
                         <div>
                             <div class="achievement-focus-label">${t('achievementsCurrentBadge')}</div>
                             <div class="achievement-focus-name">${currentBadge ? t(achievementTitleKey(currentBadge.key)) : '—'}</div>
@@ -464,7 +471,7 @@ function renderFocusedAchievementsModal() {
                             <div class="achievement-focus-label">${t('achievementsNextBadge')}</div>
                             <div class="achievement-focus-name">${t(achievementTitleKey(nextBadge.key))}</div>
                         </div>
-                        <div class="achievement-focus-icon achievement-focus-icon--muted">${nextIcon}</div>
+                        <div class="achievement-focus-icon achievement-focus-icon--muted ${nextTier}">${nextIcon}</div>
                     </div>
                 </div>
                 <div class="achievement-focus-progress-track"><div class="achievement-focus-progress-fill" style="width:${pct}%"></div></div>
@@ -506,13 +513,11 @@ function renderNearestThemeRow(a) {
     return `<div class="achievement-row">
                 <div class="achievement-row-icon">${meta.icon || ''}</div>
                 <div class="achievement-row-body">
-                    <div class="achievement-row-top">
-                        <span class="achievement-row-title">${t(achievementTitleKey(a.key))}</span>
-                        <span class="achievement-row-fraction">${a.progress}/${a.threshold}</span>
-                    </div>
+                    <span class="achievement-row-title">${t(achievementTitleKey(a.key))}</span>
                     <div class="achievement-row-condition">${achievementConditionWithReward(a)}</div>
                     <div class="achievement-row-progress-track"><div class="achievement-row-progress-fill" style="width:${pct}%"></div></div>
                 </div>
+                <span class="achievement-row-status achievement-row-fraction">${a.progress}/${a.threshold}</span>
             </div>`;
 }
 
@@ -534,6 +539,7 @@ function renderAllAchievementsModal() {
         const meta = ACHIEVEMENT_META[a.key] || {};
         const title = t(achievementTitleKey(a.key));
         const desc = achievementConditionWithReward(a);
+        const iconTier = a.rewardType === 'badge' ? badgeIconTierClass(a.rewardKey) : '';
 
         let statusHtml;
         let progressHtml = '';
@@ -552,15 +558,13 @@ function renderAllAchievementsModal() {
         }
 
         return `<div class="achievement-row${a.unlocked ? ' achievement-row--unlocked' : ''}">
-                    <div class="achievement-row-icon">${meta.icon || ''}</div>
+                    <div class="achievement-row-icon ${iconTier}">${meta.icon || ''}</div>
                     <div class="achievement-row-body">
-                        <div class="achievement-row-top">
-                            <span class="achievement-row-title">${title}</span>
-                            ${statusHtml}
-                        </div>
+                        <span class="achievement-row-title">${title}</span>
                         <div class="achievement-row-condition">${desc}</div>
                         ${progressHtml}
                     </div>
+                    <div class="achievement-row-status">${statusHtml}</div>
                 </div>`;
     };
 

@@ -29,9 +29,15 @@ public final class AchievementCatalog {
     public static final String BADGE_MENTOR = "badge_mentor";
     public static final String BADGE_SAGE = "badge_sage";
 
+    /**
+     * Keys keep their original numeric suffix ("favorites_25", "authors_10")
+     * even though the threshold below has since changed — renaming the key
+     * would orphan already-earned achievement_progress rows for existing
+     * users, so only the threshold/display text change, never the key.
+     */
     public static final List<AchievementDefinition> THEME_ACHIEVEMENTS = List.of(
-            new AchievementDefinition("favorites_25", "count", 25, "theme", "ocean"),
-            new AchievementDefinition("authors_10", "distinct_authors", 10, "theme", "forest"),
+            new AchievementDefinition("favorites_25", "count", 50, "theme", "ocean"),
+            new AchievementDefinition("authors_10", "distinct_authors", 25, "theme", "forest"),
             new AchievementDefinition("explorer", "action_set", 5, "theme", "cosmos"),
             new AchievementDefinition("week_streak", "active_days", 7, "theme", "sunset")
     );
@@ -43,12 +49,12 @@ public final class AchievementCatalog {
             new AchievementDefinition(BADGE_NOVICE, "count", 1, "badge", "novice"),
             new AchievementDefinition(BADGE_CHRONICLER, "active_days", 7, "badge", "chronicler"),
             new AchievementDefinition(BADGE_COLLECTOR, "active_days", 21, "badge", "collector"),
-            new AchievementDefinition(BADGE_BIBLIOPHILE, "active_days", 45, "badge", "bibliophile"),
-            new AchievementDefinition(BADGE_KEEPER, "active_days", 90, "badge", "keeper"),
-            new AchievementDefinition(BADGE_INTERPRETER, "active_days", 180, "badge", "interpreter"),
+            new AchievementDefinition(BADGE_BIBLIOPHILE, "active_days", 50, "badge", "bibliophile"),
+            new AchievementDefinition(BADGE_KEEPER, "active_days", 100, "badge", "keeper"),
+            new AchievementDefinition(BADGE_INTERPRETER, "active_days", 200, "badge", "interpreter"),
             new AchievementDefinition(BADGE_ARCHIVIST, "active_days", 365, "badge", "archivist"),
-            new AchievementDefinition(BADGE_MENTOR, "active_days", 730, "badge", "mentor"),
-            new AchievementDefinition(BADGE_SAGE, "active_days", 1460, "badge", "sage")
+            new AchievementDefinition(BADGE_MENTOR, "active_days", 750, "badge", "mentor"),
+            new AchievementDefinition(BADGE_SAGE, "active_days", 1500, "badge", "sage")
     );
 
     public static final List<AchievementDefinition> ALL = List.of(
