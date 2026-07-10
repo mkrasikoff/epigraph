@@ -133,7 +133,16 @@ const Api = {
             method: 'PATCH',
             headers: authHeaders(),
             body: JSON.stringify({ themeStyle })
-        })
+        }),
+
+    /**
+     * Fetches the authenticated user's achievement catalog with per-user
+     * progress/unlock state. Called lazily — only when the Achievements
+     * screen is opened, never at app bootstrap.
+     * @returns {Promise<Object[]>}
+     */
+    getAchievements: () =>
+        fetch('/api/achievements/me', { headers: authHeaders() }).then(r => r.json())
 
 };
 

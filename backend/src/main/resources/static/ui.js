@@ -132,13 +132,20 @@ function updateThemeColorMeta(mode) {
 
     grid.innerHTML = THEME_STYLE_KEYS.map(key => {
         const preview = THEME_STYLE_PREVIEWS[key];
+        const hintKey = THEME_REWARD_ACHIEVEMENT[key] ? achievementTitleKey(THEME_REWARD_ACHIEVEMENT[key]) : '';
         return `
             <button type="button" class="theme-style-card" data-theme-style-option="${key}">
                 <span class="theme-style-swatch">
                     <span class="swatch-primary" style="background:${preview.light.bg}"></span>
                     <span class="swatch-accent" style="background:${preview.light.primary}"></span>
+                    <span class="theme-style-lock" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </span>
                 </span>
                 <span class="theme-style-card-label" data-i18n="${themeStyleLabelKey(key)}"></span>
+                ${hintKey ? `<span class="theme-style-card-hint" data-i18n="${hintKey}"></span>` : ''}
             </button>
         `;
     }).join('');
@@ -149,7 +156,13 @@ function updateThemeColorMeta(mode) {
     grid.querySelectorAll('[data-theme-style-option]').forEach(btn => {
         btn.addEventListener('click', async () => {
             const style = btn.dataset.themeStyleOption;
-            if (style === document.documentElement.getAttribute('data-theme-style')) return;
+            const previous = document.documentElement.getAttribute('data-theme-style');
+            if (style === previous) return;
+
+            if (isThemeStyleLocked(style)) {
+                toast(t('achievementsThemeErrorToast'));
+                return;
+            }
 
             document.documentElement.setAttribute('data-theme-style', style);
             updateThemeStyleGrid();
@@ -161,7 +174,17 @@ function updateThemeColorMeta(mode) {
 
             if (!isGuest) {
                 try {
-                    await Api.updateThemeStyle(style);
+                    const res = await Api.updateThemeStyle(style);
+                    if (!res.ok) {
+                        document.documentElement.setAttribute('data-theme-style', previous);
+                        try {
+                            localStorage.setItem('themeStyle', previous);
+                        } catch (err) {
+                        }
+                        updateThemeStyleGrid();
+                        toast(t('achievementsThemeErrorToast'));
+                        return;
+                    }
                     if (currentUser) currentUser.themeStyle = style;
                 } catch (e) {
                 }
@@ -171,14 +194,32 @@ function updateThemeColorMeta(mode) {
 })();
 
 /**
+ * Whether the given theme style is locked for the current user — always
+ * false for "classic" and for guests/before achievements have loaded (the
+ * grid renders unlocked-looking until refreshAchievementsUi() resolves,
+ * rather than flashing every card as locked on first paint).
+ * @param {string} key
+ * @returns {boolean}
+ */
+function isThemeStyleLocked(key) {
+    if (key === 'classic' || !achievementStatuses) return false;
+
+    const match = achievementStatuses.find(a => a.rewardType === 'theme' && a.rewardKey === key);
+    return match ? !match.unlocked : true;
+}
+
+/**
  * Marks the theme-style card matching the currently active data-theme-style
- * attribute as active. Called after the initial grid render and on every
- * style switch.
+ * attribute as active, and toggles the lock overlay per isThemeStyleLocked().
+ * Called after the initial grid render, on every style switch, and again
+ * once refreshAchievementsUi() (auth.js) resolves.
  */
 function updateThemeStyleGrid() {
     const active = document.documentElement.getAttribute('data-theme-style');
     document.querySelectorAll('#theme-style-grid [data-theme-style-option]').forEach(btn => {
-        btn.classList.toggle('is-active', btn.dataset.themeStyleOption === active);
+        const key = btn.dataset.themeStyleOption;
+        btn.classList.toggle('is-active', key === active);
+        btn.classList.toggle('theme-style-card--locked', isThemeStyleLocked(key));
     });
 }
 

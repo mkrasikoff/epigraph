@@ -2108,6 +2108,27 @@ body.modal-lock-scroll {
     bottom: -8%;
 }
 
+.theme-style-lock {
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    color: var(--color-text-inverse);
+}
+
+.theme-style-card--locked .theme-style-lock {
+    display: flex;
+}
+
+.theme-style-card--locked {
+    opacity: 0.6;
+}
+
+.theme-style-card--locked:hover {
+    transform: none;
+}
+
 .theme-style-card-label {
     font-size: var(--text-xs);
     color: var(--color-text-muted);
@@ -2117,6 +2138,13 @@ body.modal-lock-scroll {
 .theme-style-card.is-active .theme-style-card-label {
     color: var(--color-text);
     font-weight: 600;
+}
+
+.theme-style-card-hint {
+    font-size: 9px;
+    color: var(--color-text-faint);
+    text-align: center;
+    line-height: 1.3;
 }
 
 .settings-item-info h4 {
@@ -2250,6 +2278,129 @@ body.modal-lock-scroll {
     align-items: center;
     gap: var(--space-2);
     line-height: 1.2;
+}
+
+/* =============================================================================
+// BADGE RANK PILL (TASK-122)
+// Nine ascending prestige levels for the equipped badge shown next to the
+// username — background/text warmth grows with rank ("option A" from the
+// design pass), text always stays light so it doesn't recede against a dark
+// page, and the top two ranks get a soft glow so they read as more
+// prestigious rather than duller. Auto-equipped, not user-styled — see
+// updateSettingsAccount() in auth.js.
+// ============================================================================= */
+.badge-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    padding: 2px 9px;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.badge-pill--r0 { background: #232119; color: #8a8272; border-color: #3a3729; }
+.badge-pill--r1 { background: #33281c; color: #96826c; border-color: #4a3a28; }
+.badge-pill--r2 { background: #43301f; color: #a8926e; border-color: #5a4530; }
+.badge-pill--r3 { background: #573a22; color: #c0a378; border-color: #6a4f34; }
+.badge-pill--r4 { background: #6e4526; color: #d4b080; border-color: #7a5638; }
+.badge-pill--r5 { background: #8a5530; color: #ecc493; border-color: #96643c; }
+.badge-pill--r6 { background: #ab6b40; color: #ffe0b3; border-color: #b87848; font-weight: 600; }
+.badge-pill--r7 {
+    background: #c67f52; color: #fff0d8; border-color: #f0c090; font-weight: 600;
+    box-shadow: 0 0 6px rgba(212, 149, 106, 0.35);
+}
+.badge-pill--r8 {
+    background: #d4956a; color: #fff8ee; border-color: #ffdcae; font-weight: 600;
+    box-shadow: 0 0 10px rgba(212, 149, 106, 0.55);
+}
+
+/* =============================================================================
+// ACHIEVEMENTS MODAL (TASK-122)
+// ============================================================================= */
+.achievements-summary-bar {
+    height: 6px;
+    background: var(--color-divider);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--space-5);
+}
+
+.achievements-summary-fill {
+    height: 100%;
+    background: var(--color-primary);
+    transition: width var(--transition);
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+.achievement-card {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+}
+
+.achievement-card--unlocked {
+    border-color: var(--color-primary-highlight);
+    background: var(--color-surface);
+}
+
+.achievement-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-highlight);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-2);
+}
+
+.achievement-card-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 2px;
+}
+
+.achievement-card-desc {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+.achievement-card-progress-track {
+    height: 4px;
+    background: var(--color-divider);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: var(--space-2);
+}
+
+.achievement-card-progress-fill {
+    height: 100%;
+    background: var(--color-text-faint);
+}
+
+.achievement-card-apply-btn {
+    margin-top: var(--space-2);
+    width: 100%;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 6px 8px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
 }
 
 .settings-account-id {
