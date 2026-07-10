@@ -168,6 +168,64 @@ function updateSettingsAccount() {
     document.getElementById('settings-change-password-title').textContent = t('changePasswordTitle');
     document.getElementById('settings-change-password-desc').textContent = t('changePasswordSettingsDesc');
     document.getElementById('settings-change-password-btn-label').textContent = t('changePasswordButton');
+
+    renderBadgePill();
+    refreshAchievementsUi();
+}
+
+/**
+ * Cached response of the last GET /api/achievements/me call — reused by the
+ * settings-item progress summary, the badge pill, and the theme-picker lock
+ * overlays so opening Settings only fetches achievements once, not per UI
+ * piece that needs them.
+ */
+let achievementStatuses = null;
+
+/**
+ * Fetches achievement status (once per Settings visit) and refreshes every
+ * UI piece that depends on it. Fire-and-forget from updateSettingsAccount()
+ * — never called from app bootstrap, and never for guests.
+ */
+async function refreshAchievementsUi() {
+    if (isGuest || !currentUser) return;
+
+    try {
+        achievementStatuses = await Api.getAchievements();
+    } catch (e) {
+        return;
+    }
+
+    const summaryEl = document.getElementById('settings-achievements-summary');
+    if (summaryEl) {
+        const unlocked = achievementStatuses.filter(a => a.unlocked).length;
+        summaryEl.textContent = t('achievementsSummary', {unlocked, total: achievementStatuses.length});
+    }
+
+    renderBadgePill();
+    updateThemeStyleGrid();
+}
+
+/**
+ * Renders the equipped-badge pill next to the username using the rank
+ * (index into BADGE_REWARD_ORDER) to pick one of 9 saturation levels
+ * (.badge-pill--r0 .. --r8, see styles.css). Hidden entirely until the
+ * user has unlocked "Новичок".
+ */
+function renderBadgePill() {
+    const el = document.getElementById('settings-account-badge');
+    if (!el) return;
+
+    const badgeKey = currentUser?.equippedBadge;
+    const rank = badgeKey ? BADGE_REWARD_ORDER.indexOf(badgeKey) : -1;
+
+    if (rank === -1) {
+        el.style.display = 'none';
+        return;
+    }
+
+    el.className = 'badge-pill badge-pill--r' + rank;
+    el.textContent = t(badgeLabelKey(badgeKey));
+    el.style.display = '';
 }
 
 /**
@@ -243,6 +301,94 @@ async function submitAvatarIcon(key) {
         setTimeout(closeModal, AVATAR_SELECT_CLOSE_DELAY_MS);
     } catch {
         toast(t('authErrorConnection'));
+    }
+}
+
+/**
+ * Opens the achievements modal — the sole entry point for the feature, only
+ * fetching from the server if refreshAchievementsUi() (called when Settings
+ * opens) hasn't already populated the cache. Guests never reach this: the
+ * settings-item that triggers it lives inside #settings-account-group,
+ * which is hidden for guests, and switchView() itself already blocks guests
+ * from entering the Settings view at all.
+ */
+async function showAchievementsModal() {
+    if (!achievementStatuses) {
+        try {
+            achievementStatuses = await Api.getAchievements();
+        } catch (e) {
+            toast(t('authErrorConnection'));
+            return;
+        }
+    }
+
+    const unlocked = achievementStatuses.filter(a => a.unlocked);
+    const inProgress = achievementStatuses.filter(a => !a.unlocked);
+    const pct = achievementStatuses.length ? Math.round((unlocked.length / achievementStatuses.length) * 100) : 0;
+
+    const renderCard = (a, isUnlocked) => {
+        const meta = ACHIEVEMENT_META[a.key] || {};
+        const title = t(achievementTitleKey(a.key));
+        const desc = t(achievementDescKey(a.key));
+
+        let extra = '';
+        if (isUnlocked) {
+            if (a.rewardType === 'theme' && currentUser?.themeStyle !== a.rewardKey) {
+                const themeName = t(themeStyleLabelKey(a.rewardKey));
+                extra = `<button type="button" class="achievement-card-apply-btn" onclick="applyAchievementTheme('${a.rewardKey}')">${t('achievementsApplyThemeBtn', {theme: themeName})}</button>`;
+            }
+        } else {
+            const progressPct = a.threshold ? Math.min(100, Math.round((a.progress / a.threshold) * 100)) : 0;
+            extra = `<div class="achievement-card-progress-track"><div class="achievement-card-progress-fill" style="width:${progressPct}%"></div></div>`;
+        }
+
+        return `<div class="achievement-card${isUnlocked ? ' achievement-card--unlocked' : ''}">
+                    <div class="achievement-card-icon">${meta.icon || ''}</div>
+                    <div class="achievement-card-title">${title}</div>
+                    <div class="achievement-card-desc">${desc}</div>
+                    ${extra}
+                </div>`;
+    };
+
+    const body = `
+        <div class="achievements-summary-bar"><div class="achievements-summary-fill" style="width:${pct}%"></div></div>
+        ${unlocked.length ? `<div class="settings-group-title">${t('achievementsUnlockedSection')}</div>
+        <div class="achievements-grid">${unlocked.map(a => renderCard(a, true)).join('')}</div>` : ''}
+        ${inProgress.length ? `<div class="settings-group-title">${t('achievementsInProgressSection')}</div>
+        <div class="achievements-grid">${inProgress.map(a => renderCard(a, false)).join('')}</div>` : ''}
+    `;
+
+    showModal(t('settingsAchievementsTitle'), body, [], true);
+}
+
+/**
+ * Applies an unlocked theme achievement's reward from inside the
+ * achievements modal — the theme-reward "manual apply" path (unlike badges,
+ * which auto-equip server-side). Mirrors the theme-picker click handler in
+ * ui.js so both paths stay in sync.
+ * @param {string} themeKey - One of THEME_STYLE_KEYS.
+ */
+async function applyAchievementTheme(themeKey) {
+    try {
+        const res = await Api.updateThemeStyle(themeKey);
+
+        if (!res.ok) {
+            toast(t('achievementsThemeErrorToast'));
+            return;
+        }
+
+        document.documentElement.setAttribute('data-theme-style', themeKey);
+        try {
+            localStorage.setItem('themeStyle', themeKey);
+        } catch (e) {
+        }
+
+        if (currentUser) currentUser.themeStyle = themeKey;
+        updateThemeStyleGrid();
+        toast(t('achievementsThemeAppliedToast'));
+        closeModal();
+    } catch (e) {
+        toast(t('achievementsThemeErrorToast'));
     }
 }
 
