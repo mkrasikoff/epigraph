@@ -23,10 +23,14 @@ import java.util.Set;
 /**
  * Evaluates and stores achievement progress (TASK-122). Called from the
  * existing mutation endpoints (quote create/favorite/import, avatar/username/
- * theme update) — never from a page-load/GET request, and never for guests
- * (no userId to evaluate against). achievement_progress.unlockedAt is the
- * sole source of truth for privileges; UserService/UserController consult
- * isRewardUnlocked() rather than re-deriving eligibility from raw counts.
+ * theme update) and, as of TASK-124, from GET /api/auth/me on every app
+ * bootstrap — a "day of activity" is meant to mean "the user opened
+ * Epigraph", not "the user happened to add or edit a quote", so simply
+ * loading the app has to be able to mark the day and refresh progress too.
+ * Never called for guests (no userId to evaluate against).
+ * achievement_progress.unlockedAt is the sole source of truth for
+ * privileges; UserService/UserController consult isRewardUnlocked() rather
+ * than re-deriving eligibility from raw counts.
  */
 @Service
 public class AchievementService {
@@ -50,18 +54,23 @@ public class AchievementService {
 
     /**
      * Upserts today's row into user_activity_days (Europe/Moscow, same zone
-     * as the QoD calendar day) if it isn't already there. Cheap no-op on
-     * every call after the first one for a given day.
+     * as the QoD calendar day) if it isn't already there — one cheap exists
+     * check on every call after the first one for a given day. Returns
+     * whether a new row was actually inserted, so callers driven by a
+     * high-frequency signal (GET /api/auth/me on every app load, as of
+     * TASK-124) can skip re-running evaluate()'s much heavier query set
+     * unless today genuinely just became a new activity day for this user.
      */
     @Transactional
-    public void markActiveToday(Long userId) {
+    public boolean markActiveToday(Long userId) {
         LocalDate today = LocalDate.now(ACTIVITY_ZONE);
-        if (activityDayRepo.existsByUserIdAndActivityDate(userId, today)) return;
+        if (activityDayRepo.existsByUserIdAndActivityDate(userId, today)) return false;
 
         UserActivityDay day = new UserActivityDay();
         day.setUserId(userId);
         day.setActivityDate(today);
         activityDayRepo.save(day);
+        return true;
     }
 
     /**
@@ -115,7 +124,7 @@ public class AchievementService {
 
         upsertProgress(userId, "favorites_25", manualFavorites, 25);
         upsertProgress(userId, "authors_10", manualAuthors, 10);
-        upsertProgress(userId, "week_streak", activeDays, 7);
+        upsertProgress(userId, "week_streak", currentStreak(userId), 7);
 
         upsertProgress(userId, AchievementCatalog.BADGE_NOVICE, manualQuotes, 1);
         for (AchievementDefinition badge : AchievementCatalog.BADGE_ACHIEVEMENTS) {
@@ -124,6 +133,28 @@ public class AchievementService {
         }
 
         reequipBadge(userId);
+    }
+
+    /**
+     * Length of the current run of consecutive calendar days with activity,
+     * counted backward from the most recently recorded day. Only feeds
+     * "week_streak"/Закат — the day-count badge ladder deliberately stays a
+     * total, gap-tolerant count (see AchievementCatalog), so it must not use
+     * this. Returns 0 for a user with no activity rows.
+     */
+    private int currentStreak(Long userId) {
+        List<LocalDate> dates = activityDayRepo.findActivityDatesDesc(userId);
+        if (dates.isEmpty()) return 0;
+
+        int streak = 1;
+        for (int i = 1; i < dates.size(); i++) {
+            if (dates.get(i - 1).minusDays(1).equals(dates.get(i))) {
+                streak++;
+            } else {
+                break;
+            }
+        }
+        return streak;
     }
 
     private void upsertProgress(Long userId, String achievementKey, long currentValue, int threshold) {
