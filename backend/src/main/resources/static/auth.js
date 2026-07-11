@@ -463,7 +463,7 @@ function renderFocusedAchievementsModal() {
                         <div class="achievement-focus-icon ${currentTier}">${currentIcon}</div>
                         <div>
                             <div class="achievement-focus-label">${t('achievementsCurrentBadge')}</div>
-                            <div class="achievement-focus-name">${currentBadge ? t(achievementTitleKey(currentBadge.key)) : '—'}</div>
+                            <div class="achievement-focus-name">${currentBadge ? t(achievementTitleKey(currentBadge.key)) : t('achievementsCurrentBadgeEmpty')}</div>
                         </div>
                     </div>
                     <div class="achievement-focus-side achievement-focus-side--right">
