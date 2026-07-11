@@ -2,6 +2,7 @@ package com.mkrasikoff.epigraph.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,6 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/geo").permitAll()
                         .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.png", "/*.ico").permitAll()
                         .requestMatchers("/manifest.json", "/api/push/vapid-public-key").permitAll()
+                        .requestMatchers("/s/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/shared/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(geoBlockFilter, OAuth2AuthorizationRequestRedirectFilter.class)

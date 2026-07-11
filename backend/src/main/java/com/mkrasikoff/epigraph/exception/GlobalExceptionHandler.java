@@ -35,6 +35,13 @@ public class GlobalExceptionHandler {
         return Map.of("error", ex.getMessage());
     }
 
+    @ExceptionHandler(SharedQuoteNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleSharedQuoteNotFound(SharedQuoteNotFoundException ex) {
+
+        return Map.of("error", ex.getMessage());
+    }
+
     @ExceptionHandler(QuoteLimitExceededException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleQuoteLimitExceeded(QuoteLimitExceededException ex) {
