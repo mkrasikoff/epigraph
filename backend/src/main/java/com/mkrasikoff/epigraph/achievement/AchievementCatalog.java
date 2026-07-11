@@ -34,12 +34,19 @@ public final class AchievementCatalog {
      * even though the threshold below has since changed — renaming the key
      * would orphan already-earned achievement_progress rows for existing
      * users, so only the threshold/display text change, never the key.
+     *
+     * "week_streak" is the one genuinely consecutive-day condition in the
+     * catalog (TASK-124) — unlike the "active_days" badge ladder below,
+     * which counts total distinct days ever active regardless of gaps, this
+     * one requires 7 days in a row (AchievementService.currentStreak()).
+     * Its progress number can go back down after a missed day; the unlock
+     * itself, once reached, is still permanent like every other achievement.
      */
     public static final List<AchievementDefinition> THEME_ACHIEVEMENTS = List.of(
             new AchievementDefinition("favorites_25", "count", 50, "theme", "ocean"),
             new AchievementDefinition("authors_10", "distinct_authors", 25, "theme", "forest"),
             new AchievementDefinition("explorer", "action_set", 5, "theme", "cosmos"),
-            new AchievementDefinition("week_streak", "active_days", 7, "theme", "sunset")
+            new AchievementDefinition("week_streak", "consecutive_days", 7, "theme", "sunset")
     );
 
     /**
