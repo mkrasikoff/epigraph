@@ -63,56 +63,60 @@ const ACHIEVEMENT_META = {
         descKey: 'achievementWeekStreakDesc',
         icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>'
     },
-    // Badge icons (novice -> sage) are one evolving glyph — a book opening
-    // wider with more visible pages as rank increases — rather than 9
-    // unrelated icons from different families, so prestige reads from the
-    // shape itself, not just the name. All single-tone (fill="currentColor",
-    // accent lines at reduced opacity) so they stay legible against any
-    // theme's badge-pill/icon-circle background, light or dark.
+    // Badge icons (novice -> sage) are one evolving glyph — a book that
+    // opens, gains page-line detail and picks up a stacked-page edge (for
+    // "volume") as rank increases — rather than 9 unrelated icons from
+    // different families, so prestige reads from the shape itself, not just
+    // the name. Every icon shares the same viewBox (0 0 24 24) and a
+    // centered spine at x=12, so the book silhouette never drifts off-center
+    // even as its rendered size grows with rank (badgeIconTierClass() in
+    // this file supplies the matching background/border/glow per rank —
+    // see achievement-icon-r0..r8 in styles.css). fill="currentColor" so it
+    // stays legible against any theme's icon-circle background.
     badge_novice: {
         titleKey: 'badgeNoviceTitle',
         descKey: 'badgeNoviceDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 28" fill="currentColor"><rect x="4" y="2" width="16" height="24" rx="1.5"/></svg>'
+        icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="9" y="5" width="6" height="14" rx="1"/></svg>'
     },
     badge_chronicler: {
         titleKey: 'badgeChroniclerTitle',
         descKey: 'badgeChroniclerDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 28" fill="currentColor"><path d="M4 3 L18 1 L20 25 L6 27 Z"/></svg>'
+        icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 4.3l8-1.2 1 14.6L9 19z"/></svg>'
     },
     badge_collector: {
         titleKey: 'badgeCollectorTitle',
         descKey: 'badgeCollectorDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 30 26" fill="currentColor"><path d="M15 5 C11 3 6 2 2 3 V22 C6 21 11 22 15 25 Z"/><path d="M15 5 C19 3 24 2 28 3 V22 C24 21 19 22 15 25 Z"/></svg>'
+        icon: '<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/></svg>'
     },
     badge_bibliophile: {
         titleKey: 'badgeBibliophileTitle',
         descKey: 'badgeBibliophileDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 32 26" fill="currentColor"><path d="M16 5 C11 3 5 2 1 3 V22 C5 21 11 22 16 25 Z"/><path d="M16 5 C21 3 27 2 31 3 V22 C27 21 21 22 16 25 Z"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/></svg>'
     },
     badge_keeper: {
         titleKey: 'badgeKeeperTitle',
         descKey: 'badgeKeeperDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 34 27" fill="currentColor"><path d="M17 6 C12 4 6 3 1 4 V23 C6 22 12 23 17 26 Z"/><path d="M17 6 C22 4 28 3 33 4 V23 C28 22 22 23 17 26 Z"/><path d="M5 9 C9 7 13 8 15 10M29 9 C25 7 21 8 19 10" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/></svg>'
     },
     badge_interpreter: {
         titleKey: 'badgeInterpreterTitle',
         descKey: 'badgeInterpreterDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 36 28" fill="currentColor"><path d="M18 6 C13 4 7 3 2 4 V24 C7 23 13 24 18 27 Z"/><path d="M18 6 C23 4 29 3 34 4 V24 C29 23 23 24 18 27 Z"/><path d="M6 10 C10 8 14 9 16 11M6 15 C10 13 14 14 16 16M30 10 C26 8 22 9 20 11M30 15 C26 13 22 14 20 16" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 17.5c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.45"/><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/><path d="M6 8.5c1.2-.6 2.6-.7 3.8-.3M13.5 8.2c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/></svg>'
     },
     badge_archivist: {
         titleKey: 'badgeArchivistTitle',
         descKey: 'badgeArchivistDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 38 30" fill="currentColor"><path d="M19 7 C13 5 7 4 2 5 V26 C7 25 13 26 19 29 Z"/><path d="M19 7 C25 5 31 4 36 5 V26 C31 25 25 26 19 29 Z"/><path d="M6 11 C11 9 15 10 17 12M6 16 C11 14 15 15 17 17M6 21 C11 19 15 20 17 22M32 11 C27 9 23 10 21 12M32 16 C27 14 23 15 21 17M32 21 C27 19 23 20 21 22" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 17.5c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.45"/><path d="M4.5 18.7c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.37"/><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/><path d="M6 8.5c1.2-.6 2.6-.7 3.8-.3M13.5 8.2c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 12.8c1.2-.6 2.6-.7 3.8-.3M13.5 12.5c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/></svg>'
     },
     badge_mentor: {
         titleKey: 'badgeMentorTitle',
         descKey: 'badgeMentorDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 40 32" fill="currentColor"><path d="M20 7 C13 5 7 4 2 5 V27 C7 26 13 27 20 30 Z"/><path d="M20 7 C27 5 33 4 38 5 V27 C33 26 27 27 20 30 Z"/><path d="M6 11 C12 9 16 10 18 12M6 16 C12 14 16 15 18 17M6 21 C12 19 16 20 18 22M34 11 C28 9 24 10 22 12M34 16 C28 14 24 15 22 17M34 21 C28 19 24 20 22 22" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" fill="none"/></svg>'
+        icon: '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 17.5c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.45"/><path d="M4.5 18.7c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.37"/><path d="M4.5 19.9c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.29"/><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/><path d="M6 8.5c1.2-.6 2.6-.7 3.8-.3M13.5 8.2c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 11.3c1.2-.6 2.6-.7 3.8-.3M13.5 11c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 14.2c1.2-.6 2.6-.7 3.8-.3M13.5 13.9c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/></svg>'
     },
     badge_sage: {
         titleKey: 'badgeSageTitle',
         descKey: 'badgeSageDesc',
-        icon: '<svg width="20" height="20" viewBox="0 0 64 52" fill="currentColor"><path d="M32 10 C24 4 12 2 4 4 V44 C12 42 24 44 32 50 Z"/><path d="M32 10 C40 4 52 2 60 4 V44 C52 42 40 44 32 50 Z"/><rect x="30" y="8" width="4" height="42"/><path d="M10 12 C16 10 22 10 27 13M10 20 C16 18 22 18 27 21M10 28 C16 26 22 26 27 29M54 12 C48 10 42 10 37 13M54 20 C48 18 42 18 37 21M54 28 C48 26 42 26 37 29" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" fill="none"/></svg>'
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 17.5c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.45"/><path d="M4.5 18.7c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.37"/><path d="M4.5 19.9c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.29"/><path d="M4.5 21.1c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.21"/><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/><path d="M6 8.5c1.2-.6 2.6-.7 3.8-.3M13.5 8.2c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 10.6c1.2-.6 2.6-.7 3.8-.3M13.5 10.3c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 12.8c1.2-.6 2.6-.7 3.8-.3M13.5 12.5c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 14.9c1.2-.6 2.6-.7 3.8-.3M13.5 14.6c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/></svg>'
     }
 };
 
@@ -145,20 +149,18 @@ function badgeLabelKey(rewardKey) {
 }
 
 /**
- * Returns the CSS modifier class for a badge icon circle's prestige tier —
- * ranks 0-2 get a muted outline, 3-5 a filled ring, 6-8 a filled double
- * ring with glow (see .achievement-icon-tier-* in styles.css). Same 3-stage
- * "visual weight" grammar approved for the icons, just applied to the
- * circle instead of hand-picking 9 colors — reuses each theme's own
- * --color-primary/--color-primary-highlight so it stays theme-safe with no
- * extra CSS per theme style.
+ * Returns the CSS modifier class for a badge icon circle's prestige rank —
+ * one class per badge (.achievement-icon-r0 .. r8 in styles.css), each a
+ * darker-to-lighter step built from that theme's own --color-primary/
+ * --color-surface-2 via color-mix(), so it stays theme-safe with no extra
+ * CSS per theme style. The last 3 ranks (archivist/mentor/sage) also pick
+ * up a dashed outer ring, and the top rank (sage) a glow, purely from this
+ * class — see the r6/r7/r8 rules.
  * @param {string} rewardKey
  * @returns {string}
  */
 function badgeIconTierClass(rewardKey) {
     const rank = BADGE_REWARD_ORDER.indexOf(rewardKey);
     if (rank < 0) return '';
-    if (rank <= 2) return 'achievement-icon-tier-1';
-    if (rank <= 5) return 'achievement-icon-tier-2';
-    return 'achievement-icon-tier-3';
+    return 'achievement-icon-r' + rank;
 }
