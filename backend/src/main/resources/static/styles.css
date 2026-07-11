@@ -2508,41 +2508,84 @@ body.modal-lock-scroll {
     justify-content: center;
 }
 
-/* -- badge icon prestige tiers (badgeIconTierClass() in achievements.js) --
-   Same 3-stage grammar as the icon-concept mockups: outline -> filled ring
-   -> filled double ring + glow. Built from each theme's own --color-primary
-   family, so it needs no per-theme overrides. */
-.achievement-row-icon.achievement-icon-tier-1,
-.achievement-focus-icon.achievement-icon-tier-1 {
-    background: var(--color-surface-2);
-    color: var(--color-text-muted);
-    border: 1px solid var(--color-border);
-}
-
-.achievement-row-icon.achievement-icon-tier-2,
-.achievement-focus-icon.achievement-icon-tier-2 {
-    background: var(--color-primary-highlight);
-    color: var(--color-primary);
-    border: 1.5px solid var(--color-primary);
-}
-
-.achievement-row-icon.achievement-icon-tier-3,
-.achievement-focus-icon.achievement-icon-tier-3 {
+/* -- badge icon prestige ranks (badgeIconTierClass() in achievements.js) --
+   One class per badge (r0 novice .. r8 sage). Classic light/dark use the
+   exact hex ramp from the approved v7 mockup (background stays in the warm
+   brown family the whole way up — it never goes pale — while the icon
+   itself goes from muted to bright white, which is what makes the r6-r8
+   page-line/stack detail in the SVG, drawn as dark strokes for contrast
+   against a *light* book, actually visible). Non-Classic theme styles
+   reuse the same shape via color-mix() off that theme's own
+   --color-primary, following the .badge-pill --r0..r8 precedent. The last
+   3 ranks add a dashed outer ring, and the top rank (sage) a glow. Ring/
+   glow color is derived from each rule's own border via currentColor so it
+   doesn't need separate per-theme overrides. */
+.achievement-row-icon.achievement-icon-r6,
+.achievement-focus-icon.achievement-icon-r6,
+.achievement-row-icon.achievement-icon-r7,
+.achievement-focus-icon.achievement-icon-r7,
+.achievement-row-icon.achievement-icon-r8,
+.achievement-focus-icon.achievement-icon-r8 {
     position: relative;
-    background: var(--color-primary);
-    color: var(--color-text-inverse);
-    border: 1.5px solid var(--color-primary-active);
-    box-shadow: 0 0 8px color-mix(in oklch, var(--color-primary) 50%, transparent);
 }
 
-.achievement-row-icon.achievement-icon-tier-3::before,
-.achievement-focus-icon.achievement-icon-tier-3::before {
+.achievement-row-icon.achievement-icon-r6::before,
+.achievement-focus-icon.achievement-icon-r6::before,
+.achievement-row-icon.achievement-icon-r7::before,
+.achievement-focus-icon.achievement-icon-r7::before,
+.achievement-row-icon.achievement-icon-r8::before,
+.achievement-focus-icon.achievement-icon-r8::before {
     content: '';
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    border: 1px dashed color-mix(in oklch, var(--color-primary) 60%, transparent);
+    border: 1px dashed color-mix(in oklch, var(--achievement-icon-ring, currentColor) 60%, transparent);
 }
+
+.achievement-row-icon.achievement-icon-r8,
+.achievement-focus-icon.achievement-icon-r8 {
+    box-shadow: 0 0 10px color-mix(in oklch, var(--achievement-icon-ring, currentColor) 55%, transparent);
+}
+
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r0, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r0 { background: #232119; color: #5a5446; border: 1px solid #3a3729; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r1, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r1 { background: #26221a; color: #75695490; border: 1px solid #453f2f; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r2, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r2 { background: #2c2519; color: #8a7250; border: 1px solid #4a4030; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r3, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r3 { background: #332a1a; color: #a8875a; border: 1px solid #5a4830; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r4, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r4 { background: #3a2d1c; color: #c8a06a; border: 1.5px solid #6e5738; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r5, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r5 { background: #4a331c; color: #d4956a; border: 1.5px solid #8a6942; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r6, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r6 { background: #5c3e1e; color: #f0d9c0; border: 1.5px solid #d4956a; --achievement-icon-ring: #d4956a; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r7, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r7 { background: #6e4820; color: #faf4ea; border: 1.5px solid #e8a87a; --achievement-icon-ring: #e8a87a; }
+[data-theme="dark"] .achievement-row-icon.achievement-icon-r8, [data-theme="dark"] .achievement-focus-icon.achievement-icon-r8 { background: #8b5e28; color: #ffffff; border: 1.5px solid #f0b888; --achievement-icon-ring: #f0b888; }
+
+[data-theme="light"] .achievement-row-icon.achievement-icon-r0, [data-theme="light"] .achievement-focus-icon.achievement-icon-r0 { background: #ece5d6; color: #7a6a54; border: 1px solid #d8cdb8; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r1, [data-theme="light"] .achievement-focus-icon.achievement-icon-r1 { background: #e2d5b8; color: #6d5c42; border: 1px solid #cfc0a2; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r2, [data-theme="light"] .achievement-focus-icon.achievement-icon-r2 { background: #d5c19a; color: #5c4a32; border: 1px solid #c0aa7e; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r3, [data-theme="light"] .achievement-focus-icon.achievement-icon-r3 { background: #c7ac7c; color: #4a3822; border: 1px solid #ad9268; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r4, [data-theme="light"] .achievement-focus-icon.achievement-icon-r4 { background: #b8975e; color: #3d2c1a; border: 1.5px solid #9c7d48; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r5, [data-theme="light"] .achievement-focus-icon.achievement-icon-r5 { background: #a37f45; color: #2e2011; border: 1.5px solid #8a6a38; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r6, [data-theme="light"] .achievement-focus-icon.achievement-icon-r6 { background: #8b5e3c; color: #fdf8f0; border: 1.5px solid #6e4a2d; --achievement-icon-ring: #6e4a2d; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r7, [data-theme="light"] .achievement-focus-icon.achievement-icon-r7 { background: #6e4a2d; color: #fdf8f0; border: 1.5px solid #523620; --achievement-icon-ring: #523620; }
+[data-theme="light"] .achievement-row-icon.achievement-icon-r8, [data-theme="light"] .achievement-focus-icon.achievement-icon-r8 { background: #523620; color: #fdf8f0; border: 1.5px solid #3a2513; --achievement-icon-ring: #3a2513; }
+
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r0, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r0 { background: color-mix(in oklch, var(--color-primary) 6%, var(--color-surface-2)); color: var(--color-text-faint); border-color: var(--color-divider); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r1, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r1 { background: color-mix(in oklch, var(--color-primary) 14%, var(--color-surface-2)); color: var(--color-text-muted); border-color: var(--color-divider); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r2, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r2 { background: color-mix(in oklch, var(--color-primary) 22%, var(--color-surface-2)); color: var(--color-text-muted); border-color: var(--color-border); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r3, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r3 { background: color-mix(in oklch, var(--color-primary) 32%, var(--color-surface-2)); color: var(--color-text); border-color: var(--color-border); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r4, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r4 { background: color-mix(in oklch, var(--color-primary) 44%, var(--color-surface-2)); color: var(--color-text); border-color: var(--color-primary); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r5, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r5 { background: color-mix(in oklch, var(--color-primary) 56%, var(--color-surface-2)); color: var(--color-text); border-color: var(--color-primary); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r6, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r6 { background: color-mix(in oklch, var(--color-primary) 68%, var(--color-surface-2)); color: var(--color-text); border-color: var(--color-primary); --achievement-icon-ring: var(--color-primary); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r7, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r7 { background: color-mix(in oklch, var(--color-primary) 80%, var(--color-surface-2)); color: color-mix(in oklch, var(--color-text) 80%, white); border-color: var(--color-primary-hover); --achievement-icon-ring: var(--color-primary-hover); }
+[data-theme="dark"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r8, [data-theme="dark"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r8 { background: color-mix(in oklch, var(--color-primary) 92%, var(--color-surface-2)); color: white; border-color: var(--color-primary-active); --achievement-icon-ring: var(--color-primary-active); }
+
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r0, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r0 { background: color-mix(in oklch, var(--color-primary) 8%, var(--color-surface-2)); color: var(--color-text-muted); border-color: var(--color-divider); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r1, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r1 { background: color-mix(in oklch, var(--color-primary) 18%, var(--color-surface-2)); color: var(--color-text-muted); border-color: var(--color-divider); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r2, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r2 { background: color-mix(in oklch, var(--color-primary) 30%, var(--color-surface-2)); color: var(--color-text); border-color: var(--color-border); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r3, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r3 { background: color-mix(in oklch, var(--color-primary) 44%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-border); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r4, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r4 { background: color-mix(in oklch, var(--color-primary) 58%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-primary); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r5, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r5 { background: color-mix(in oklch, var(--color-primary) 70%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-primary); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r6, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r6 { background: var(--color-primary); color: var(--color-text-inverse); border-color: var(--color-primary); --achievement-icon-ring: var(--color-primary); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r7, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r7 { background: var(--color-primary-hover); color: var(--color-text-inverse); border-color: var(--color-primary-hover); --achievement-icon-ring: var(--color-primary-hover); }
+[data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r8, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r8 { background: var(--color-primary-active); color: var(--color-text-inverse); border-color: var(--color-primary-active); --achievement-icon-ring: var(--color-primary-active); }
 
 .achievement-row-body {
     flex: 1;
