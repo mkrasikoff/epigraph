@@ -80,6 +80,16 @@ const Api = {
         fetch(API, { method: 'DELETE', headers: authHeaders() }),
 
     /**
+     * Creates (or, on repeat calls for the same quote, fetches) a public share
+     * link for a single quote. See SharedQuoteController.
+     * @param {number|string} id - Quote identifier.
+     * @returns {Promise<{token: string}>}
+     */
+    shareQuote: (id) =>
+        fetch(`${API}/${id}/share`, { method: 'POST', headers: authHeaders() })
+            .then(r => r.json()),
+
+    /**
      * Fetches the authenticated user's own profile (id, email, username).
      * @returns {Promise<Object|null>} Profile object, or null on failure/guest.
      */

@@ -145,6 +145,7 @@ const TRANSLATIONS = {
         // ── Quote list ────────────────────────────────────────────────────────
         ariaFavorite:                   'В избранное',
         ariaCopy:                       'Копировать',
+        ariaShare:                      'Поделиться',
         ariaEdit:                       'Редактировать',
         ariaDelete:                     'Удалить',
         ariaSearch:                     'Поиск',
@@ -411,6 +412,22 @@ const TRANSLATIONS = {
         notifIntervalShort12h:          '12ч',
         notifIntervalShort24h:          '24ч',
 
+        // ── Share (public quote page, TASK-125) ───────────────────────────────
+        shareBadge:                     'Публичная',
+        shareAddButton:                 'Добавить в коллекцию',
+        shareAlreadyImported:           'Уже в коллекции',
+        shareLoginRequired:             'Войдите, чтобы добавить',
+        shareImportSuccess:             'Цитата добавлена в вашу коллекцию',
+        shareImportError:               'Не удалось добавить цитату',
+        shareNotFoundTitle:             'Ссылка не найдена',
+        shareNotFoundText:              'Эта цитата больше недоступна.',
+        shareOpenApp:                   'Открыть Epigraph',
+        shareActionLabel:               'Поделиться',
+        shareModalTitle:                'Ссылка на цитату',
+        shareCopyLink:                  'Скопировать ссылку',
+        shareLinkCopied:                'Ссылка скопирована',
+        shareLinkError:                 'Не удалось создать ссылку',
+
         // ── General ───────────────────────────────────────────────────────────
         toastLoginRequired:             'Войдите в аккаунт для доступа к этому разделу',
         toastError:                     'Ошибка',
@@ -551,6 +568,7 @@ const TRANSLATIONS = {
         // ── Quote list ────────────────────────────────────────────────────────
         ariaFavorite:                   'Add to favorites',
         ariaCopy:                       'Copy',
+        ariaShare:                      'Share',
         ariaEdit:                       'Edit',
         ariaDelete:                     'Delete',
         ariaSearch:                     'Search',
@@ -816,6 +834,22 @@ const TRANSLATIONS = {
         notifIntervalShort6h:           '6h',
         notifIntervalShort12h:          '12h',
         notifIntervalShort24h:          '24h',
+
+        // ── Share (public quote page, TASK-125) ───────────────────────────────
+        shareBadge:                     'Public',
+        shareAddButton:                 'Add to my collection',
+        shareAlreadyImported:           'Already in your collection',
+        shareLoginRequired:             'Sign in to add it',
+        shareImportSuccess:             'Quote added to your collection',
+        shareImportError:               'Couldn\'t add the quote',
+        shareNotFoundTitle:             'Link not found',
+        shareNotFoundText:              'This quote is no longer available.',
+        shareOpenApp:                   'Open Epigraph',
+        shareActionLabel:               'Share',
+        shareModalTitle:                'Quote link',
+        shareCopyLink:                  'Copy link',
+        shareLinkCopied:                'Link copied',
+        shareLinkError:                 'Couldn\'t create the link',
 
         // ── General ───────────────────────────────────────────────────────────
         toastLoginRequired:             'Sign in to access this section',

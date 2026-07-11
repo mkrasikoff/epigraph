@@ -398,6 +398,9 @@ function renderQuoteCard(q, index, rankMap) {
               <button class="card-btn" onclick="copyQuote(${q.id})" aria-label="${t('ariaCopy')}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               </button>
+              <button class="card-btn" onclick="shareQuote(${q.id})" aria-label="${t('ariaShare')}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </button>
               <button class="card-btn edit" onclick="editQuote(${q.id})" aria-label="${t('ariaEdit')}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
@@ -827,6 +830,57 @@ function copyQuote(id) {
     navigator.clipboard.writeText(text)
         .then(() => toast(t('toastCopied')))
         .catch(() => toast(t('toastError')));
+}
+
+/**
+ * Generates (or, on repeat calls for the same quote, re-fetches) a public share
+ * link for the quote identified by id, then shows it in a modal for copying.
+ * @param {number|string} id - Quote identifier.
+ */
+function shareQuote(id) {
+    Api.shareQuote(id)
+        .then(({token}) => {
+            if (!token) throw new Error('No token in response');
+            showShareModal(`${window.location.origin}/s/${token}`);
+        })
+        .catch(() => toast(t('shareLinkError'), 'error'));
+}
+
+/**
+ * Shows the shared modal with a read-only, pre-selected public link and a
+ * copy-to-clipboard action.
+ * @param {string} url - Public share URL to display.
+ */
+function showShareModal(url) {
+    const body = `
+    <div class="edit-form-group">
+      <div class="edit-input-wrap">
+        <input class="edit-input" type="text" id="share-link-input" value="${escHtml(url)}" readonly>
+      </div>
+    </div>
+  `;
+
+    showModal(
+        t('shareModalTitle'),
+        body,
+        [
+            {label: t('shareCopyLink'), cls: 'btn-primary', action: () => copyShareLink(url)},
+            {label: t('editCancelButton'), cls: 'btn-secondary', action: closeModal}
+        ]
+    );
+
+    const input = document.getElementById('share-link-input');
+    if (input) input.select();
+}
+
+/**
+ * Copies a public share URL to the clipboard.
+ * @param {string} url
+ */
+function copyShareLink(url) {
+    navigator.clipboard.writeText(url)
+        .then(() => toast(t('shareLinkCopied')))
+        .catch(() => toast(t('toastCopyError'), 'error'));
 }
 
 /**
