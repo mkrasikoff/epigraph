@@ -4,6 +4,7 @@ import com.mkrasikoff.epigraph.dto.AuthRequest;
 import com.mkrasikoff.epigraph.dto.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.VerifyRequest;
 import com.mkrasikoff.epigraph.model.User;
+import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;
 import com.mkrasikoff.epigraph.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,12 +40,15 @@ class AuthControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private AchievementService achievementService;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        AuthController controller = new AuthController(authService, userService);
+        AuthController controller = new AuthController(authService, userService, achievementService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         objectMapper = new ObjectMapper();
     }
@@ -275,6 +279,40 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.preferredLanguage").value("en"))
                 .andExpect(jsonPath("$.themeStyle").value("forest"))
                 .andExpect(jsonPath("$.equippedBadge").value("chronicler"));
+    }
+
+    @Test
+    @DisplayName("GET /api/auth/me: re-evaluates achievements when today is a new activity day (TASK-124)")
+    void me_evaluatesAchievements_onNewActivityDay() throws Exception {
+        User user = new User();
+        user.setId(42L);
+        user.setEmail("user@example.com");
+        when(userService.findById(null)).thenReturn(Optional.of(user));
+        when(achievementService.markActiveToday(null)).thenReturn(true);
+
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isOk());
+
+        verify(achievementService).markActiveToday(null);
+        verify(achievementService).evaluate(null);
+        verify(userService, org.mockito.Mockito.times(2)).findById(null);
+    }
+
+    @Test
+    @DisplayName("GET /api/auth/me: skips evaluate() when today was already recorded (TASK-124)")
+    void me_skipsEvaluate_whenNotANewActivityDay() throws Exception {
+        User user = new User();
+        user.setId(42L);
+        user.setEmail("user@example.com");
+        when(userService.findById(null)).thenReturn(Optional.of(user));
+        when(achievementService.markActiveToday(null)).thenReturn(false);
+
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isOk());
+
+        verify(achievementService).markActiveToday(null);
+        verify(achievementService, org.mockito.Mockito.never()).evaluate(null);
+        verify(userService, org.mockito.Mockito.times(1)).findById(null);
     }
 
     @Test

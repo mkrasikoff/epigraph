@@ -50,23 +50,25 @@ class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("markActiveToday: inserts a row when today isn't recorded yet")
+    @DisplayName("markActiveToday: inserts a row and returns true when today isn't recorded yet")
     void markActiveToday_insertsRow_whenMissing() {
         when(activityDayRepo.existsByUserIdAndActivityDate(eq(USER_ID), any(LocalDate.class))).thenReturn(false);
 
-        achievementService.markActiveToday(USER_ID);
+        boolean isNewDay = achievementService.markActiveToday(USER_ID);
 
         verify(activityDayRepo).save(any(UserActivityDay.class));
+        assertThat(isNewDay).isTrue();
     }
 
     @Test
-    @DisplayName("markActiveToday: is a no-op when today is already recorded")
+    @DisplayName("markActiveToday: is a no-op and returns false when today is already recorded")
     void markActiveToday_noOp_whenAlreadyRecorded() {
         when(activityDayRepo.existsByUserIdAndActivityDate(eq(USER_ID), any(LocalDate.class))).thenReturn(true);
 
-        achievementService.markActiveToday(USER_ID);
+        boolean isNewDay = achievementService.markActiveToday(USER_ID);
 
         verify(activityDayRepo, never()).save(any());
+        assertThat(isNewDay).isFalse();
     }
 
     @Test
@@ -118,6 +120,34 @@ class AchievementServiceTest {
         boolean favoritesUnlocked = captor.getAllValues().stream()
                 .anyMatch(p -> p.getAchievementKey().equals("favorites_25") && p.getUnlockedAt() != null);
         assertThat(favoritesUnlocked).isTrue();
+    }
+
+    @Test
+    @DisplayName("evaluate: week_streak progress is the consecutive run, not the total active-day count")
+    void evaluate_weekStreakUsesConsecutiveRun_notTotalDays() {
+        when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
+        when(quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(USER_ID)).thenReturn(0L);
+        when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
+        when(activityDayRepo.countByUserId(USER_ID)).thenReturn(5L);
+        when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(
+                LocalDate.of(2024, 1, 10),
+                LocalDate.of(2024, 1, 9),
+                LocalDate.of(2024, 1, 8),
+                LocalDate.of(2023, 12, 20),
+                LocalDate.of(2023, 12, 19)
+        ));
+        when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
+        when(progressRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        achievementService.evaluate(USER_ID);
+
+        ArgumentCaptor<AchievementProgress> captor = ArgumentCaptor.forClass(AchievementProgress.class);
+        verify(progressRepo, org.mockito.Mockito.atLeastOnce()).save(captor.capture());
+        AchievementProgress weekStreak = captor.getAllValues().stream()
+                .filter(p -> p.getAchievementKey().equals("week_streak"))
+                .findFirst().orElseThrow();
+        assertThat(weekStreak.getProgress()).isEqualTo(3);
+        assertThat(weekStreak.getUnlockedAt()).isNull();
     }
 
     @Test

@@ -6,6 +6,8 @@ import com.mkrasikoff.epigraph.dto.ErrorResponse;
 import com.mkrasikoff.epigraph.dto.MeResponse;
 import com.mkrasikoff.epigraph.dto.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.VerifyRequest;
+import com.mkrasikoff.epigraph.model.User;
+import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;
 import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;
@@ -31,10 +33,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
+    private final AchievementService achievementService;
 
-    public AuthController(AuthService authService, UserService userService) {
+    public AuthController(AuthService authService, UserService userService, AchievementService achievementService) {
         this.authService = authService;
         this.userService = userService;
+        this.achievementService = achievementService;
     }
 
     @PostMapping("/register")
@@ -49,12 +53,37 @@ public class AuthController {
 
     /**
      * Returns the authenticated user's own profile (id, email, username).
-     * Used by the client to display real account info instead of a placeholder.
+     * Used by the client to display real account info instead of a placeholder,
+     * and called once on every app bootstrap — which as of TASK-124 is also
+     * what marks "today" as an activity day (see AchievementService), since a
+     * day of activity is meant to mean "opened Epigraph", not "happened to
+     * add or edit a quote today".
+     *
+     * markActiveToday() itself is one cheap exists-check either way, but the
+     * full evaluate() (multiple counts + up to 13 upserts + badge re-equip)
+     * only runs when it returns true — i.e. only on the first request of a
+     * new calendar day per user. Every later reload/refresh that same day
+     * short-circuits after the exists-check, since nothing evaluate() would
+     * recompute can have changed without either a new day or a quote
+     * mutation (which already re-evaluates on its own, see QuoteController).
      */
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal Long userId) {
         return userService.findById(userId)
-                .<ResponseEntity<?>>map(user -> ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon(), user.getPreferredLanguage(), user.getThemeStyle(), user.getEquippedBadge())))
+                .<ResponseEntity<?>>map(user -> {
+                    boolean isNewActivityDay = achievementService.markActiveToday(userId);
+                    if (!isNewActivityDay) {
+                        return ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon(), user.getPreferredLanguage(), user.getThemeStyle(), user.getEquippedBadge()));
+                    }
+
+                    achievementService.evaluate(userId);
+                    // Re-fetch after evaluate() — a badge crossed today's threshold
+                    // auto-equips inside evaluate(), and `user` fetched above is a
+                    // detached snapshot from before that ran, so it would still
+                    // report the old badge.
+                    User refreshed = userService.findById(userId).orElse(user);
+                    return ResponseEntity.ok(new MeResponse(refreshed.getId(), refreshed.getEmail(), refreshed.getUsername(), refreshed.getAvatarIcon(), refreshed.getPreferredLanguage(), refreshed.getThemeStyle(), refreshed.getEquippedBadge()));
+                })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ErrorResponse("Пользователь не найден")));
     }
