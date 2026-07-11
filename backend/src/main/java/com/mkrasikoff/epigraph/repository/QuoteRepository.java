@@ -31,4 +31,8 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
     @Query("SELECT COUNT(DISTINCT q.author) FROM Quote q " +
             "WHERE q.userId = :userId AND q.manuallyAdded = true AND q.author IS NOT NULL AND q.author <> ''")
     long countDistinctManuallyAddedAuthors(@Param("userId") Long userId);
+
+    boolean existsBySharedQuoteIdAndUserId(Long sharedQuoteId, Long userId);
+
+    Optional<Quote> findBySharedQuoteIdAndUserId(Long sharedQuoteId, Long userId);
 }

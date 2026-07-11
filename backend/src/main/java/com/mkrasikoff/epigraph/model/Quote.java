@@ -63,4 +63,17 @@ public class Quote {
     @JsonIgnore
     @Column(name = "manually_added", updatable = false, nullable = false)
     private boolean manuallyAdded;
+
+    /**
+     * Provenance for quotes imported via a public share link — which SharedQuote
+     * it came from, who shared it, and when. Null for quotes not imported this way.
+     */
+    @Column(name = "shared_quote_id", updatable = false)
+    private Long sharedQuoteId;
+
+    @Column(name = "shared_from_user_id", updatable = false)
+    private Long sharedFromUserId;
+
+    @Column(name = "imported_at", updatable = false)
+    private Long importedAt;
 }
