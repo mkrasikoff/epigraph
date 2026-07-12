@@ -5,7 +5,6 @@ import com.mkrasikoff.epigraph.dto.PublicSharedQuoteResponse;
 import com.mkrasikoff.epigraph.dto.SharedQuoteLinkResponse;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.SharedQuote;
-import com.mkrasikoff.epigraph.repository.QuoteRepository;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.SharedQuoteService;
 import org.slf4j.Logger;
@@ -24,14 +23,11 @@ public class SharedQuoteController {
     private static final Logger log = LoggerFactory.getLogger(SharedQuoteController.class);
 
     private final SharedQuoteService sharedQuoteService;
-    private final QuoteRepository quoteRepository;
     private final AchievementService achievementService;
 
     public SharedQuoteController(SharedQuoteService sharedQuoteService,
-                                  QuoteRepository quoteRepository,
                                   AchievementService achievementService) {
         this.sharedQuoteService = sharedQuoteService;
-        this.quoteRepository = quoteRepository;
         this.achievementService = achievementService;
     }
 
@@ -48,13 +44,11 @@ public class SharedQuoteController {
     public PublicSharedQuoteResponse getShared(@PathVariable String token, @AuthenticationPrincipal Long userId) {
         SharedQuote shared = sharedQuoteService.getPublic(token);
 
-        Quote imported = userId != null
-                ? quoteRepository.findBySharedQuoteIdAndUserId(shared.getId(), userId).orElse(null)
-                : null;
+        Quote existing = sharedQuoteService.findExistingCopy(shared, userId).orElse(null);
 
         return new PublicSharedQuoteResponse(
                 shared.getText(), shared.getAuthor(), shared.getSource(), shared.getTags(),
-                shared.getCreatedAt(), imported != null, imported != null ? imported.getId() : null);
+                shared.getCreatedAt(), existing != null, existing != null ? existing.getId() : null);
     }
 
     @PostMapping("/api/shared/{token}/import")
