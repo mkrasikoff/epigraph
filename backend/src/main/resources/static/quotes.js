@@ -893,53 +893,21 @@ function copyQuote(id) {
 
 /**
  * Generates (or, on repeat calls for the same quote, re-fetches) a public share
- * link for the quote identified by id, then shows it in a modal for copying.
+ * link for the quote identified by id, then copies it straight to the
+ * clipboard — same instant-copy pattern as copyQuote(), no intermediate modal
+ * (there's nothing else to do with the link here: no revoke, no other actions).
  * @param {number|string} id - Quote identifier.
  */
 function shareQuote(id) {
     Api.shareQuote(id)
         .then(({token}) => {
             if (!token) throw new Error('No token in response');
-            showShareModal(`${window.location.origin}/s/${token}`);
+            const url = `${window.location.origin}/s/${token}`;
+
+            return navigator.clipboard.writeText(url);
         })
-        .catch(() => toast(t('shareLinkError'), 'error'));
-}
-
-/**
- * Shows the shared modal with a read-only, pre-selected public link and a
- * copy-to-clipboard action.
- * @param {string} url - Public share URL to display.
- */
-function showShareModal(url) {
-    const body = `
-    <div class="edit-form-group">
-      <div class="edit-input-wrap">
-        <input class="edit-input" type="text" id="share-link-input" value="${escHtml(url)}" readonly>
-      </div>
-    </div>
-  `;
-
-    showModal(
-        t('shareModalTitle'),
-        body,
-        [
-            {label: t('shareCopyLink'), cls: 'btn-primary', action: () => copyShareLink(url)},
-            {label: t('editCancelButton'), cls: 'btn-secondary', action: closeModal}
-        ]
-    );
-
-    const input = document.getElementById('share-link-input');
-    if (input) input.select();
-}
-
-/**
- * Copies a public share URL to the clipboard.
- * @param {string} url
- */
-function copyShareLink(url) {
-    navigator.clipboard.writeText(url)
         .then(() => toast(t('shareLinkCopied')))
-        .catch(() => toast(t('toastCopyError'), 'error'));
+        .catch(() => toast(t('shareLinkError'), 'error'));
 }
 
 /**

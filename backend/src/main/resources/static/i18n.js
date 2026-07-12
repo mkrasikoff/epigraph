@@ -414,7 +414,8 @@ const TRANSLATIONS = {
         notifIntervalShort24h:          '24ч',
 
         // ── Share (public quote page, TASK-125) ───────────────────────────────
-        shareBadge:                     'Публичная',
+        shareBadge:                     'Публичная цитата',
+        sharePublicHint:                'Эта цитата публичная.\nДоступен только просмотр.',
         shareAddButton:                 'Добавить в коллекцию',
         shareViewInCollection:          'Посмотреть в коллекции',
         shareCopyQuote:                 'Копировать',
@@ -425,8 +426,6 @@ const TRANSLATIONS = {
         shareNotFoundText:              'Эта цитата больше недоступна.',
         shareOpenApp:                   'Открыть Epigraph',
         shareActionLabel:               'Поделиться',
-        shareModalTitle:                'Ссылка на цитату',
-        shareCopyLink:                  'Скопировать ссылку',
         shareLinkCopied:                'Ссылка скопирована',
         shareLinkError:                 'Не удалось создать ссылку',
 
@@ -839,7 +838,8 @@ const TRANSLATIONS = {
         notifIntervalShort24h:          '24h',
 
         // ── Share (public quote page, TASK-125) ───────────────────────────────
-        shareBadge:                     'Public',
+        shareBadge:                     'Public quote',
+        sharePublicHint:                'This quote is public.\nView only.',
         shareAddButton:                 'Add to my collection',
         shareViewInCollection:          'View in my collection',
         shareCopyQuote:                 'Copy',
@@ -850,8 +850,6 @@ const TRANSLATIONS = {
         shareNotFoundText:              'This quote is no longer available.',
         shareOpenApp:                   'Open Epigraph',
         shareActionLabel:               'Share',
-        shareModalTitle:                'Quote link',
-        shareCopyLink:                  'Copy link',
         shareLinkCopied:                'Link copied',
         shareLinkError:                 'Couldn\'t create the link',
 

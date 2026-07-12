@@ -240,6 +240,36 @@ function initShareLangToggle() {
 }
 
 // =============================================================================
+// PUBLIC-QUOTE BADGE
+// Icon-only "this is public, view-only" indicator — click toggles a short
+// explanation tooltip (not hover, so it works the same on touch devices).
+// =============================================================================
+function initShareBadgeTooltip() {
+    const btn = document.getElementById('share-badge-icon');
+    const tooltip = document.getElementById('share-badge-tooltip');
+    if (!btn || !tooltip) return;
+
+    function close() {
+        tooltip.classList.remove('visible');
+        btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const opening = !tooltip.classList.contains('visible');
+        tooltip.classList.toggle('visible', opening);
+        btn.setAttribute('aria-expanded', String(opening));
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!tooltip.contains(e.target) && e.target !== btn) close();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') close();
+    });
+}
+
+// =============================================================================
 // COPY QUOTE TEXT
 // Same text format as the main app's formatQuoteAsText() (ui.js), read from
 // the JSON data block the server embeds alongside the rendered card.
@@ -349,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const quote = shareReadQuoteData();
     if (quote) applyShareCardAdaptiveSize(quote.text);
     animateShareCardEntrance();
+    initShareBadgeTooltip();
     initShareCopyButton(quote);
     initShareAddButton();
 });
