@@ -85,9 +85,10 @@ class SharedQuoteControllerTest {
         mockMvc.perform(get("/api/shared/tok123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text").value("Shared text"))
-                .andExpect(jsonPath("$.alreadyImported").value(false));
+                .andExpect(jsonPath("$.alreadyImported").value(false))
+                .andExpect(jsonPath("$.importedQuoteId").doesNotExist());
 
-        verify(quoteRepository, org.mockito.Mockito.never()).existsBySharedQuoteIdAndUserId(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(quoteRepository, org.mockito.Mockito.never()).findBySharedQuoteIdAndUserId(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test

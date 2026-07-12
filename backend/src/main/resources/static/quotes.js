@@ -379,7 +379,7 @@ function syncFavButtonWidth(btn, label) {
  */
 function renderQuoteCard(q, index, rankMap) {
     return `
-        <article class="quote-card" style="animation-delay: ${Math.min(index * 40, 300)}ms">
+        <article class="quote-card" data-id="${q.id}" style="animation-delay: ${Math.min(index * 40, 300)}ms">
           <span class="quote-card-num">${rankMap.get(q.id) ?? '—'}</span>
           <div class="quote-card-text-wrap">
             <p class="quote-card-text">${escHtml(q.text)}</p>
@@ -478,6 +478,50 @@ function renderList(resetPage = true) {
     markClippedCards();
     initExpandableCards();
     renderShowMoreButton(visibleQuotes.length, filteredQuotes.length);
+}
+
+/**
+ * localStorage key share.js writes before redirecting from the public share
+ * page's "View in my collection" button to /#all — see goToImportedQuote()
+ * in share.js.
+ */
+const SHARE_HIGHLIGHT_STORAGE_KEY = 'epigraph_highlight_quote_id';
+
+/**
+ * @returns {boolean} Whether a share-page redirect is waiting to be highlighted,
+ *   without consuming it — used by switchView() to render the full unpaginated
+ *   list so the target card isn't hidden behind "show more".
+ */
+function hasPendingSharedImport() {
+    try {
+        return !!localStorage.getItem(SHARE_HIGHLIGHT_STORAGE_KEY);
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Scrolls to and briefly highlights the quote card left behind by a "View in
+ * my collection" redirect from the public share page, then clears the flag.
+ * No-ops silently if the flag is absent or the card isn't in the current
+ * (already fully rendered, thanks to hasPendingSharedImport()) list.
+ */
+function highlightPendingSharedImport() {
+    let pendingId;
+    try {
+        pendingId = localStorage.getItem(SHARE_HIGHLIGHT_STORAGE_KEY);
+        if (pendingId) localStorage.removeItem(SHARE_HIGHLIGHT_STORAGE_KEY);
+    } catch (e) {
+        return;
+    }
+    if (!pendingId) return;
+
+    const card = document.querySelector(`.quote-card[data-id="${pendingId}"]`);
+    if (!card) return;
+
+    card.scrollIntoView({behavior: 'smooth', block: 'center'});
+    card.classList.add('just-shared');
+    setTimeout(() => card.classList.remove('just-shared'), 1800);
 }
 
 /**

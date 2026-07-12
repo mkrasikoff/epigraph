@@ -415,7 +415,8 @@ const TRANSLATIONS = {
         // ── Share (public quote page, TASK-125) ───────────────────────────────
         shareBadge:                     'Публичная',
         shareAddButton:                 'Добавить в коллекцию',
-        shareAlreadyImported:           'Уже в коллекции',
+        shareViewInCollection:          'Посмотреть в коллекции',
+        shareCopyQuote:                 'Копировать',
         shareLoginRequired:             'Войдите, чтобы добавить',
         shareImportSuccess:             'Цитата добавлена в вашу коллекцию',
         shareImportError:               'Не удалось добавить цитату',
@@ -838,7 +839,8 @@ const TRANSLATIONS = {
         // ── Share (public quote page, TASK-125) ───────────────────────────────
         shareBadge:                     'Public',
         shareAddButton:                 'Add to my collection',
-        shareAlreadyImported:           'Already in your collection',
+        shareViewInCollection:          'View in my collection',
+        shareCopyQuote:                 'Copy',
         shareLoginRequired:             'Sign in to add it',
         shareImportSuccess:             'Quote added to your collection',
         shareImportError:               'Couldn\'t add the quote',

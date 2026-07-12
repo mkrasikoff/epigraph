@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.ImportSharedQuoteResponse;
 import com.mkrasikoff.epigraph.dto.PublicSharedQuoteResponse;
 import com.mkrasikoff.epigraph.dto.SharedQuoteLinkResponse;
+import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.SharedQuote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
 import com.mkrasikoff.epigraph.service.AchievementService;
@@ -47,12 +48,13 @@ public class SharedQuoteController {
     public PublicSharedQuoteResponse getShared(@PathVariable String token, @AuthenticationPrincipal Long userId) {
         SharedQuote shared = sharedQuoteService.getPublic(token);
 
-        boolean alreadyImported = userId != null
-                && quoteRepository.existsBySharedQuoteIdAndUserId(shared.getId(), userId);
+        Quote imported = userId != null
+                ? quoteRepository.findBySharedQuoteIdAndUserId(shared.getId(), userId).orElse(null)
+                : null;
 
         return new PublicSharedQuoteResponse(
                 shared.getText(), shared.getAuthor(), shared.getSource(), shared.getTags(),
-                shared.getCreatedAt(), alreadyImported);
+                shared.getCreatedAt(), imported != null, imported != null ? imported.getId() : null);
     }
 
     @PostMapping("/api/shared/{token}/import")
