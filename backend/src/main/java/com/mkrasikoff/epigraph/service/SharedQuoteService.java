@@ -11,6 +11,7 @@ import com.mkrasikoff.epigraph.repository.SharedQuoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -63,15 +64,36 @@ public class SharedQuoteService {
     }
 
     /**
+     * Finds a quote the given user already "has" for this shared link — either
+     * a previously imported copy, or, if the visitor is the link's own owner,
+     * the original quote itself (source_quote_id), so the owner viewing their
+     * own share link doesn't get offered an "Add to collection" button that
+     * would just duplicate a quote they already own. Returns empty if the
+     * user has neither (userId is null, or the owner's original was since
+     * deleted — see the 016 migration comment on why that's a normal state).
+     */
+    @Transactional(readOnly = true)
+    public Optional<Quote> findExistingCopy(SharedQuote shared, Long userId) {
+        if (userId == null) return Optional.empty();
+
+        if (userId.equals(shared.getOwnerUserId()) && shared.getSourceQuoteId() != null) {
+            Optional<Quote> original = quoteRepo.findByIdAndUserId(shared.getSourceQuoteId(), userId);
+            if (original.isPresent()) return original;
+        }
+
+        return quoteRepo.findBySharedQuoteIdAndUserId(shared.getId(), userId);
+    }
+
+    /**
      * Copies a shared quote into the importer's own collection. A given user can
-     * import a given link at most once — a repeat call returns the previously
-     * imported copy instead of creating a duplicate.
+     * import a given link at most once — a repeat call (or the owner importing
+     * their own share) returns the existing quote instead of creating a duplicate.
      */
     @Transactional
     public ImportSharedQuoteResponse importToCollection(String token, Long importerUserId) {
         SharedQuote shared = getPublic(token);
 
-        Quote existing = quoteRepo.findBySharedQuoteIdAndUserId(shared.getId(), importerUserId).orElse(null);
+        Quote existing = findExistingCopy(shared, importerUserId).orElse(null);
         if (existing != null) {
             return new ImportSharedQuoteResponse(existing, true);
         }

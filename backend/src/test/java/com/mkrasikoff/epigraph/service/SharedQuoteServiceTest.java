@@ -115,6 +115,55 @@ class SharedQuoteServiceTest {
     }
 
     @Test
+    @DisplayName("findExistingCopy: returns empty for an anonymous visitor")
+    void findExistingCopy_returnsEmpty_whenUserIdNull() {
+        SharedQuote shared = buildSharedQuote(5L);
+
+        assertThat(sharedQuoteService.findExistingCopy(shared, null)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findExistingCopy: finds the owner's original quote without a prior import")
+    void findExistingCopy_findsOwnersOriginal() {
+        SharedQuote shared = buildSharedQuote(5L);
+        Quote original = buildQuote();
+        when(quoteRepo.findByIdAndUserId(QUOTE_ID, OWNER_ID)).thenReturn(Optional.of(original));
+
+        Optional<Quote> result = sharedQuoteService.findExistingCopy(shared, OWNER_ID);
+
+        assertThat(result).contains(original);
+        verify(quoteRepo, never()).findBySharedQuoteIdAndUserId(any(), any());
+    }
+
+    @Test
+    @DisplayName("findExistingCopy: falls back to an imported copy when the owner's original is gone")
+    void findExistingCopy_fallsBackWhenOriginalDeleted() {
+        SharedQuote shared = buildSharedQuote(5L);
+        Quote reimported = buildQuote();
+        when(quoteRepo.findByIdAndUserId(QUOTE_ID, OWNER_ID)).thenReturn(Optional.empty());
+        when(quoteRepo.findBySharedQuoteIdAndUserId(5L, OWNER_ID)).thenReturn(Optional.of(reimported));
+
+        Optional<Quote> result = sharedQuoteService.findExistingCopy(shared, OWNER_ID);
+
+        assertThat(result).contains(reimported);
+    }
+
+    @Test
+    @DisplayName("importToCollection: owner visiting their own share link doesn't create a duplicate")
+    void importToCollection_ownerDoesNotDuplicate() {
+        SharedQuote shared = buildSharedQuote(5L);
+        Quote original = buildQuote();
+        when(sharedQuoteRepo.findByToken("tok123")).thenReturn(Optional.of(shared));
+        when(quoteRepo.findByIdAndUserId(QUOTE_ID, OWNER_ID)).thenReturn(Optional.of(original));
+
+        ImportSharedQuoteResponse result = sharedQuoteService.importToCollection("tok123", OWNER_ID);
+
+        assertThat(result.isAlreadyImported()).isTrue();
+        assertThat(result.getQuote()).isSameAs(original);
+        verify(quoteRepo, never()).save(any());
+    }
+
+    @Test
     @DisplayName("importToCollection: copies the shared quote into the importer's collection")
     void importToCollection_createsCopy() {
         SharedQuote shared = buildSharedQuote(5L);

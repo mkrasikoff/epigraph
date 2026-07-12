@@ -84,17 +84,17 @@ public class SharePageController {
         String author = shared.getAuthor() != null ? HtmlUtils.htmlEscape(shared.getAuthor()) : "";
         String source = shared.getSource() != null ? HtmlUtils.htmlEscape(shared.getSource()) : "";
         String sourceBlock = shared.getSource() != null && !shared.getSource().isBlank()
-                ? "<div class=\"share-source\">" + source + "</div>"
+                ? "<div class=\"qod-source\">" + source + "</div>"
                 : "";
 
         return """
-                <div class="share-card">
+                <div class="qod-card">
                     <span class="share-badge" data-i18n="shareBadge">Публичная</span>
-                    <p class="share-quote">%s</p>
-                    <div class="share-author">%s</div>
+                    <p class="qod-quote" id="share-quote-text">%s</p>
+                    <div class="qod-author">%s</div>
                     %s
                 </div>
-                <div class="share-actions">
+                <div class="qod-actions">
                     <button class="btn-secondary" id="share-copy-btn">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         <span data-i18n="shareCopyQuote">Копировать</span>

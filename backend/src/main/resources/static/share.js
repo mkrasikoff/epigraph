@@ -48,6 +48,117 @@ function shareAuthHeaders() {
         : {'Content-Type': 'application/json'};
 }
 
+/**
+ * Reads the quote data SharePageController embeds in a JSON <script> block
+ * alongside the rendered card — shared by the copy button and the adaptive
+ * card-sizing logic so both work off one parse. Returns null on the
+ * not-found page (no data block) or if parsing fails.
+ */
+function shareReadQuoteData() {
+    const dataEl = document.getElementById('share-quote-json');
+    if (!dataEl) return null;
+
+    try {
+        return JSON.parse(dataEl.textContent);
+    } catch (e) {
+        return null;
+    }
+}
+
+// =============================================================================
+// LOGO ANIMATION
+// Same draw-in / flip flourishes as the main app's header (ui.js) — ported
+// rather than imported since ui.js assumes the full SPA is loaded around it.
+// =============================================================================
+function drawLogoIcon() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const paths = document.querySelectorAll('#logo-icon path');
+    if (!paths.length) return;
+
+    const lengths = [...paths].map(path => path.getTotalLength());
+
+    paths.forEach((path, i) => {
+        path.style.strokeDasharray = String(lengths[i]);
+        path.style.strokeDashoffset = String(lengths[i]);
+    });
+
+    requestAnimationFrame(() => {
+        paths.forEach((path, i) => {
+            path.style.transition = `stroke-dashoffset 600ms ease ${i * 100}ms`;
+            path.style.strokeDashoffset = '0';
+        });
+    });
+
+    setTimeout(() => {
+        paths.forEach(path => {
+            path.style.transition = '';
+            path.style.strokeDasharray = '';
+            path.style.strokeDashoffset = '';
+        });
+    }, 600 + paths.length * 100 + 20);
+}
+
+function flipLogoIcon() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const icon = document.getElementById('logo-icon');
+    if (!icon) return;
+
+    const deg = (parseFloat(icon.dataset.flipDeg) || 0) + 180;
+    icon.dataset.flipDeg = String(deg);
+    icon.style.transform = `rotateY(${deg}deg)`;
+}
+
+// =============================================================================
+// ADAPTIVE CARD SIZE
+// Same width/font-size heuristic as the QoD screen's applyQodAdaptiveSize()
+// (quotes.js) — ported onto this page's own card/text ids so a long shared
+// quote gets a wider card and smaller font instead of clipping, matching
+// the reading experience of the main app rather than a fixed-size box.
+// =============================================================================
+function applyShareCardAdaptiveSize(text) {
+    const card = document.querySelector('.qod-card');
+    const el = document.getElementById('share-quote-text');
+    if (!card || !el || !text) return;
+
+    const len = text.length;
+
+    function estimateLines(fontSizeRem, cardWidthPx) {
+        const charsPerLine = (cardWidthPx * 0.88) / (fontSizeRem * 16 * 0.55);
+        return Math.ceil(len / charsPerLine);
+    }
+
+    const widths = [
+        {cls: 'qod-size-short', px: 480},
+        {cls: 'qod-size-medium', px: 740},
+        {cls: 'qod-size-long', px: 960},
+        {cls: 'qod-size-very-long', px: 1100},
+    ];
+    const fontSizes = [3.4, 2.8, 2.2, 1.8, 1.5];
+
+    let chosenWidth = widths[widths.length - 1];
+    let chosenFont = fontSizes[fontSizes.length - 1];
+
+    outer:
+        for (const fontSize of fontSizes) {
+            for (const width of widths) {
+                if (estimateLines(fontSize, width.px) <= 2) {
+                    chosenFont = fontSize;
+                    chosenWidth = width;
+                    break outer;
+                }
+            }
+        }
+
+    card.classList.remove('qod-size-short', 'qod-size-medium', 'qod-size-long', 'qod-size-very-long');
+    card.classList.add(chosenWidth.cls);
+
+    const minFontSize = (chosenFont * 0.72).toFixed(2);
+    const midFontSize = (chosenFont * 0.55).toFixed(2);
+    el.style.fontSize = `clamp(${minFontSize}rem, ${midFontSize}rem + 2vw, ${chosenFont}rem)`;
+}
+
 // =============================================================================
 // THEME / LANGUAGE TOGGLES
 // Same localStorage keys as the main app (ui.js), simplified — no icon
@@ -98,17 +209,9 @@ function initShareLangToggle() {
 // Same text format as the main app's formatQuoteAsText() (ui.js), read from
 // the JSON data block the server embeds alongside the rendered card.
 // =============================================================================
-function initShareCopyButton() {
+function initShareCopyButton(quote) {
     const btn = document.getElementById('share-copy-btn');
-    const dataEl = document.getElementById('share-quote-json');
-    if (!btn || !dataEl) return;
-
-    let quote;
-    try {
-        quote = JSON.parse(dataEl.textContent);
-    } catch (e) {
-        return;
-    }
+    if (!btn || !quote) return;
 
     btn.addEventListener('click', () => {
         let text = quote.text || '';
@@ -206,6 +309,10 @@ document.addEventListener('DOMContentLoaded', () => {
     applyI18n();
     initShareThemeToggle();
     initShareLangToggle();
-    initShareCopyButton();
+    drawLogoIcon();
+
+    const quote = shareReadQuoteData();
+    if (quote) applyShareCardAdaptiveSize(quote.text);
+    initShareCopyButton(quote);
     initShareAddButton();
 });
