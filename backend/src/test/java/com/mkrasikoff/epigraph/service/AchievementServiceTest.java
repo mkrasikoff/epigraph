@@ -104,10 +104,10 @@ class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("evaluate: unlocks favorites_25 once 50 manually-added favorites are reached")
+    @DisplayName("evaluate: unlocks favorites_25 once 50 favorites are reached, regardless of manuallyAdded")
     void evaluate_unlocksFavorites25() {
         when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
-        when(quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(USER_ID)).thenReturn(50L);
+        when(quoteRepo.countByUserIdAndFavTrue(USER_ID)).thenReturn(50L);
         when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
         when(activityDayRepo.countByUserId(USER_ID)).thenReturn(0L);
         when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
@@ -123,10 +123,29 @@ class AchievementServiceTest {
     }
 
     @Test
+    @DisplayName("evaluate: favorites_25 counts favorited quotes imported via a share link too")
+    void evaluate_favorites25CountsImportedQuotes() {
+        when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
+        when(quoteRepo.countByUserIdAndFavTrue(USER_ID)).thenReturn(3L);
+        when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
+        when(activityDayRepo.countByUserId(USER_ID)).thenReturn(0L);
+        when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
+        when(progressRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        achievementService.evaluate(USER_ID);
+
+        ArgumentCaptor<AchievementProgress> captor = ArgumentCaptor.forClass(AchievementProgress.class);
+        verify(progressRepo, org.mockito.Mockito.atLeastOnce()).save(captor.capture());
+        AchievementProgress favorites = captor.getAllValues().stream()
+                .filter(p -> p.getAchievementKey().equals("favorites_25"))
+                .findFirst().orElseThrow();
+        assertThat(favorites.getProgress()).isEqualTo(3);
+    }
+
+    @Test
     @DisplayName("evaluate: week_streak progress is the consecutive run, not the total active-day count")
     void evaluate_weekStreakUsesConsecutiveRun_notTotalDays() {
         when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
-        when(quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(USER_ID)).thenReturn(0L);
         when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
         when(activityDayRepo.countByUserId(USER_ID)).thenReturn(5L);
         when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(
@@ -154,7 +173,6 @@ class AchievementServiceTest {
     @DisplayName("evaluate: does not unlock badges below the active-days threshold")
     void evaluate_doesNotUnlockBadges_belowThreshold() {
         when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(1L);
-        when(quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(USER_ID)).thenReturn(0L);
         when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
         when(activityDayRepo.countByUserId(USER_ID)).thenReturn(3L);
         when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
@@ -173,7 +191,6 @@ class AchievementServiceTest {
     @DisplayName("evaluate: re-equips the highest-prestige unlocked badge")
     void evaluate_reequipsHighestBadge() {
         when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(1L);
-        when(quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(USER_ID)).thenReturn(0L);
         when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
         when(activityDayRepo.countByUserId(USER_ID)).thenReturn(30L);
         when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());

@@ -492,7 +492,7 @@ function renderFocusedAchievementsModal() {
 }
 
 /**
- * Compact "condition + reward" line for a row — e.g. "25 избранных вручную ·
+ * Compact "condition + reward" line for a row — e.g. "50 избранных ·
  * тема «Океан»" for theme achievements, or just the condition for badges
  * (the badge itself already *is* the reward, so restating it would be
  * redundant clutter).
@@ -541,6 +541,16 @@ function renderAllAchievementsModal() {
         const desc = achievementConditionWithReward(a);
         const iconTier = a.rewardType === 'badge' ? badgeIconTierClass(a.rewardKey) : '';
 
+        // Only "Начитанность" (distinct-authors count) is gated on manuallyAdded quotes —
+        // imported-via-link quotes don't move it, unlike favorites. That's non-obvious enough
+        // to call out right on the row rather than as a general disclaimer nobody reads.
+        const infoHtml = a.key === 'authors_10' ? `
+            <button type="button" class="achievement-info-btn" data-achievement-info-toggle aria-label="${t('ariaAchievementInfo')}" aria-expanded="false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </button>
+            <div class="achievement-info-tooltip" role="tooltip">${t('achievementsImportHint')}</div>
+        ` : '';
+
         let statusHtml;
         let progressHtml = '';
 
@@ -560,7 +570,10 @@ function renderAllAchievementsModal() {
         return `<div class="achievement-row${a.unlocked ? ' achievement-row--unlocked' : ''}">
                     <div class="achievement-row-icon ${iconTier}">${meta.icon || ''}</div>
                     <div class="achievement-row-body">
-                        <span class="achievement-row-title">${title}</span>
+                        <span class="achievement-row-title-wrap">
+                            <span class="achievement-row-title">${title}</span>
+                            ${infoHtml}
+                        </span>
                         <div class="achievement-row-condition">${desc}</div>
                         ${progressHtml}
                     </div>
@@ -578,7 +591,40 @@ function renderAllAchievementsModal() {
     `;
 
     showModal(t('settingsAchievementsTitle'), body, [], true);
+    initAchievementInfoTooltips();
 }
+
+/**
+ * Wires up click-to-toggle for the small info icons rendered next to
+ * achievement rows that need a disclaimer (currently just authors_10 — see
+ * renderAllAchievementsModal()). Called after every render since showModal()
+ * replaces the modal body's innerHTML each time, so previous listeners (and
+ * their elements) are already gone — no accumulation risk. The click-outside/
+ * Escape-to-close handling is registered once at module load, below.
+ */
+function initAchievementInfoTooltips() {
+    document.querySelectorAll('[data-achievement-info-toggle]').forEach(btn => {
+        const tooltip = btn.nextElementSibling;
+        if (!tooltip || !tooltip.classList.contains('achievement-info-tooltip')) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const opening = !tooltip.classList.contains('visible');
+            document.querySelectorAll('.achievement-info-tooltip.visible').forEach(t => t.classList.remove('visible'));
+            tooltip.classList.toggle('visible', opening);
+            btn.setAttribute('aria-expanded', String(opening));
+        });
+    });
+}
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.achievement-info-tooltip.visible').forEach(t => t.classList.remove('visible'));
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.achievement-info-tooltip.visible').forEach(t => t.classList.remove('visible'));
+    }
+});
 
 /**
  * Applies an unlocked theme achievement's reward from inside the
