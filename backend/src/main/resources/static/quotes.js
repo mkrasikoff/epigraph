@@ -500,11 +500,22 @@ function hasPendingSharedImport() {
     }
 }
 
+const SHARE_HIGHLIGHT_FADE_MS = 900;
+const SHARE_HIGHLIGHT_HOLD_MS = 1100;
+
 /**
  * Scrolls to and briefly highlights the quote card left behind by a "View in
  * my collection" redirect from the public share page, then clears the flag.
  * No-ops silently if the flag is absent or the card isn't in the current
  * (already fully rendered, thanks to hasPendingSharedImport()) list.
+ *
+ * Fades out via an intermediate .just-shared-fade-out modifier rather than
+ * just removing .just-shared directly — a CSS transition's duration comes
+ * from the state being transitioned TO, so removing .just-shared outright
+ * would fade out using .quote-card's own snappy 180ms hover transition
+ * instead of this highlight's slower, deliberate one. Keeping .just-shared
+ * applied while flipping the box-shadow value keeps that slower transition
+ * in effect for the fade-out too — see the CSS comment in styles.css.
  */
 function highlightPendingSharedImport() {
     let pendingId;
@@ -521,7 +532,11 @@ function highlightPendingSharedImport() {
 
     card.scrollIntoView({behavior: 'smooth', block: 'center'});
     card.classList.add('just-shared');
-    setTimeout(() => card.classList.remove('just-shared'), 1800);
+
+    setTimeout(() => {
+        card.classList.add('just-shared-fade-out');
+        setTimeout(() => card.classList.remove('just-shared', 'just-shared-fade-out'), SHARE_HIGHLIGHT_FADE_MS);
+    }, SHARE_HIGHLIGHT_HOLD_MS);
 }
 
 /**
