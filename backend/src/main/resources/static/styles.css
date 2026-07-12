@@ -1088,6 +1088,20 @@ body.modal-lock-scroll {
     transform: translateY(-1px);
 }
 
+/* Brief highlight for the card landed on via a "View in my collection" redirect from the public share page */
+.quote-card.just-shared {
+    animation: justSharedPulse 1.8s ease;
+}
+
+@keyframes justSharedPulse {
+    0%, 100% {
+        box-shadow: var(--shadow-sm);
+    }
+    15%, 60% {
+        box-shadow: 0 0 0 3px var(--color-primary);
+    }
+}
+
 .quote-card-num {
     position: absolute;
     top: var(--space-3);

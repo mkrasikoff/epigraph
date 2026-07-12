@@ -15,9 +15,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Serves the public share page at GET /s/{token}. This is intentionally a plain
@@ -32,10 +36,12 @@ public class SharePageController {
     private static final Logger log = LoggerFactory.getLogger(SharePageController.class);
 
     private final SharedQuoteService sharedQuoteService;
+    private final ObjectMapper objectMapper;
     private final String template;
 
-    public SharePageController(SharedQuoteService sharedQuoteService) {
+    public SharePageController(SharedQuoteService sharedQuoteService, ObjectMapper objectMapper) {
         this.sharedQuoteService = sharedQuoteService;
+        this.objectMapper = objectMapper;
         this.template = loadTemplate();
     }
 
@@ -77,20 +83,39 @@ public class SharePageController {
         String text = HtmlUtils.htmlEscape(shared.getText()).replace("\n", "<br>");
         String author = shared.getAuthor() != null ? HtmlUtils.htmlEscape(shared.getAuthor()) : "";
         String source = shared.getSource() != null ? HtmlUtils.htmlEscape(shared.getSource()) : "";
+        String sourceBlock = shared.getSource() != null && !shared.getSource().isBlank()
+                ? "<div class=\"share-source\">" + source + "</div>"
+                : "";
 
         return """
-                <div class="quote-card is-expanded">
-                    <span class="quote-card-badge" data-i18n="shareBadge">Публичная</span>
-                    <div class="quote-card-text-wrap"><div class="quote-card-text">%s</div></div>
-                    <div class="quote-card-meta">
-                        <div>
-                            <span class="quote-card-author">%s</span>
-                            <span class="quote-card-source">%s</span>
-                        </div>
-                    </div>
+                <div class="share-card">
+                    <span class="share-badge" data-i18n="shareBadge">Публичная</span>
+                    <p class="share-quote">%s</p>
+                    <div class="share-author">%s</div>
+                    %s
                 </div>
-                <button id="share-add-btn" class="btn-primary" data-token="%s" disabled></button>
-                """.formatted(text, author, source, HtmlUtils.htmlEscape(token));
+                <div class="share-actions">
+                    <button class="btn-secondary" id="share-copy-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span data-i18n="shareCopyQuote">Копировать</span>
+                    </button>
+                    <button id="share-add-btn" class="btn-primary" data-token="%s" disabled></button>
+                </div>
+                <script type="application/json" id="share-quote-json">%s</script>
+                """.formatted(text, author, sourceBlock, HtmlUtils.htmlEscape(token), toQuoteJson(shared));
+    }
+
+    private String toQuoteJson(SharedQuote shared) {
+        Map<String, String> data = new LinkedHashMap<>();
+        data.put("text", shared.getText());
+        data.put("author", shared.getAuthor());
+        data.put("source", shared.getSource());
+
+        try {
+            return objectMapper.writeValueAsString(data).replace("</", "<\\/");
+        } catch (Exception e) {
+            return "{}";
+        }
     }
 
     private String buildNotFoundBody() {
