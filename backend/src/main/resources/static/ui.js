@@ -461,12 +461,19 @@ function switchView(id) {
 
     if (id !== 'qod') document.body.classList.remove('no-scroll');
     if (id === 'list') {
-        // A pending share-page redirect means the target card must not be hidden
-        // behind pagination — render the full list before searching for it.
-        const highlightPending = hasPendingSharedImport();
-        if (highlightPending) listVisibleCount = quotes.length;
         renderList();
-        if (highlightPending) highlightPendingSharedImport();
+
+        // A pending share-page redirect means the target card must not be hidden
+        // behind pagination. renderList()'s own resetPage=true branch always resets
+        // listVisibleCount back to LIST_PAGE_SIZE, so setting it beforehand doesn't
+        // stick — instead, reuse the same incremental-append path loadMoreQuotes()
+        // uses (renderList(false)) to reveal the rest without re-rendering (and
+        // thus re-animating) the cards already on screen.
+        if (hasPendingSharedImport()) {
+            listVisibleCount = quotes.length;
+            renderList(false);
+            highlightPendingSharedImport();
+        }
     }
     // loadQod() talks to the authenticated /api/quotes/qod endpoint, which 204s for
     // guests (no account to resolve a QoD for) — that would reset qodAnchorId to null
@@ -490,7 +497,35 @@ function switchView(id) {
     if (window.location.hash !== newHash) {
         window.history.pushState(null, '', newHash);
     }
+
+    updateScrollTopBtn();
 }
+
+// =============================================================================
+// SCROLL TO TOP
+// Floating button, "Мои цитаты" list view only — the page scrolls on the
+// document itself (no inner scrollable container), so this listens on window.
+// =============================================================================
+const SCROLL_TOP_THRESHOLD_PX = 480;
+
+/**
+ * Shows/hides the floating scroll-to-top button based on the current view and
+ * scroll position. Called on every scroll event and on every switchView().
+ */
+function updateScrollTopBtn() {
+    const btn = document.getElementById('scroll-top-btn');
+    if (!btn) return;
+
+    const onListView = document.getElementById('view-list')?.classList.contains('active');
+    btn.classList.toggle('visible', !!onListView && window.scrollY > SCROLL_TOP_THRESHOLD_PX);
+}
+
+/** Smooth-scrolls back to the top of the page — called by the floating button's onclick. */
+function scrollListToTop() {
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+window.addEventListener('scroll', updateScrollTopBtn, {passive: true});
 
 /**
  * Navigates to the Add view and scrolls to the import section.

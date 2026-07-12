@@ -111,6 +111,41 @@ function flipLogoIcon() {
 }
 
 // =============================================================================
+// ENTRANCE ANIMATION
+// Same "entry" phase randomQuote() (quotes.js) plays after swapping in a new
+// QoD quote — ported here as a one-time entrance for the card on load, since
+// this page has no previous quote to collapse away from, only the fade/slide
+// reveal of the new one. Durations are deliberately longer than the QoD
+// original (380ms/440ms) — this plays once on a page the visitor is landing
+// on cold, rather than after a button click they just triggered, so a more
+// unhurried pace reads better here.
+// =============================================================================
+function animateShareCardEntrance() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const card = document.querySelector('.qod-card');
+    if (!card) return;
+
+    card.style.transition = 'none';
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(14px) scale(0.97)';
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            card.style.transition = 'opacity 650ms ease-out, transform 750ms cubic-bezier(0.16, 1, 0.3, 1)';
+            card.style.opacity = '1';
+            card.style.transform = '';
+
+            setTimeout(() => {
+                card.style.transition = '';
+                card.style.opacity = '';
+                card.style.transform = '';
+            }, 770);
+        });
+    });
+}
+
+// =============================================================================
 // ADAPTIVE CARD SIZE
 // Same width/font-size heuristic as the QoD screen's applyQodAdaptiveSize()
 // (quotes.js) — ported onto this page's own card/text ids so a long shared
@@ -313,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const quote = shareReadQuoteData();
     if (quote) applyShareCardAdaptiveSize(quote.text);
+    animateShareCardEntrance();
     initShareCopyButton(quote);
     initShareAddButton();
 });
