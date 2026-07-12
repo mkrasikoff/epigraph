@@ -460,7 +460,14 @@ function switchView(id) {
     moveNavIndicator();
 
     if (id !== 'qod') document.body.classList.remove('no-scroll');
-    if (id === 'list') renderList();
+    if (id === 'list') {
+        // A pending share-page redirect means the target card must not be hidden
+        // behind pagination — render the full list before searching for it.
+        const highlightPending = hasPendingSharedImport();
+        if (highlightPending) listVisibleCount = quotes.length;
+        renderList();
+        if (highlightPending) highlightPendingSharedImport();
+    }
     // loadQod() talks to the authenticated /api/quotes/qod endpoint, which 204s for
     // guests (no account to resolve a QoD for) — that would reset qodAnchorId to null
     // and incorrectly clear the "Today" highlight even though the same guest anchor
