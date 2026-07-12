@@ -133,6 +133,7 @@ const TRANSLATIONS = {
         ariaSwitchToDarkTheme:          'Переключить на тёмную тему',
         ariaToggleLanguage:             'Переключить язык',
         ariaLogout:                     'Выйти из аккаунта',
+        ariaScrollTop:                  'Наверх',
         ariaBannerClose:                'Закрыть',
 
         // ── QOD (Quote of the Day) ────────────────────────────────────────────
@@ -557,6 +558,7 @@ const TRANSLATIONS = {
         ariaSwitchToDarkTheme:          'Switch to dark theme',
         ariaToggleLanguage:             'Switch language',
         ariaLogout:                     'Sign out',
+        ariaScrollTop:                  'Scroll to top',
         ariaBannerClose:                'Close',
 
         // ── QOD (Quote of the Day) ────────────────────────────────────────────

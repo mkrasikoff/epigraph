@@ -1088,18 +1088,28 @@ body.modal-lock-scroll {
     transform: translateY(-1px);
 }
 
-/* Brief highlight for the card landed on via a "View in my collection" redirect from the public share page */
+/* Brief highlight for the card landed on via a "View in my collection" redirect from the public
+   share page. Deliberately a transition on box-shadow, not a keyframe animation — .quote-card
+   already has its own `animation: cardAppear ...`, and toggling a class that also sets `animation`
+   replaces that shorthand, which makes the browser treat it as a new animation once the class is
+   removed and restarts cardAppear (the card visibly disappears and re-fades-in). box-shadow
+   transitions don't touch the animation property at all, so this can't retrigger it.
+
+   Own transition-duration (not the shared var(--transition), which is a snappy 180ms tuned for
+   hover micro-interactions) — reusing that made both the fade-in and fade-out read as an abrupt
+   snap rather than the graceful highlight this is meant to be. A CSS transition's duration is
+   taken from the state being transitioned TO, so a fade-OUT that used .quote-card's own 180ms
+   transition (the class being removed) would still be fast even with a slower fade-in here — the
+   .just-shared-fade-out modifier keeps .just-shared (and its 900ms transition) applied while
+   flipping the box-shadow value back, so the class removal itself is a no-op restyle and both
+   directions share the same slow, graceful timing. See highlightPendingSharedImport() in quotes.js. */
 .quote-card.just-shared {
-    animation: justSharedPulse 1.8s ease;
+    box-shadow: 0 0 0 3px var(--color-primary);
+    transition: box-shadow 900ms ease;
 }
 
-@keyframes justSharedPulse {
-    0%, 100% {
-        box-shadow: var(--shadow-sm);
-    }
-    15%, 60% {
-        box-shadow: 0 0 0 3px var(--color-primary);
-    }
+.quote-card.just-shared.just-shared-fade-out {
+    box-shadow: var(--shadow-sm);
 }
 
 .quote-card-num {
@@ -2939,6 +2949,55 @@ body.modal-lock-scroll {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+}
+
+/* =============================================================================
+// SCROLL TO TOP
+// Floating button shown on the "Мои цитаты" list view once the user has
+// scrolled down past a threshold — see scrollListToTop()/updateScrollTopBtn()
+// in ui.js. Sits above .toast-wrap's offset so the two don't overlap if a
+// toast fires while it's visible.
+// ============================================================================= */
+.scroll-top-btn {
+    position: fixed;
+    bottom: calc(var(--space-6) + 56px);
+    right: var(--space-6);
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: oklch(from var(--color-surface) l c h / 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    z-index: 90;
+    opacity: 0;
+    transform: translateY(14px) scale(0.9);
+    pointer-events: none;
+    /* Deliberately much slower than --transition (180ms, tuned for hover micro-interactions) —
+       this is a standalone appear/disappear, not a hover reaction, and reads as considerably
+       calmer at this pace. */
+    transition: opacity 480ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+                background var(--transition), color var(--transition);
+}
+
+.scroll-top-btn.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.scroll-top-btn:hover {
+    background: var(--color-surface-offset);
+    color: var(--color-primary);
+}
+
+.scroll-top-btn:active {
+    transform: scale(0.94);
 }
 
 /* =============================================================================
