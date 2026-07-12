@@ -134,6 +134,7 @@ const TRANSLATIONS = {
         ariaToggleLanguage:             'Переключить язык',
         ariaLogout:                     'Выйти из аккаунта',
         ariaScrollTop:                  'Наверх',
+        ariaAchievementInfo:            'Подробнее',
         ariaBannerClose:                'Закрыть',
 
         // ── QOD (Quote of the Day) ────────────────────────────────────────────
@@ -326,6 +327,7 @@ const TRANSLATIONS = {
         achievementExplorerDesc:        'Добавление цитаты, избранное, импорт, смена темы, правка профиля',
         achievementWeekStreakTitle:     'Неделя с Epigraph',
         achievementWeekStreakDesc:      '7 дней активности подряд',
+        achievementsImportHint:         'Цитаты, импортированные из файла, не считаются для достижения «Начитанность» и количества добавленных цитат.',
         badgeNoviceTitle:               'Новичок',
         badgeNoviceDesc:                'Добавьте первую цитату вручную',
         badgeChroniclerTitle:           'Летописец',
@@ -558,6 +560,7 @@ const TRANSLATIONS = {
         ariaToggleLanguage:             'Switch language',
         ariaLogout:                     'Sign out',
         ariaScrollTop:                  'Scroll to top',
+        ariaAchievementInfo:            'More info',
         ariaBannerClose:                'Close',
 
         // ── QOD (Quote of the Day) ────────────────────────────────────────────
@@ -750,6 +753,7 @@ const TRANSLATIONS = {
         achievementExplorerDesc:        'Add a quote, favorite one, import, switch theme, edit profile',
         achievementWeekStreakTitle:     'A week with Epigraph',
         achievementWeekStreakDesc:      '7 days of consecutive activity',
+        achievementsImportHint:         'Quotes imported from a file don\'t count toward the "Well-read" achievement or your added-quotes total.',
         badgeNoviceTitle:               'Novice',
         badgeNoviceDesc:                'Add your first quote by hand',
         badgeChroniclerTitle:           'Chronicler',
