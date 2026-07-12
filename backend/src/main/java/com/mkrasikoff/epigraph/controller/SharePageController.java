@@ -89,7 +89,12 @@ public class SharePageController {
 
         return """
                 <div class="qod-card">
-                    <span class="share-badge" data-i18n="shareBadge">Публичная</span>
+                    <button type="button" class="share-badge-icon" id="share-badge-icon"
+                            aria-label="Публичная цитата" data-i18n-aria="shareBadge"
+                            aria-describedby="share-badge-tooltip" aria-expanded="false">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </button>
+                    <div class="share-badge-tooltip" id="share-badge-tooltip" role="tooltip" data-i18n="sharePublicHint">Эта цитата публичная.\nДоступен только просмотр.</div>
                     <p class="qod-quote" id="share-quote-text">%s</p>
                     <div class="qod-author">%s</div>
                     %s
