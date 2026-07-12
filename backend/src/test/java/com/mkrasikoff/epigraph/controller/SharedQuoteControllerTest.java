@@ -3,7 +3,6 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.ImportSharedQuoteResponse;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.SharedQuote;
-import com.mkrasikoff.epigraph.repository.QuoteRepository;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.SharedQuoteService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,16 +36,13 @@ class SharedQuoteControllerTest {
     private SharedQuoteService sharedQuoteService;
 
     @Mock
-    private QuoteRepository quoteRepository;
-
-    @Mock
     private AchievementService achievementService;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        SharedQuoteController controller = new SharedQuoteController(sharedQuoteService, quoteRepository, achievementService);
+        SharedQuoteController controller = new SharedQuoteController(sharedQuoteService, achievementService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
@@ -80,15 +76,30 @@ class SharedQuoteControllerTest {
     @Test
     @DisplayName("GET /api/shared/{token}: returns public quote content with no auth required")
     void getShared_returnsPublicContent() throws Exception {
-        when(sharedQuoteService.getPublic("tok123")).thenReturn(buildSharedQuote());
+        SharedQuote shared = buildSharedQuote();
+        when(sharedQuoteService.getPublic("tok123")).thenReturn(shared);
+        when(sharedQuoteService.findExistingCopy(shared, null)).thenReturn(java.util.Optional.empty());
 
         mockMvc.perform(get("/api/shared/tok123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text").value("Shared text"))
                 .andExpect(jsonPath("$.alreadyImported").value(false))
                 .andExpect(jsonPath("$.importedQuoteId").doesNotExist());
+    }
 
-        verify(quoteRepository, org.mockito.Mockito.never()).findBySharedQuoteIdAndUserId(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    @Test
+    @DisplayName("GET /api/shared/{token}: reports already-owned when the visitor already has a copy (e.g. is the owner)")
+    void getShared_reportsExistingCopy() throws Exception {
+        SharedQuote shared = buildSharedQuote();
+        Quote owned = new Quote();
+        owned.setId(10L);
+        when(sharedQuoteService.getPublic("tok123")).thenReturn(shared);
+        when(sharedQuoteService.findExistingCopy(shared, null)).thenReturn(java.util.Optional.of(owned));
+
+        mockMvc.perform(get("/api/shared/tok123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.alreadyImported").value(true))
+                .andExpect(jsonPath("$.importedQuoteId").value(10));
     }
 
     @Test

@@ -56,36 +56,18 @@
             gap: var(--space-4);
         }
         .share-body {
+            position: relative;
             min-height: calc(100vh - 60px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: var(--space-6);
+            gap: var(--space-8);
             padding: var(--space-8) var(--space-6);
-        }
-        .share-card {
-            position: relative;
-            width: 100%;
-            max-width: 34rem;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--space-10) var(--space-8) var(--space-6);
-            box-shadow: var(--shadow-lg);
             overflow: hidden;
         }
-        .share-card::before {
-            content: '"';
-            position: absolute;
-            top: calc(-1 * var(--space-6));
-            left: var(--space-6);
-            font-family: var(--font-display);
-            font-size: 7rem;
-            line-height: 1;
-            color: var(--color-primary);
-            opacity: 0.15;
-            pointer-events: none;
+        .share-body .qod-card {
+            cursor: default;
         }
         .share-badge {
             display: inline-block;
@@ -99,41 +81,64 @@
             letter-spacing: 0.06em;
             margin-bottom: var(--space-4);
         }
-        .share-quote {
-            font-family: var(--font-display);
-            font-style: italic;
-            font-weight: 400;
-            font-size: var(--text-lg);
-            line-height: 1.5;
-            color: var(--color-text);
-            margin-bottom: var(--space-4);
-        }
-        .share-author {
-            font-size: var(--text-sm);
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--color-primary);
-        }
-        .share-source {
-            font-size: var(--text-xs);
-            color: var(--color-text-muted);
-            margin-top: var(--space-1);
-            font-style: italic;
-        }
-        .share-actions {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--space-3);
-            flex-wrap: wrap;
-        }
     </style>
 </head>
 <body>
+
+<!-- THEME DECOR — same fixed animated background as index.html, one group per theme style -->
+<div id="theme-decor" aria-hidden="true">
+    <div class="decor decor-classic">
+        <span class="decor-glyph" style="--x:6%; --dur:34s; --delay:-4s;">&ldquo;</span>
+        <span class="decor-glyph" style="--x:22%; --dur:29s; --delay:-14s;">&rdquo;</span>
+        <span class="decor-glyph" style="--x:40%; --dur:38s; --delay:-2s;">&rdquo;</span>
+        <span class="decor-glyph" style="--x:58%; --dur:26s; --delay:-18s;">&ldquo;</span>
+        <span class="decor-glyph" style="--x:76%; --dur:33s; --delay:-9s;">&ldquo;</span>
+        <span class="decor-glyph" style="--x:90%; --dur:31s; --delay:-22s;">&rdquo;</span>
+    </div>
+    <div class="decor decor-forest">
+        <span class="decor-leaf" style="--x:4%; --dur:13s; --delay:-3s;"></span>
+        <span class="decor-leaf" style="--x:16%; --dur:17s; --delay:-9s;"></span>
+        <span class="decor-leaf" style="--x:30%; --dur:14s; --delay:-1s;"></span>
+        <span class="decor-leaf" style="--x:45%; --dur:19s; --delay:-11s;"></span>
+        <span class="decor-leaf" style="--x:60%; --dur:15s; --delay:-6s;"></span>
+        <span class="decor-leaf" style="--x:74%; --dur:18s; --delay:-14s;"></span>
+        <span class="decor-leaf" style="--x:87%; --dur:16s; --delay:-4s;"></span>
+        <span class="decor-leaf" style="--x:96%; --dur:20s; --delay:-8s;"></span>
+    </div>
+    <div class="decor decor-cosmos">
+        <span class="decor-star" style="--x:5%; --y:10%; --dur:3.2s; --delay:-1s;"></span>
+        <span class="decor-star" style="--x:14%; --y:32%; --dur:4.1s; --delay:-2s;"></span>
+        <span class="decor-star" style="--x:24%; --y:60%; --dur:3.6s; --delay:-3s;"></span>
+        <span class="decor-star" style="--x:33%; --y:18%; --dur:4.6s; --delay:-1.5s;"></span>
+        <span class="decor-star" style="--x:44%; --y:75%; --dur:3.9s; --delay:-2.5s;"></span>
+        <span class="decor-star" style="--x:53%; --y:40%; --dur:4.3s; --delay:-0.5s;"></span>
+        <span class="decor-star" style="--x:63%; --y:12%; --dur:3.4s; --delay:-3.5s;"></span>
+        <span class="decor-star" style="--x:71%; --y:55%; --dur:4.8s; --delay:-1.8s;"></span>
+        <span class="decor-star" style="--x:80%; --y:28%; --dur:3.7s; --delay:-2.2s;"></span>
+        <span class="decor-star" style="--x:90%; --y:68%; --dur:4.2s; --delay:-0.8s;"></span>
+        <span class="decor-star" style="--x:96%; --y:20%; --dur:3.9s; --delay:-3.2s;"></span>
+        <span class="decor-shooting"></span>
+    </div>
+    <div class="decor decor-ocean">
+        <span class="decor-bubble" style="--x:6%; --size:10px; --dur:15s; --delay:-2s;"></span>
+        <span class="decor-bubble" style="--x:18%; --size:16px; --dur:19s; --delay:-8s;"></span>
+        <span class="decor-bubble" style="--x:31%; --size:8px; --dur:13s; --delay:-4s;"></span>
+        <span class="decor-bubble" style="--x:47%; --size:13px; --dur:17s; --delay:-11s;"></span>
+        <span class="decor-bubble" style="--x:61%; --size:9px; --dur:14s; --delay:-6s;"></span>
+        <span class="decor-bubble" style="--x:74%; --size:18px; --dur:20s; --delay:-13s;"></span>
+        <span class="decor-bubble" style="--x:86%; --size:11px; --dur:16s; --delay:-3s;"></span>
+        <span class="decor-bubble" style="--x:95%; --size:14px; --dur:18s; --delay:-9s;"></span>
+    </div>
+    <div class="decor decor-sunset">
+        <span class="decor-blob decor-blob-1"></span>
+        <span class="decor-blob decor-blob-2"></span>
+        <span class="decor-blob decor-blob-3"></span>
+    </div>
+</div>
+
 <header class="share-header">
-    <a class="logo" href="/">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+    <a class="logo" href="/" onclick="flipLogoIcon()">
+        <svg id="logo-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
             <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
         </svg>
@@ -143,11 +148,12 @@
         <button class="btn-icon" id="share-theme-toggle" aria-label="Переключить тему" data-i18n-aria="ariaToggleTheme">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <button class="btn-icon" id="share-lang-toggle" aria-label="Переключить язык" data-i18n-aria="ariaToggleLanguage">EN</button>
-        <a class="btn-secondary" href="/" data-i18n="shareOpenApp">Открыть Epigraph</a>
+        <button class="btn-icon" id="share-lang-toggle" data-lang-toggle aria-label="Переключить язык" data-i18n-aria="ariaToggleLanguage">EN</button>
+        <button class="btn-secondary" onclick="window.location.href='/'" data-i18n="shareOpenApp">Открыть Epigraph</button>
     </div>
 </header>
 <div class="share-body">
+    <div class="qod-bg-ornament"></div>
     {{BODY}}
 </div>
 <div id="toast-wrap" class="toast-wrap"></div>
