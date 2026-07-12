@@ -26,7 +26,15 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
 
     long countByUserIdAndManuallyAddedTrue(Long userId);
 
-    long countByUserIdAndManuallyAddedTrueAndFavTrue(Long userId);
+    /**
+     * Unlike the other count*ManuallyAdded* queries, favorites intentionally
+     * count every favorited quote regardless of manuallyAdded — favoriting an
+     * imported quote is still a real curation action by the user, unlike
+     * "added N quotes" or "N distinct authors", which reward hand-entering
+     * content and would be trivially gamed by importing many quotes at once.
+     * See AchievementService.evaluate()'s favorites_25 handling.
+     */
+    long countByUserIdAndFavTrue(Long userId);
 
     @Query("SELECT COUNT(DISTINCT q.author) FROM Quote q " +
             "WHERE q.userId = :userId AND q.manuallyAdded = true AND q.author IS NOT NULL AND q.author <> ''")

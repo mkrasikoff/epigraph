@@ -82,10 +82,7 @@ public class AchievementService {
      */
     @Transactional
     public void recordAction(Long userId, String actionKey) {
-        AchievementDefinition explorer = AchievementCatalog.THEME_ACHIEVEMENTS.stream()
-                .filter(a -> a.key().equals("explorer"))
-                .findFirst()
-                .orElseThrow();
+        AchievementDefinition explorer = achievementDef("explorer");
 
         AchievementProgress row = progressRepo.findByUserIdAndAchievementKey(userId, explorer.key())
                 .orElseGet(() -> {
@@ -114,25 +111,44 @@ public class AchievementService {
      * Recomputes every count/distinct/streak-based achievement (everything
      * except "explorer", which is updated incrementally by recordAction())
      * from current data, upserts unlock status, then re-equips the badge.
+     *
+     * favorites_25 deliberately reads countByUserIdAndFavTrue (every favorited
+     * quote), not a manuallyAdded-gated count like authors_10/badge_novice —
+     * favoriting a quote imported via a share link (TASK-125) is still a real
+     * choice by the user, unlike "added N quotes"/"N distinct authors", which
+     * would be trivially inflated by importing a large collection at once.
+     *
+     * Thresholds are read from the catalog (achievementDef(key).threshold())
+     * rather than hardcoded here — they previously duplicated the catalog's
+     * numbers as literals and had drifted out of sync (favorites_25 checked
+     * against 25 here while the catalog/frontend showed a 50 goal; authors_10
+     * similarly checked 10 against a displayed 25), silently unlocking early.
      */
     @Transactional
     public void evaluate(Long userId) {
         long manualQuotes = quoteRepo.countByUserIdAndManuallyAddedTrue(userId);
-        long manualFavorites = quoteRepo.countByUserIdAndManuallyAddedTrueAndFavTrue(userId);
+        long favoritedQuotes = quoteRepo.countByUserIdAndFavTrue(userId);
         long manualAuthors = quoteRepo.countDistinctManuallyAddedAuthors(userId);
         long activeDays = activityDayRepo.countByUserId(userId);
 
-        upsertProgress(userId, "favorites_25", manualFavorites, 25);
-        upsertProgress(userId, "authors_10", manualAuthors, 10);
-        upsertProgress(userId, "week_streak", currentStreak(userId), 7);
+        upsertProgress(userId, "favorites_25", favoritedQuotes, achievementDef("favorites_25").threshold());
+        upsertProgress(userId, "authors_10", manualAuthors, achievementDef("authors_10").threshold());
+        upsertProgress(userId, "week_streak", currentStreak(userId), achievementDef("week_streak").threshold());
 
-        upsertProgress(userId, AchievementCatalog.BADGE_NOVICE, manualQuotes, 1);
+        upsertProgress(userId, AchievementCatalog.BADGE_NOVICE, manualQuotes, achievementDef(AchievementCatalog.BADGE_NOVICE).threshold());
         for (AchievementDefinition badge : AchievementCatalog.BADGE_ACHIEVEMENTS) {
             if (badge.key().equals(AchievementCatalog.BADGE_NOVICE)) continue;
             upsertProgress(userId, badge.key(), activeDays, badge.threshold());
         }
 
         reequipBadge(userId);
+    }
+
+    private AchievementDefinition achievementDef(String key) {
+        return AchievementCatalog.ALL.stream()
+                .filter(a -> a.key().equals(key))
+                .findFirst()
+                .orElseThrow();
     }
 
     /**
