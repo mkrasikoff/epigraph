@@ -1020,52 +1020,6 @@ function dismissBanner() {
 }
 
 // =============================================================================
-// QUOTE OF THE DAY LOADER
-// Fetches QoD from the backend and caches the result in sessionStorage
-// to avoid redundant API calls within the same session.
-// =============================================================================
-/**
- * Loads the Quote of the Day from the backend, using sessionStorage cache
- * to avoid redundant requests within the same browser session.
- * Falls back to renderQod(null) if the request fails.
- * @param {boolean} [animate=false] - Crossfade the card into the new content (see
- *   renderQodAnimated()) instead of updating it instantly — the caller decides this based on
- *   whether the card is already showing today's quote (see switchView() in ui.js).
- */
-async function loadQod(animate) {
-    const render = animate ? renderQodAnimated : renderQod;
-    const CACHE_KEY = 'epigraph_qod_id';
-
-    try {
-        const cachedId = sessionStorage.getItem(CACHE_KEY);
-        if (cachedId !== null) {
-            const quote = quotes.find(q => q.id === Number(cachedId));
-            if (quote) {
-                qodAnchorId = quote.id;
-                render(quote);
-                return;
-            }
-            // Cached id no longer matches a local quote (deleted/edited since caching) —
-            // fall through to a fresh fetch instead of rendering with no anchor at all,
-            // which used to permanently strip the "Today" tab highlight for the rest of
-            // the session once the cache went stale.
-        }
-    } catch { /* corrupted cache — proceed to fetch */ }
-
-    try {
-        const qodQuote = await Api.getQod();
-        if (qodQuote) {
-            sessionStorage.setItem(CACHE_KEY, String(qodQuote.id));
-        }
-        qodAnchorId = qodQuote ? qodQuote.id : null;
-        render(qodQuote);
-    } catch {
-        qodAnchorId = null;
-        render(null);
-    }
-}
-
-// =============================================================================
 // HASH ROUTING
 // Syncs browser URL hash with the active view and handles back/forward navigation.
 // Supported hashes: #today, #all, #add, #settings
