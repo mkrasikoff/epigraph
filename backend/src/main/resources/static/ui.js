@@ -481,8 +481,20 @@ function switchView(id) {
     // quote is still on screen. Guests already have their anchor (quotes[0], set in
     // showGuestMode()), so just re-render it instead of hitting the backend.
     if (id === 'qod') {
-        if (isGuest) renderQod();
-        else loadQod();
+        // Only animate the content swap when the card is about to show something other than
+        // today's actual quote — landing back on a QoD that was already on screen (e.g.
+        // clicking "Today" again, or returning from another tab without having browsed away
+        // via Random/swipe) shouldn't replay the transition. currentQodIndex === -1 means the
+        // card has never been rendered at all (very first "Today" visit this session) — nothing
+        // real to crossfade from yet, so treat that as "already showing" too, otherwise the
+        // very first render plays phase 1 (fade/collapse) against an empty placeholder card
+        // before any data has loaded, flashing an empty card for a moment.
+        const alreadyShowingQod = currentQodIndex === -1 || quotes[currentQodIndex]?.id === qodAnchorId;
+        if (isGuest) {
+            if (alreadyShowingQod) renderQod(); else renderQodAnimated();
+        } else {
+            loadQod(!alreadyShowingQod);
+        }
     }
     if (id === 'add') { renderTags(); moveAllToggleIndicators(); }
     if (id === 'settings') {
@@ -624,6 +636,10 @@ document.addEventListener('keydown', e => {
  */
 function toast(msg, type) {
     const wrap = document.getElementById('toast-wrap');
+    // Only ever show the latest toast — piling up several at once (e.g. from repeated
+    // "Copy" clicks) hasn't been useful anywhere in the app.
+    wrap.querySelectorAll('.toast').forEach(el => el.remove());
+
     const el = document.createElement('div');
 
     el.className = 'toast' + (type === 'error' ? ' toast--error' : '');

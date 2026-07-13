@@ -27,7 +27,7 @@
  * - applyHashRoute()          {fn}  — defined in auth.js
  * - hideLoadingOverlay()      {fn}  — defined in auth.js
  * - authSubmit()              {fn}  — defined in auth.js
- * - SORT_LABELS      {Object}  — defined in quotes.js
+ * - SORT_LABEL_KEYS  {Object}  — defined in quotes.js
  * - randomQuote()    {fn}      — defined in quotes.js
  * - initNotifications()       {fn}  — defined in notifications.js
  * - applyI18n()               {fn}  — defined in i18n.js
@@ -86,10 +86,10 @@
     // Restore sort preference
     try {
         const savedSort = localStorage.getItem('epigraph_sort');
-        if (savedSort && SORT_LABELS[savedSort]) {
+        if (savedSort && SORT_LABEL_KEYS[savedSort]) {
             currentSort = savedSort;
             const label = document.getElementById('sort-btn-label');
-            if (label) label.textContent = SORT_LABELS[savedSort];
+            if (label) label.textContent = t(SORT_LABEL_KEYS[savedSort]);
             document.querySelectorAll('.sort-menu-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.sort === savedSort);
             });
