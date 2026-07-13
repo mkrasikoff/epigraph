@@ -9,7 +9,12 @@
     <meta name="theme-color" content="#18160f" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f5f2ec" id="theme-color-meta">
     <script>
-        // Runs synchronously before first paint — sets theme-color before Safari reads it
+        // Runs synchronously before first paint — sets theme-color before Safari reads it, and
+        // sets data-theme-style before anything renders so the loading spinner (styled purely
+        // via [data-theme-style] CSS) doesn't flash the "classic" default for a moment before
+        // ui.js's theme IIFE (which only runs once every earlier <script> tag has loaded) gets
+        // to it. Keep this style-key list in sync with THEME_STYLE_KEYS in themes.js — it can't
+        // be shared since themes.js hasn't loaded yet at this point.
         (function () {
             var stored = null;
             try {
@@ -20,6 +25,14 @@
             if (dark) {
                 document.getElementById('theme-color-meta').setAttribute('content', '#18160f');
                 document.documentElement.setAttribute('data-theme', 'dark');
+            }
+
+            try {
+                var style = localStorage.getItem('themeStyle');
+                if (style && ['classic', 'forest', 'cosmos', 'ocean', 'sunset'].indexOf(style) !== -1) {
+                    document.documentElement.setAttribute('data-theme-style', style);
+                }
+            } catch (e) {
             }
         })();
     </script>
@@ -428,7 +441,7 @@
                                 <line x1="3" y1="12" x2="15" y2="12"/>
                                 <line x1="3" y1="18" x2="9" y2="18"/>
                             </svg>
-                            <span id="sort-btn-label" data-i18n="sortDateDesc">
+                            <span id="sort-btn-label">
                                 Сначала новые
                             </span>
                             <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none"
@@ -487,7 +500,7 @@
                     Добавляйте цитаты вручную или импортируйте через JSON файл.
                 </p>
 
-                <form onsubmit="addQuote(event)">
+                <form onsubmit="addQuote(event)" autocomplete="off">
                     <div class="form-group">
                         <label class="form-label" for="q-text">
                             <span data-i18n="addLabelText">
@@ -498,7 +511,7 @@
                                 (обязательно)
                             </span>
                         </label>
-                        <div class="form-textarea-wrap"><textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…" maxlength="1000" data-i18n-placeholder="placeholderQuoteText"></textarea>
+                        <div class="form-textarea-wrap"><textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…" maxlength="1000" data-i18n-placeholder="placeholderQuoteText" autocomplete="off"></textarea>
                             <div class="char-counter" id="quoteTextCounter">0 / 1000</div>
                         </div>
                     </div>
@@ -514,7 +527,7 @@
                                 </span>
                             </label>
                             <div class="form-input-wrap">
-                                <input class="form-input" type="text" id="q-author" placeholder="Имя автора" data-i18n-placeholder="placeholderAuthor" maxlength="100">
+                                <input class="form-input" type="text" id="q-author" placeholder="Имя автора" data-i18n-placeholder="placeholderAuthor" maxlength="100" autocomplete="off">
                                 <div class="char-counter" id="authorCounter">0 / 100</div>
                             </div>
                         </div>
@@ -529,7 +542,7 @@
                                 </span>
                             </label>
                             <div class="form-input-wrap">
-                                <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…" data-i18n-placeholder="placeholderSource" maxlength="200">
+                                <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…" data-i18n-placeholder="placeholderSource" maxlength="200" autocomplete="off">
                                 <div class="char-counter" id="sourceCounter">0 / 200</div>
                             </div>
                         </div>
@@ -1055,6 +1068,17 @@
                                 Ваши цитаты хранятся в облаке и доступны с любого устройства. Используйте экспорт для резервных копий.
                             </p>
                         </div>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4 data-i18n="settingsContactTitle">
+                                Обратная связь
+                            </h4>
+                            <p data-i18n="settingsContactDesc">
+                                Есть вопрос или предложение? Напишите мне.
+                            </p>
+                        </div>
+                        <span class="settings-contact-email">epigraph.support@icloud.com</span>
                     </div>
                     <div class="settings-item">
                         <div class="settings-item-info">

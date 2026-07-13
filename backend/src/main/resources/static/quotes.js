@@ -195,8 +195,20 @@ function randomQuote() {
         idx = Math.floor(Math.random() * quotes.length);
     } while (idx === currentQodIndex && quotes.length > 1);
 
+    renderQodAnimated(idx);
+}
+
+/**
+ * Same as renderQod(), but crossfades the card out and back in around the content swap instead
+ * of updating it instantly — used whenever the QoD card is already on screen and about to show
+ * different content (a random quote, or navigating back to "Today" from elsewhere), so the
+ * change reads as a deliberate transition rather than a jump cut. Falls back to a plain
+ * renderQod() when there's no existing card to animate from (e.g. the very first render).
+ * @param {Object|number|null} [qodOrIdx] - Same argument renderQod() accepts.
+ */
+function renderQodAnimated(qodOrIdx) {
     const card = document.querySelector('.qod-card');
-    if (!card) { renderQod(idx); return; }
+    if (!card) { renderQod(qodOrIdx); return; }
 
     // Phase 1: collapse card upward
     const prevHeight = card.offsetHeight;
@@ -213,7 +225,7 @@ function randomQuote() {
         card.style.height = 'auto'; // release freeze temporarily
 
         // Update content synchronously (renderQod no longer has its own animation)
-        renderQod(idx);
+        renderQod(qodOrIdx);
 
         // Force reflow so browser computes new dimensions with new text + font size + width class
         void card.offsetHeight;
@@ -641,11 +653,14 @@ function setFilter(filter, btn) {
 // SORT DROPDOWN
 // Custom pill-style sort control: open/close, selection, and persistence.
 // =============================================================================
-const SORT_LABELS = {
-    date_desc: t('sortDateDesc'),
-    date_asc: t('sortDateAsc'),
-    author_asc: t('sortAuthorAsc'),
-    author_desc: t('sortAuthorDesc'),
+// Maps sort keys to i18n keys (not translated strings) so the label can be
+// recomputed on demand — e.g. by applyI18n()'s sort-label resync — instead of
+// going stale after a language switch.
+const SORT_LABEL_KEYS = {
+    date_desc: 'sortDateDesc',
+    date_asc: 'sortDateAsc',
+    author_asc: 'sortAuthorAsc',
+    author_desc: 'sortAuthorDesc',
 };
 
 /**
@@ -690,7 +705,7 @@ function selectSort(value) {
     }
 
     const label = document.getElementById('sort-btn-label');
-    if (label) label.textContent = SORT_LABELS[value] || value;
+    if (label) label.textContent = t(SORT_LABEL_KEYS[value] || SORT_LABEL_KEYS.date_desc);
 
     document.querySelectorAll('.sort-menu-item').forEach(item => {
         item.classList.toggle('active', item.dataset.sort === value);
@@ -926,7 +941,7 @@ function editQuote(id) {
     <div class="edit-textarea-wrap">
         <textarea class="edit-textarea" id="editQuoteText" rows="4"
                   placeholder="${t('placeholderEditQuoteText')}"
-                  maxlength="1000"></textarea>
+                  maxlength="1000" autocomplete="off"></textarea>
         <div class="char-counter" id="editQuoteTextCounter">0 / 1000</div>
     </div>
     </div>
@@ -934,14 +949,14 @@ function editQuote(id) {
       <div class="edit-form-group">
         <label for="edit-author">${t('addLabelAuthor')} <span>${t('addOptional')}</span></label>
         <div class="edit-input-wrap">
-            <input class="edit-input" type="text" id="edit-author" value="${escHtml(q.author || '')}" placeholder="${t('placeholderEditAuthor')}" maxlength="100">
+            <input class="edit-input" type="text" id="edit-author" value="${escHtml(q.author || '')}" placeholder="${t('placeholderEditAuthor')}" maxlength="100" autocomplete="off">
             <div class="char-counter" id="editAuthorCounter">${(q.author || '').length} / 100</div>
         </div>
       </div>
       <div class="edit-form-group">
         <label for="edit-source">${t('addLabelSource')} <span>${t('addOptional')}</span></label>
         <div class="edit-input-wrap">
-            <input class="edit-input" type="text" id="edit-source" value="${escHtml(q.source || '')}" placeholder="${t('placeholderEditSource')}" maxlength="200">
+            <input class="edit-input" type="text" id="edit-source" value="${escHtml(q.source || '')}" placeholder="${t('placeholderEditSource')}" maxlength="200" autocomplete="off">
             <div class="char-counter" id="editSourceCounter">${(q.source || '').length} / 200</div>
         </div>
       </div>
