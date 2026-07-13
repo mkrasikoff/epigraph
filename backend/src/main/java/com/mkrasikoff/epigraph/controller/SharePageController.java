@@ -25,10 +25,11 @@ import java.util.Map;
 
 /**
  * Serves the public share page at GET /s/{token}. This is intentionally a plain
- * String-replace template (not a full templating engine) rendered outside
- * static/, because it's the one page that needs server-injected Open Graph tags
- * for link-preview crawlers — see TASK-125 plan for why the rest of the SPA
- * doesn't need this.
+ * String-replace template (not a full templating engine) that lives in
+ * resources/templates/ (not static/), because it's the one page that needs
+ * server-injected Open Graph tags for link-preview crawlers and must NOT be
+ * directly reachable as a static URL — see TASK-125 plan for why the rest of the
+ * SPA doesn't need this.
  */
 @RestController
 public class SharePageController {
@@ -146,8 +147,7 @@ public class SharePageController {
 
     private String loadTemplate() {
         try {
-            return new String(new ClassPathResource("share-template.html").getInputStream().readAllBytes(),
-                    StandardCharsets.UTF_8);
+            return new String(new ClassPathResource("templates/share-template.html").getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to load share-template.html", e);
         }
