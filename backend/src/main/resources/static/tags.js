@@ -68,6 +68,7 @@ function renderTagEditor(opts) {
         input.className = 'form-input tag-input';
         input.placeholder = t('placeholderTagInput');
         input.maxLength = 50;
+        input.autocomplete = 'off';
 
         const commit = () => {
             const val = input.value.trim();

@@ -7,6 +7,7 @@
  * - currentQodIndex  {number}   — defined in index.html CONSTANTS
  * - loadData()       {fn}       — defined in api.js
  * - renderQod()      {fn}       — defined in quotes.js
+ * - renderQodAnimated() {fn}    — defined in quotes.js
  * - switchView()     {fn}       — defined in index.html NAVIGATION
  * - t()              {fn}       — defined in i18n.js
  * - setLanguage()    {fn}       — defined in i18n.js
@@ -1027,8 +1028,12 @@ function dismissBanner() {
  * Loads the Quote of the Day from the backend, using sessionStorage cache
  * to avoid redundant requests within the same browser session.
  * Falls back to renderQod(null) if the request fails.
+ * @param {boolean} [animate=false] - Crossfade the card into the new content (see
+ *   renderQodAnimated()) instead of updating it instantly — the caller decides this based on
+ *   whether the card is already showing today's quote (see switchView() in ui.js).
  */
-async function loadQod() {
+async function loadQod(animate) {
+    const render = animate ? renderQodAnimated : renderQod;
     const CACHE_KEY = 'epigraph_qod_id';
 
     try {
@@ -1037,7 +1042,7 @@ async function loadQod() {
             const quote = quotes.find(q => q.id === Number(cachedId));
             if (quote) {
                 qodAnchorId = quote.id;
-                renderQod(quote);
+                render(quote);
                 return;
             }
             // Cached id no longer matches a local quote (deleted/edited since caching) —
@@ -1053,10 +1058,10 @@ async function loadQod() {
             sessionStorage.setItem(CACHE_KEY, String(qodQuote.id));
         }
         qodAnchorId = qodQuote ? qodQuote.id : null;
-        renderQod(qodQuote);
+        render(qodQuote);
     } catch {
         qodAnchorId = null;
-        renderQod(null);
+        render(null);
     }
 }
 

@@ -380,6 +380,8 @@ const TRANSLATIONS = {
         settingsStorageDesc:            'Ваши цитаты хранятся в облаке и доступны с любого устройства. Используйте экспорт для резервных копий.',
         settingsSourceTitle:            'Исходный код',
         settingsSourceDesc:             'Проект с открытым исходным кодом на GitHub.',
+        settingsContactTitle:           'Обратная связь',
+        settingsContactDesc:            'Есть вопрос или предложение? Напишите мне.',
         ariaNotificationsToggle:        'Уведомления о цитате дня',
 
         // ── Notifications ─────────────────────────────────────────────────────
@@ -426,6 +428,9 @@ const TRANSLATIONS = {
         shareImportError:               'Не удалось добавить цитату',
         shareNotFoundTitle:             'Ссылка не найдена',
         shareNotFoundText:              'Эта цитата больше недоступна.',
+        notFoundTitle:                  'Страница не найдена',
+        notFoundText:                   'Похоже, эта страница потерялась между цитатами. Такой страницы не существует.',
+        notFoundHomeBtn:                'На главную',
         shareOpenApp:                   'Открыть Epigraph',
         shareActionLabel:               'Поделиться',
         shareLinkCopied:                'Ссылка скопирована',
@@ -806,6 +811,8 @@ const TRANSLATIONS = {
         settingsStorageDesc:            'Your quotes are stored in the cloud and available from any device. Use export for backups.',
         settingsSourceTitle:            'Source code',
         settingsSourceDesc:             'An open-source project on GitHub.',
+        settingsContactTitle:           'Contact us',
+        settingsContactDesc:            'Have a question or suggestion? Reach out to me.',
         ariaNotificationsToggle:        'Quote of the day notifications',
 
         // ── Notifications ─────────────────────────────────────────────────────
@@ -852,6 +859,9 @@ const TRANSLATIONS = {
         shareImportError:               'Couldn\'t add the quote',
         shareNotFoundTitle:             'Link not found',
         shareNotFoundText:              'This quote is no longer available.',
+        notFoundTitle:                  'Page not found',
+        notFoundText:                   'Looks like this page got lost between the quotes. No such page exists.',
+        notFoundHomeBtn:                'Go home',
         shareOpenApp:                   'Open Epigraph',
         shareActionLabel:               'Share',
         shareLinkCopied:                'Link copied',
@@ -976,6 +986,16 @@ function applyI18n(root = document) {
     root.querySelectorAll('[data-i18n-title]').forEach(el => {
         el.setAttribute('title', t(el.dataset.i18nTitle));
     });
+
+    // #sort-btn-label isn't [data-i18n] on purpose — its text tracks currentSort
+    // (set by selectSort()/bootstrap.js's restore-on-load code), not the static
+    // markup default. Re-sync it here so a later applyI18n() call (language
+    // switch, settings re-render) can't reset it back to the "date_desc" default
+    // while leaving the dropdown's checked item pointing at the real sort.
+    const sortLabelEl = document.getElementById('sort-btn-label');
+    if (sortLabelEl && typeof currentSort !== 'undefined' && typeof SORT_LABEL_KEYS !== 'undefined') {
+        sortLabelEl.textContent = t(SORT_LABEL_KEYS[currentSort] || SORT_LABEL_KEYS.date_desc);
+    }
 
     // Nav-tab and segmented-toggle labels just changed width (these are the only i18n
     // consumers whose text feeds a layout measurement) — re-sync the sliding pills so
