@@ -22,39 +22,6 @@
 const _registerFormSnapshot = document.getElementById('auth-register-form-col')?.innerHTML;
 
 // =============================================================================
-// AUTH STATE
-// JWT token stored in localStorage, helpers to read/write/clear it.
-// =============================================================================
-function getToken() {
-    try {
-        return localStorage.getItem('epigraph_token');
-    } catch (e) {
-        return null;
-    }
-}
-
-function setToken(token) {
-    try {
-        localStorage.setItem('epigraph_token', token);
-    } catch (e) {
-    }
-}
-
-function clearToken() {
-    try {
-        localStorage.removeItem('epigraph_token');
-    } catch (e) {
-    }
-}
-
-function authHeaders() {
-    const token = getToken();
-    return token
-        ? {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token}
-        : {'Content-Type': 'application/json'};
-}
-
-// =============================================================================
 // AUTH UI
 // The block responsible for authentication screens, modes, and session flow.
 // =============================================================================
@@ -111,19 +78,6 @@ function hideGuestMode() {
         document.getElementById('tab-' + id)?.classList.remove('guest-locked');
         document.getElementById('btn-fav-qod')?.classList.remove('guest-locked');
     });
-}
-
-/**
- * Fetches the authenticated user's profile (id, email, username) and caches
- * it in `currentUser` for display in Settings > Account. No-ops to null on
- * failure — callers fall back to placeholder text.
- */
-async function loadCurrentUser() {
-    try {
-        currentUser = await Api.getMe();
-    } catch (e) {
-        currentUser = null;
-    }
 }
 
 /**
@@ -886,72 +840,6 @@ async function submitProfileSetup() {
 }
 
 /**
- * Reconciles the app's active language with the authenticated user's account
- * right after login/register/reset. If this device already has an explicit
- * language choice (the guest picked one, or it was set on a previous
- * session), that choice wins and is pushed to the account — this is how a
- * language picked on the guest screen "sticks" through registration/login
- * instead of being silently overwritten by whatever the account had stored.
- * Otherwise (a fresh device with no local choice), the account's stored
- * preference is pulled down and applied locally.
- */
-async function syncPreferredLanguage() {
-    if (!currentUser) return;
-
-    let explicit = null;
-    try {
-        explicit = localStorage.getItem('epigraph_lang');
-    } catch (e) {
-    }
-
-    const serverLang = currentUser.preferredLanguage;
-
-    if (explicit && TRANSLATIONS[explicit] && explicit !== serverLang) {
-        try {
-            await Api.updatePreferredLanguage(explicit);
-            currentUser.preferredLanguage = explicit;
-        } catch (e) {
-        }
-    } else if (!explicit && serverLang) {
-        setLanguage(serverLang);
-    }
-}
-
-/**
- * Reconciles the app's active theme style with the authenticated user's
- * account right after login/register/reset — same "guest choice wins" shape
- * as syncPreferredLanguage() above, applied to the theme-style picker
- * instead of the language toggle. No page reload needed here since a style
- * switch is a pure CSS variable swap, not a text-reflow change.
- */
-async function syncPreferredTheme() {
-    if (!currentUser) return;
-
-    let explicit = null;
-    try {
-        explicit = localStorage.getItem('themeStyle');
-    } catch (e) {
-    }
-
-    const serverStyle = currentUser.themeStyle;
-
-    if (explicit && THEME_STYLE_KEYS.includes(explicit) && explicit !== serverStyle) {
-        try {
-            await Api.updateThemeStyle(explicit);
-            currentUser.themeStyle = explicit;
-        } catch (e) {
-        }
-    } else if (!explicit && serverStyle) {
-        document.documentElement.setAttribute('data-theme-style', serverStyle);
-        try {
-            localStorage.setItem('themeStyle', serverStyle);
-        } catch (e) {
-        }
-        updateThemeStyleGrid();
-    }
-}
-
-/**
  * Fetches the latest release tag from GitHub and displays it as the app version.
  * Caches the result in sessionStorage to avoid redundant API calls within the same session.
  */
@@ -1264,13 +1152,6 @@ async function initAuthButtons() {
             btn.style.display = '';
         });
     }
-}
-
-function logout() {
-    clearToken();
-    currentUser = null;
-    showGuestMode();
-    switchView('qod');
 }
 
 function handleAuthOverlayClick(e) {
