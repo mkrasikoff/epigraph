@@ -1,32 +1,23 @@
 /**
- * quotes.js — Quote rendering, list, sort, favorites, add/edit/delete, and import/export for Epigraph.
+ * quotes-edit.js — Quote mutations for Epigraph.
+ *
+ * Add-quote form handling, favourite toggling from the list, single-quote copy/share, and the
+ * edit + delete modals. The former quotes.js was split into qod.js / quotes-list.js /
+ * import-export.js / account.js and this file (TASK-127).
  *
  * Depends on:
- * - quotes           {Array}    — global mutable quotes array, defined in index.html CONSTANTS
- * - currentFilter    {string}   — defined in index.html CONSTANTS
- * - currentSort      {string}   — defined in index.html CONSTANTS
- * - currentQodIndex  {number}   — defined in index.html CONSTANTS
- * - editingId        {number}   — defined in index.html CONSTANTS
- * - QOD_ANIMATION_DEBOUNCE_MS  {number} — defined in index.html CONSTANTS
- * - FAVORITE_RERENDER_DELAY_MS {number} — defined in index.html CONSTANTS
- * - LIST_PAGE_SIZE   {number}   — defined in state.js
- * - listVisibleCount {number}   — defined in state.js
- * - listRenderedCount {number}  — defined in state.js
- * - moveNavIndicator() {fn}     — defined in ui.js
- * - currentLanguage  {string}   — defined in i18n.js
- * - isGuest          {boolean}  — defined in auth.js
- * - currentTags      {Array}    — defined in tags.js
+ * - quotes / currentFilter / currentTags / editTags / editingId {globals} — defined in state.js / tags.js
+ * - FAVORITE_RERENDER_DELAY_MS {number} — defined in state.js
  * - Api              {Object}   — defined in api.js
- * - renderTags()     {fn}       — defined in tags.js
- * - renderEditTags() {fn}       — defined in tags.js
- * - escHtml()        {fn}       — defined in index.html UTILITIES
- * - formatQuoteAsText() {fn}    — defined in index.html UTILITIES
- * - showModal()      {fn}       — defined in index.html MODAL
- * - closeModal()     {fn}       — defined in index.html MODAL
- * - toast()          {fn}       — defined in index.html TOAST
- * - updateCharCounter()  {fn}   — defined in index.html UTILITIES
- * - updateInputCounter() {fn}   — defined in index.html UTILITIES
  * - t()              {fn}       — defined in i18n.js
+ * - escHtml() / formatQuoteAsText() / showModal() / closeModal() / toast() {fn} — defined in ui.js
+ * - updateCharCounter() / updateInputCounter() {fn} — defined in ui.js
+ * - renderTags() / renderEditTags() {fn} — defined in tags.js
+ * - renderList() {fn} — defined in quotes-list.js
+ * - checkForNewAchievements() {fn} — defined in auth.js
+ *
+ * Provides (globals): addQuote(), resetForm(), toggleFav(), copyQuote(), shareQuote(),
+ *   editQuote(), saveEditQuote(), deleteQuote(), MAX_QUOTES_PER_USER.
  */
 
 // =============================================================================
@@ -362,175 +353,4 @@ async function deleteQuote(id) {
             {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal}],
         true
     );
-}
-
-/**
- * Shows a confirmation modal before deleting the account.
- * Two-step confirmation — user must click twice to proceed.
- */
-function confirmDeleteAccount() {
-    const phrase = t('deleteAccountConfirmPhrase');
-    showModal(
-        t('deleteAccountTitle'),
-        `${t('deleteAccountBody')}
-         <p style="margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)">
-             ${t('deleteConfirmHint')}<br><strong>${phrase}</strong>
-         </p>
-         <input id="delete-account-confirm-input" class="modal-confirm-input"
-                placeholder="${t('deleteAccountConfirmPlaceholder')}"
-                oninput="
-                    var btn = document.getElementById('modal-delete-account-btn');
-                    if (this.value === '${phrase}') {
-                        btn.removeAttribute('disabled');
-                        btn.style.opacity = '';
-                        btn.style.pointerEvents = '';
-                    } else {
-                        btn.setAttribute('disabled', 'true');
-                        btn.style.opacity = '0.45';
-                        btn.style.pointerEvents = 'none';
-                    }
-                ">`,
-        [
-            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
-            {
-                label: t('deleteAccountButton'),
-                cls: 'btn-danger',
-                id: 'modal-delete-account-btn',
-                action: deleteAccount
-            }
-        ]
-    );
-
-    // Disable immediately after modal renders — no setTimeout needed
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-        const btn = document.getElementById('modal-delete-account-btn');
-        if (btn) {
-            btn.setAttribute('disabled', 'true');
-            btn.style.opacity = '0.45';
-            btn.style.pointerEvents = 'none';
-        }
-    }));
-}
-
-/**
- * Sends DELETE /api/user/me request, clears local state, and redirects to home.
- */
-async function deleteAccount() {
-    closeModal();
-    try {
-        const res = await fetch('/api/user/me', {
-            method: 'DELETE',
-            headers: authHeaders()
-        });
-        if (!res.ok) throw new Error('Server error');
-
-        clearToken();
-        sessionStorage.clear();
-        quotes = [];
-
-        window.location.href = '/';
-    } catch (e) {
-        console.error('[deleteAccount] Failed:', e);
-        toast(t('deleteAccountToastError'));
-    }
-}
-
-/**
- * Opens the change-password modal.
- * Shows two fields: new password and confirm new password.
- */
-function showChangePasswordModal() {
-    showModal(
-        t('changePasswordTitle'),
-        `<div class="auth-field" style="margin-bottom:var(--space-3)">
-             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
-                 ${t('changePasswordNew')}
-             </label>
-             <input id="cp-new" type="password" class="modal-confirm-input"
-                    style="margin-top:var(--space-1)"
-                    placeholder="${t('changePasswordNewPlaceholder')}"
-                    autocomplete="new-password">
-         </div>
-         <div class="auth-field" style="margin-bottom:0">
-             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
-                 ${t('changePasswordConfirm')}
-             </label>
-             <input id="cp-confirm" type="password" class="modal-confirm-input"
-                    style="margin-top:var(--space-1)"
-                    placeholder="${t('changePasswordConfirmPlaceholder')}"
-                    autocomplete="new-password">
-         </div>
-         <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
-         color:#c0392b;min-height:1.2em"></p>`,
-        [
-            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
-            {
-                label: t('changePasswordSubmit'),
-                cls: 'btn-primary',
-                id: 'cp-submit-btn',
-                action: submitChangePassword
-            }
-        ]
-    );
-
-    // Disable submit until user starts typing a new password
-    const cpSubmitBtn = document.getElementById('cp-submit-btn');
-    const cpNewInput = document.getElementById('cp-new');
-    const cpConfirmInput = document.getElementById('cp-confirm');
-
-    if (cpSubmitBtn) {
-        cpSubmitBtn.disabled = true;
-        cpSubmitBtn.classList.add('btn-disabled-empty');
-    }
-
-    const updateSubmitState = () => {
-        const filled = cpNewInput.value.length > 0 && cpConfirmInput.value.length > 0;
-        if (!cpSubmitBtn) return;
-        cpSubmitBtn.disabled = !filled;
-        cpSubmitBtn.classList.toggle('btn-disabled-empty', !filled);
-    };
-
-    cpNewInput?.addEventListener('input', updateSubmitState);
-    cpConfirmInput?.addEventListener('input', updateSubmitState);
-}
-
-/**
- * Submits the new-password request. No current password required —
- * account recovery is handled by the forgot-password flow.
- */
-async function submitChangePassword() {
-    const newPw = document.getElementById('cp-new')?.value;
-    const confirmPw = document.getElementById('cp-confirm')?.value;
-    const errorEl = document.getElementById('cp-error');
-    const btn = document.getElementById('cp-submit-btn');
-
-    if (newPw !== confirmPw) {
-        if (errorEl) errorEl.textContent = t('changePasswordErrorMismatch');
-        return;
-    }
-
-    if (btn) btn.disabled = true;
-
-    try {
-        const res = await fetch('/api/user/me/password', {
-            method: 'PATCH',
-            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-            body: JSON.stringify({ newPassword: newPw })
-        });
-
-        const data = await res.json().catch(() => null);
-
-        if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorMismatch');
-            return;
-        }
-
-        closeModal();
-        toast(t('changePasswordSuccess'));
-
-    } catch {
-        if (errorEl) errorEl.textContent = t('authErrorConnection');
-    } finally {
-        if (btn) btn.disabled = false;
-    }
 }
