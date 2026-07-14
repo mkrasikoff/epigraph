@@ -811,7 +811,7 @@ const TRANSLATIONS = {
         settingsStorageDesc:            'Your quotes are stored in the cloud and available from any device. Use export for backups.',
         settingsSourceTitle:            'Source code',
         settingsSourceDesc:             'An open-source project on GitHub.',
-        settingsContactTitle:           'Contact us',
+        settingsContactTitle:           'Feedback',
         settingsContactDesc:            'Have a question or suggestion? Reach out to me.',
         ariaNotificationsToggle:        'Quote of the day notifications',
 
