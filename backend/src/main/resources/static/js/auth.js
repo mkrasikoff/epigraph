@@ -118,39 +118,6 @@ function dismissBanner() {
     setTimeout(() => banner.style.display = 'none', 210);
 }
 
-// =============================================================================
-// HASH ROUTING
-// Syncs browser URL hash with the active view and handles back/forward navigation.
-// Supported hashes: #today, #all, #add, #settings
-// =============================================================================
-/** Maps URL hashes to view identifiers. */
-const HASH_TO_VIEW = {
-    '#today':    'qod',
-    '#all':      'list',
-    '#add':      'add',
-    '#settings': 'settings',
-};
-
-/**
- * Returns the view id for the current window.location.hash,
- * falling back to 'qod' for unknown or empty hashes.
- * @returns {string}
- */
-function getViewFromHash() {
-    return HASH_TO_VIEW[window.location.hash] || 'qod';
-}
-
-/**
- * Navigates to the view matching the current URL hash.
- * Called on hashchange (back/forward) and on initial load.
- */
-function applyHashRoute() {
-    switchView(getViewFromHash());
-}
-
-// Handle browser back / forward buttons
-window.addEventListener('hashchange', applyHashRoute);
-
 function toggleAuthMode() {
     if (document.getElementById('auth-forgot-panel')) {
         hideForgotPasswordForm();
