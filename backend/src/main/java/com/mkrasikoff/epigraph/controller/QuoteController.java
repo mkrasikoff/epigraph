@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.BatchImportResult;
+import com.mkrasikoff.epigraph.dto.quote.BatchImportResult;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.QuoteService;

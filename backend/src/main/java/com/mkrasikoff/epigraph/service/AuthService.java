@@ -7,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
@@ -37,9 +39,13 @@ public class AuthService {
      * Username is no longer collected at this step (see TASK-81) — a default derived from
      * the email local part is set here, and the client offers to change it (along with the
      * avatar icon) in a profile-setup modal shown right after verify() succeeds.
+     *
+     * @param language the guest-selected UI language, passed through so the verification email is
+     *                 localized ("en" → English). The account's own preferredLanguage is persisted
+     *                 later, in verify().
      */
     @Transactional
-    public void register(String email, String rawPassword) {
+    public void register(String email, String rawPassword, String language) {
         userRepository.findByEmail(email).ifPresent(existing -> {
             if (existing.isEmailVerified()) {
                 throw new IllegalArgumentException("Этот email уже зарегистрирован");
@@ -60,7 +66,7 @@ public class AuthService {
         user.setEmailVerified(false);
         userRepository.save(user);
 
-        emailVerificationService.sendCode(email);
+        emailVerificationService.sendCode(email, language);
     }
 
     /**
@@ -84,20 +90,29 @@ public class AuthService {
     }
 
     /**
-     * Completes registration: validates the code, marks the user as verified,
-     * creates default quotes, and returns a JWT.
+     * Completes registration: validates the code, marks the user as verified, creates default
+     * quotes (localized to the guest's chosen language), and returns a JWT.
+     *
+     * @param language the guest-selected UI language, carried over from the client (the
+     *                 {@code epigraph_lang} cookie). "en" seeds an English account + English
+     *                 onboarding quotes; anything else keeps the Russian default. Persisting it
+     *                 here also makes the account language correct from creation, so the client's
+     *                 later syncPreferredLanguage() is a no-op instead of a visible reset.
      */
     @Transactional
-    public String verify(String email, String code) {
+    public String verify(String email, String code, String language) {
         emailVerificationService.verifyCode(email, code);
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
         user.setEmailVerified(true);
+        if ("en".equals(language)) {
+            user.setPreferredLanguage("en");
+        }
         userRepository.save(user);
 
-        quoteService.createDefaultQuotes(user.getId());
+        quoteService.createDefaultQuotes(user.getId(), user.getPreferredLanguage());
 
         return jwtService.generateToken(user.getId(), user.getEmail());
     }
@@ -105,12 +120,14 @@ public class AuthService {
     /**
      * Resends a verification code if the user exists and is not yet verified.
      * Silently does nothing if the email is unknown — avoids user enumeration.
+     *
+     * @param language the guest-selected UI language, passed through to localize the email.
      */
     @Transactional
-    public void resendCode(String email) {
+    public void resendCode(String email, String language) {
         userRepository.findByEmail(email)
                 .filter(u -> !u.isEmailVerified())
-                .ifPresent(u -> emailVerificationService.sendCode(email));
+                .ifPresent(u -> emailVerificationService.sendCode(email, language));
     }
 
     @Transactional(readOnly = true)
@@ -120,5 +137,59 @@ public class AuthService {
                 .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
                 .map(user -> jwtService.generateToken(user.getId(), user.getEmail()))
                 .orElse(null);
+    }
+
+    /**
+     * Provisions an OAuth2 (Google/Yandex) user: returns the account already registered under
+     * this email if one exists, otherwise creates a fresh account, seeds its onboarding quotes,
+     * and returns it. This mirrors the local register()+verify() outcome (a usable account with
+     * default quotes) for the OAuth path, keeping {@code OAuth2SuccessHandler} a thin web adapter
+     * that only extracts provider attributes and issues the redirect. OAuth accounts are verified
+     * on creation via the {@code emailVerified = true} entity default — the provider vouches for
+     * the address.
+     *
+     * @param suggestedUsername raw display name pulled from the provider; sanitized here to the
+     *                          username policy (may resolve to null when nothing usable remains,
+     *                          in which case the client shows a fallback).
+     * @param language          the guest-selected UI language carried over from the client (the
+     *                          {@code epigraph_lang} cookie, present on the OAuth callback). "en"
+     *                          seeds an English account + English onboarding quotes; anything else
+     *                          keeps the Russian default.
+     */
+    @Transactional
+    public User provisionOAuthUser(String email, String provider, String providerId, String suggestedUsername, String language) {
+        Optional<User> existing = userRepository.findByEmail(email);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        User user = new User();
+        user.setEmail(email);
+        user.setProvider(provider);
+        user.setProviderId(providerId);
+        user.setUsername(sanitizeUsername(suggestedUsername));
+        user.setCreatedAt(System.currentTimeMillis());
+        if ("en".equals(language)) {
+            user.setPreferredLanguage("en");
+        }
+        user = userRepository.save(user);
+
+        quoteService.createDefaultQuotes(user.getId(), user.getPreferredLanguage());
+
+        return user;
+    }
+
+    /**
+     * Cleans up a name pulled from an OAuth provider so it fits the username constraints
+     * (3–20 chars, letters/digits/underscore only). Returns null when nothing usable is left —
+     * the client will then show a fallback.
+     */
+    private String sanitizeUsername(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+
+        String cleaned = raw.trim().replaceAll("[^a-zA-Z0-9_]", "");
+        if (cleaned.length() > 20) cleaned = cleaned.substring(0, 20);
+
+        return cleaned.length() >= 3 ? cleaned : null;
     }
 }

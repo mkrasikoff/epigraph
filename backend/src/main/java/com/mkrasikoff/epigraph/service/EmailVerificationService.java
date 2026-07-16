@@ -23,10 +23,12 @@ public class EmailVerificationService {
 
     /**
      * Generates a 6-digit code, invalidates previous codes for this email,
-     * saves the new one, and sends it via email.
+     * saves the new one, and sends it via email localized to {@code language}.
+     *
+     * @param language the guest-selected UI language, passed through to the email ("en" → English).
      */
     @Transactional
-    public void sendCode(String email) {
+    public void sendCode(String email, String language) {
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
 
         repo.invalidateAll(email);
@@ -38,7 +40,7 @@ public class EmailVerificationService {
         verification.setCreatedAt(System.currentTimeMillis());
         repo.save(verification);
 
-        emailService.sendVerificationCode(email, code);
+        emailService.sendVerificationCode(email, code, language);
     }
 
     /**

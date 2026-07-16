@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.ImportSharedQuoteResponse;
+import com.mkrasikoff.epigraph.dto.share.ImportSharedQuoteResponse;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.SharedQuote;
 import com.mkrasikoff.epigraph.service.AchievementService;

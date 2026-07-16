@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
-import com.mkrasikoff.epigraph.dto.BatchImportResult;
+import com.mkrasikoff.epigraph.dto.quote.BatchImportResult;
 import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
@@ -312,7 +312,7 @@ class QuoteServiceTest {
     void createDefaultQuotes_savesThreeQuotes() {
         when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        quoteService.createDefaultQuotes(USER_ID);
+        quoteService.createDefaultQuotes(USER_ID, "ru");
 
         verify(repo, times(3)).save(any(Quote.class));
     }
@@ -322,7 +322,7 @@ class QuoteServiceTest {
     void createDefaultQuotes_setsCorrectUserId() {
         when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        quoteService.createDefaultQuotes(USER_ID);
+        quoteService.createDefaultQuotes(USER_ID, "ru");
 
         verify(repo, times(3)).save(argThat(q -> USER_ID.equals(q.getUserId())));
     }
@@ -332,7 +332,7 @@ class QuoteServiceTest {
     void createDefaultQuotes_leavesManuallyAddedFalse() {
         when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        quoteService.createDefaultQuotes(USER_ID);
+        quoteService.createDefaultQuotes(USER_ID, "ru");
 
         verify(repo, times(3)).save(argThat(q -> !q.isManuallyAdded()));
     }

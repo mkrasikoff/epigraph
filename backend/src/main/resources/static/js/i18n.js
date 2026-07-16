@@ -873,9 +873,26 @@ const TRANSLATIONS = {
     }
 };
 
+/**
+ * Mirrors the active language into a cookie. localStorage stays the source of truth, but the
+ * backend needs the language at the two moments it seeds a new account's onboarding quotes — the
+ * /api/auth/verify POST and the OAuth provider callback redirect — and neither carries localStorage.
+ * path=/ so it's sent on both endpoints; SameSite=Lax so it survives the top-level OAuth redirect
+ * back to us. See AuthController.verify / OAuth2SuccessHandler on the backend.
+ * @param {string} lang - 'ru' or 'en'.
+ */
+function writeLangCookie(lang) {
+    try {
+        document.cookie = `epigraph_lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch (e) {
+    }
+}
+
 /** Currently active language code. */
 let currentLanguage = localStorage.getItem('epigraph_lang') || 'ru';
 document.documentElement.lang = currentLanguage;
+// Keep the cookie in step with a language chosen in an earlier session (localStorage already set).
+writeLangCookie(currentLanguage);
 
 /**
  * Picks the grammatically correct Russian plural form for a count.
@@ -923,6 +940,7 @@ function setLanguage(lang) {
         localStorage.setItem('epigraph_lang', lang);
     } catch (e) {
     }
+    writeLangCookie(lang);
     document.documentElement.lang = lang;
     applyI18n();
 
