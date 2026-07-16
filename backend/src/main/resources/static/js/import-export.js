@@ -169,7 +169,7 @@ function showImportSummary(added, total, outcome, rejectedItems) {
                     ${quote.source ? `<span class="quote-card-source">${escHtml(quote.source)}</span>` : ''}
                 </p>
             ` : ''}
-            <p class="import-preview-reason">${escHtml((errors || []).join(', '))}</p>
+            <p class="import-preview-reason">${escHtml((errors || []).map(e => codeToText(e, 'importErrorGeneric')).join(', '))}</p>
         </div>
     `).join('');
 

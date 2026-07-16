@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class UpdateThemeStyleRequest {
 
-    @NotBlank(message = "Тема обязательна")
+    @NotBlank(message = "THEME_REQUIRED")
     @Pattern(
             regexp = "^(classic|forest|cosmos|ocean|sunset)$",
-            message = "Недопустимая тема"
+            message = "THEME_INVALID"
     )
     private String themeStyle;
 }

@@ -8,6 +8,6 @@ import lombok.Data;
 public class ChangePasswordRequest {
 
     @NotBlank
-    @Size(min = 8, message = "Пароль должен содержать минимум 8 символов")
+    @Size(min = 8, message = "PASSWORD_TOO_SHORT")
     private String newPassword;
 }

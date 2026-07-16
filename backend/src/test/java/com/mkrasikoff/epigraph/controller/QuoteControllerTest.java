@@ -156,7 +156,7 @@ class QuoteControllerTest {
     @DisplayName("POST /api/quotes/batch: reports rejected quotes with reasons")
     void createBatch_reportsRejectedQuotes() throws Exception {
         List<Quote> incoming = List.of(buildQuote(null, "Too long"));
-        RejectedQuote rejectedQuote = new RejectedQuote(buildQuote(null, "Too long"), List.of("Размер цитаты не должен превышать 1000 символов"));
+        RejectedQuote rejectedQuote = new RejectedQuote(buildQuote(null, "Too long"), List.of("QUOTE_TOO_LONG"));
         BatchImportResult result = new BatchImportResult(List.of(), List.of(rejectedQuote));
         when(quoteService.saveAll(any(), isNull())).thenReturn(result);
 
@@ -167,7 +167,7 @@ class QuoteControllerTest {
                 .andExpect(jsonPath("$.saved.length()").value(0))
                 .andExpect(jsonPath("$.rejected.length()").value(1))
                 .andExpect(jsonPath("$.rejected[0].quote.text").value("Too long"))
-                .andExpect(jsonPath("$.rejected[0].errors[0]").value("Размер цитаты не должен превышать 1000 символов"));
+                .andExpect(jsonPath("$.rejected[0].errors[0]").value("QUOTE_TOO_LONG"));
     }
 
     @Test

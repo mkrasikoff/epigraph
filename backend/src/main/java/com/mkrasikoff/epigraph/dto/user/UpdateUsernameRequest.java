@@ -8,11 +8,11 @@ import lombok.Data;
 @Data
 public class UpdateUsernameRequest {
 
-    @NotBlank(message = "Имя пользователя обязательно")
-    @Size(min = 3, max = 20, message = "Имя пользователя должно содержать от 3 до 20 символов")
+    @NotBlank(message = "USERNAME_REQUIRED")
+    @Size(min = 3, max = 20, message = "USERNAME_LENGTH")
     @Pattern(
             regexp = "^[a-zA-Z0-9_]+$",
-            message = "Имя пользователя может содержать только латинские буквы, цифры и подчёркивание"
+            message = "USERNAME_PATTERN"
     )
     private String username;
 }

@@ -164,7 +164,7 @@ async function authSubmit() {
 
         if (!res.ok) {
             if (data.password) {
-                errorEl.textContent = data.password;
+                errorEl.textContent = codeToText(data.password, 'authErrorPasswordPattern');
                 return;
             }
 
