@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.exception;
 
-import com.mkrasikoff.epigraph.dto.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.common.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;

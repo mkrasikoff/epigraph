@@ -1,11 +1,11 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.AuthRequest;
-import com.mkrasikoff.epigraph.dto.AuthResponse;
-import com.mkrasikoff.epigraph.dto.ErrorResponse;
-import com.mkrasikoff.epigraph.dto.MeResponse;
-import com.mkrasikoff.epigraph.dto.RegisterRequest;
-import com.mkrasikoff.epigraph.dto.VerifyRequest;
+import com.mkrasikoff.epigraph.dto.auth.AuthRequest;
+import com.mkrasikoff.epigraph.dto.auth.AuthResponse;
+import com.mkrasikoff.epigraph.dto.common.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.auth.MeResponse;
+import com.mkrasikoff.epigraph.dto.auth.RegisterRequest;
+import com.mkrasikoff.epigraph.dto.auth.VerifyRequest;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;

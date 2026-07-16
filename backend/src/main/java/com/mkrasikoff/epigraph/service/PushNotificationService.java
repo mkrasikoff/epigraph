@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
-import com.mkrasikoff.epigraph.dto.PushSubscriptionDto;
+import com.mkrasikoff.epigraph.dto.push.PushSubscriptionDto;
 import com.mkrasikoff.epigraph.model.PushSubscription;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.PushSubscriptionRepository;

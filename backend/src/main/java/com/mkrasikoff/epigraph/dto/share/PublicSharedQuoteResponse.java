@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.dto;
+package com.mkrasikoff.epigraph.dto.share;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

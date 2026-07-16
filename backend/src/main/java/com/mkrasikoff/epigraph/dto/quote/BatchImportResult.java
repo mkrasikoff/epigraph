@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.dto;
+package com.mkrasikoff.epigraph.dto.quote;
 
 import com.mkrasikoff.epigraph.model.Quote;
 import lombok.AllArgsConstructor;

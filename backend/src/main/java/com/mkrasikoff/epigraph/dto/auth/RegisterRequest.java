@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.dto;
+package com.mkrasikoff.epigraph.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.dto;
+package com.mkrasikoff.epigraph.dto.push;
 
 import lombok.Data;
 

@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.PushSubscriptionDto;
+import com.mkrasikoff.epigraph.dto.push.PushSubscriptionDto;
 import com.mkrasikoff.epigraph.service.PushNotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

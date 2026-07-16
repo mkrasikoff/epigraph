@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.PushSubscriptionDto;
+import com.mkrasikoff.epigraph.dto.push.PushSubscriptionDto;
 import com.mkrasikoff.epigraph.service.PushNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

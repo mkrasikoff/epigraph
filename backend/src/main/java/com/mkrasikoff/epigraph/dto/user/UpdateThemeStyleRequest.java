@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.dto;
+package com.mkrasikoff.epigraph.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

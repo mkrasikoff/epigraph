@@ -1,8 +1,8 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.AuthRequest;
-import com.mkrasikoff.epigraph.dto.RegisterRequest;
-import com.mkrasikoff.epigraph.dto.VerifyRequest;
+import com.mkrasikoff.epigraph.dto.auth.AuthRequest;
+import com.mkrasikoff.epigraph.dto.auth.RegisterRequest;
+import com.mkrasikoff.epigraph.dto.auth.VerifyRequest;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;
