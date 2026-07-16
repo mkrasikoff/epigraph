@@ -2,6 +2,7 @@ package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.dto.quote.BatchImportResult;
 import com.mkrasikoff.epigraph.dto.quote.RejectedQuote;
+import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
@@ -62,7 +63,7 @@ public class QuoteService {
     @Transactional
     public Quote save(Quote quote, Long userId) {
         if (repo.countByUserId(userId) >= MAX_QUOTES_PER_USER) {
-            throw new QuoteLimitExceededException(MAX_QUOTES_PER_USER);
+            throw new QuoteLimitExceededException();
         }
 
         if (quote.getAdded() == null) {
@@ -105,7 +106,7 @@ public class QuoteService {
             }
 
             if (remainingSlots <= 0) {
-                rejected.add(new RejectedQuote(quote, List.of(QuoteLimitExceededException.buildMessage(MAX_QUOTES_PER_USER))));
+                rejected.add(new RejectedQuote(quote, List.of(ApiCodes.QUOTE_LIMIT_EXCEEDED)));
                 continue;
             }
 

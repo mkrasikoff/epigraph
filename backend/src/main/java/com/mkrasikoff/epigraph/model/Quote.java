@@ -40,14 +40,14 @@ public class Quote {
     private boolean fav;
 
     /**
-     * Хранится как "tag1,tag2" (строка)
+     * Stored as a comma-separated string, e.g. "tag1,tag2".
      */
-    @Size(max = 500, message = "Tags must not exceed 500 characters")
+    @Size(max = 500, message = "TAGS_TOO_LONG")
     @Column(length = 500)
     private String tags;
 
     /**
-     * Unix timestamp в миллисекундах
+     * Unix timestamp in milliseconds.
      */
     @Column(updatable = false)
     private Long added;

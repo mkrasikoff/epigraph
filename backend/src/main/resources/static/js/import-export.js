@@ -179,20 +179,18 @@ function showImportSummary(added, total, outcome, rejectedItems) {
             <p class="import-preview-summary">${t('importSummarySkipped', {count: skipped, word: quoteCountWord(skipped)})}</p>
             <div class="import-preview-list">${rejectedRows}</div>
             ${remaining > 0 ? `<div class="import-preview-more">${t('importPreviewMore', {count: remaining, word: quoteCountWord(remaining)})}</div>` : ''}
-            <button type="button" class="btn-secondary import-copy-btn" onclick="downloadRejectedQuotes()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                ${t('importDownloadRejectedBtn')}
-            </button>
         ` : ''}
     `;
 
-    showModal(t('importPreviewTitle'), body, [
-        {label: t('closeButton'), cls: 'btn-primary', action: closeModal}
-    ], true);
+    // The "download rejected" button lives in the footer next to Close (same size, same row) —
+    // only shown when there actually were rejected items to download.
+    const actions = [];
+    if (skipped > 0) {
+        actions.push({label: t('importDownloadRejectedBtn'), cls: 'btn-secondary', action: downloadRejectedQuotes});
+    }
+    actions.push({label: t('closeButton'), cls: 'btn-primary', action: closeModal});
+
+    showModal(t('importPreviewTitle'), body, actions, true);
 }
 
 /**

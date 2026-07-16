@@ -55,6 +55,7 @@ const TRANSLATIONS = {
         authErrorUserNotFound:          'Пользователь не найден',
         resetLinkInvalid:               'Ссылка недействительна или истекла',
         errBadRequest:                  'Некорректный запрос',
+        errQuoteLimit:                  'Достигнут лимит в 1000 цитат на аккаунт',
         authGeoBlocked:                 'Вход через Google недоступен в вашем регионе',
         authGeoBlockedYandex:           'Вход через Яндекс доступен только из России',
         authErrorInvalidEmailServer:    'Некорректный email',
@@ -268,6 +269,7 @@ const TRANSLATIONS = {
         importErrorQuoteTooLong:        'Цитата длиннее 1000 символов',
         importErrorAuthorTooLong:       'Имя автора длиннее 100 символов',
         importErrorSourceTooLong:       'Источник длиннее 200 символов',
+        importErrorTagsTooLong:         'Теги длиннее 500 символов',
         importErrorGeneric:             'Не прошло проверку',
         importDownloadRejectedBtn:      'Скачать JSON с этими цитатами',
 
@@ -324,7 +326,7 @@ const TRANSLATIONS = {
         achievementsNextBadge:          'Следующий',
         achievementsShowAllBtn:         'Все достижения ({total}) →',
         achievementsBackBtn:            '← Ближайшие',
-        achievementsApplyThemeBtn:      'Применить тему «{theme}»',
+        achievementsApplyThemeBtn:      'Применить тему',
         achievementsThemeAppliedToast:  'Тема применена',
         achievementsThemeErrorToast:    'Не удалось применить тему',
         achievementFavorites25Title:    'Ценитель',
@@ -437,7 +439,7 @@ const TRANSLATIONS = {
         shareNotFoundTitle:             'Ссылка не найдена',
         shareNotFoundText:              'Эта цитата больше недоступна.',
         notFoundTitle:                  'Страница не найдена',
-        notFoundText:                   'Похоже, эта страница потерялась между цитатами. Такой страницы не существует.',
+        notFoundText:                   'Похоже, эта страница потерялась между строк. Такой страницы не существует.',
         notFoundHomeBtn:                'На главную',
         shareOpenApp:                   'Открыть Epigraph',
         shareActionLabel:               'Поделиться',
@@ -494,6 +496,7 @@ const TRANSLATIONS = {
         authErrorUserNotFound:          'User not found',
         resetLinkInvalid:               'The link is invalid or has expired',
         errBadRequest:                  'Bad request',
+        errQuoteLimit:                  "You've reached the 1000-quote account limit",
         authGeoBlocked:                 'Google sign-in is unavailable in your region',
         authGeoBlockedYandex:           'Yandex sign-in is only available from Russia',
         authErrorInvalidEmailServer:    'Invalid email',
@@ -707,6 +710,7 @@ const TRANSLATIONS = {
         importErrorQuoteTooLong:        'Quote is longer than 1000 characters',
         importErrorAuthorTooLong:       'Author is longer than 100 characters',
         importErrorSourceTooLong:       'Source is longer than 200 characters',
+        importErrorTagsTooLong:         'Tags are longer than 500 characters',
         importErrorGeneric:             'Failed validation',
         importDownloadRejectedBtn:      'Download JSON with these quotes',
 
@@ -763,7 +767,7 @@ const TRANSLATIONS = {
         achievementsNextBadge:          'Next',
         achievementsShowAllBtn:         'All achievements ({total}) →',
         achievementsBackBtn:            '← Nearest',
-        achievementsApplyThemeBtn:      'Apply "{theme}" theme',
+        achievementsApplyThemeBtn:      'Apply theme',
         achievementsThemeAppliedToast:  'Theme applied',
         achievementsThemeErrorToast:    'Couldn\'t apply the theme',
         achievementFavorites25Title:    'Connoisseur',
@@ -1005,10 +1009,12 @@ const ERROR_CODE_KEYS = {
     INVALID_OR_EXPIRED_CODE:  'verifyErrorInvalidCode',
     RESET_LINK_INVALID:       'resetLinkInvalid',
     BAD_REQUEST:              'errBadRequest',
+    QUOTE_LIMIT_EXCEEDED:     'errQuoteLimit',
     // Quote bean-validation codes surfaced per-item in the import-rejected report.
     QUOTE_TOO_LONG:           'importErrorQuoteTooLong',
     AUTHOR_TOO_LONG:          'importErrorAuthorTooLong',
     SOURCE_TOO_LONG:          'importErrorSourceTooLong',
+    TAGS_TOO_LONG:            'importErrorTagsTooLong',
 };
 
 /**

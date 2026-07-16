@@ -236,7 +236,7 @@ class QuoteServiceTest {
         assertThat(result.getSaved().get(0).getText()).isEqualTo("Fits");
         assertThat(result.getRejected()).hasSize(1);
         assertThat(result.getRejected().get(0).getQuote().getText()).isEqualTo("Over quota");
-        assertThat(result.getRejected().get(0).getErrors().get(0)).contains("1000");
+        assertThat(result.getRejected().get(0).getErrors().get(0)).isEqualTo("QUOTE_LIMIT_EXCEEDED");
     }
 
     @Test

@@ -99,11 +99,12 @@ class UserServiceTest {
         when(userRepository.findByEmail("user@mail.com")).thenReturn(Optional.of(user));
         when(jwtService.generateResetToken(USER_ID)).thenReturn("reset-token");
 
-        userService.initiatePasswordReset("user@mail.com");
+        userService.initiatePasswordReset("user@mail.com", "en");
 
         verify(emailService).sendPasswordResetLink(
                 eq("user@mail.com"),
-                eq(BASE_URL + "/?reset=reset-token")
+                eq(BASE_URL + "/?reset=reset-token"),
+                eq("en")
         );
     }
 
@@ -113,9 +114,9 @@ class UserServiceTest {
         User user = buildUser(USER_ID, "user@mail.com", false);
         when(userRepository.findByEmail("user@mail.com")).thenReturn(Optional.of(user));
 
-        userService.initiatePasswordReset("user@mail.com");
+        userService.initiatePasswordReset("user@mail.com", "en");
 
-        verify(emailService, never()).sendPasswordResetLink(any(), any());
+        verify(emailService, never()).sendPasswordResetLink(any(), any(), any());
         verify(jwtService, never()).generateResetToken(any());
     }
 
@@ -124,9 +125,9 @@ class UserServiceTest {
     void initiatePasswordReset_doesNothing_forUnknownEmail() {
         when(userRepository.findByEmail("ghost@mail.com")).thenReturn(Optional.empty());
 
-        userService.initiatePasswordReset("ghost@mail.com");
+        userService.initiatePasswordReset("ghost@mail.com", "en");
 
-        verify(emailService, never()).sendPasswordResetLink(any(), any());
+        verify(emailService, never()).sendPasswordResetLink(any(), any(), any());
     }
 
     @Test

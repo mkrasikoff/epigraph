@@ -57,17 +57,19 @@ public class UserService {
 
     /**
      * Initiates the password-reset flow: generates a short-lived reset token,
-     * builds the reset link, and sends it to the user's email.
+     * builds the reset link, and sends it to the user's email (localized to {@code language}).
      * Silently does nothing when the email is unknown — avoids user enumeration.
+     *
+     * @param language the guest-selected UI language, passed through to localize the email.
      */
     @Transactional(readOnly = true)
-    public void initiatePasswordReset(String email) {
+    public void initiatePasswordReset(String email, String language) {
         userRepository.findByEmail(email)
                 .filter(User::isEmailVerified)
                 .ifPresent(user -> {
                     String token = jwtService.generateResetToken(user.getId());
                     String link = baseUrl + "/?reset=" + token;
-                    emailService.sendPasswordResetLink(email, link);
+                    emailService.sendPasswordResetLink(email, link, language);
                 });
     }
 
