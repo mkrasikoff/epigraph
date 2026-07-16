@@ -88,7 +88,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.changePassword(99L, "newpass"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не найден");
+                .hasMessageContaining("USER_NOT_FOUND");
     }
 
     @Test
@@ -147,7 +147,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.getEmailByUserId(99L))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не найден");
+                .hasMessageContaining("USER_NOT_FOUND");
     }
 
     @Test
@@ -204,7 +204,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.updateUsername(99L, "newname"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не найден");
+                .hasMessageContaining("USER_NOT_FOUND");
 
         verify(userRepository, never()).save(any());
     }
@@ -228,7 +228,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.updateAvatarIcon(99L, "cat"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не найден");
+                .hasMessageContaining("USER_NOT_FOUND");
 
         verify(userRepository, never()).save(any());
     }
@@ -252,7 +252,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.updatePreferredLanguage(99L, "en"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не найден");
+                .hasMessageContaining("USER_NOT_FOUND");
 
         verify(userRepository, never()).save(any());
     }
@@ -292,7 +292,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.updateThemeStyle(USER_ID, "forest"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не разблокирована");
+                .hasMessageContaining("THEME_LOCKED");
 
         verify(userRepository, never()).save(any());
     }
@@ -304,7 +304,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.updateThemeStyle(99L, "forest"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не найден");
+                .hasMessageContaining("USER_NOT_FOUND");
 
         verify(userRepository, never()).save(any());
     }

@@ -107,7 +107,7 @@ class EmailVerificationServiceTest {
 
         assertThatThrownBy(() -> service.verifyCode("user@mail.com", "123456"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Неверный или истёкший код");
+                .hasMessageContaining("INVALID_OR_EXPIRED_CODE");
     }
 
     @Test
@@ -118,7 +118,7 @@ class EmailVerificationServiceTest {
 
         assertThatThrownBy(() -> service.verifyCode("user@mail.com", "000000"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Неверный или истёкший код");
+                .hasMessageContaining("INVALID_OR_EXPIRED_CODE");
     }
 
     @Test

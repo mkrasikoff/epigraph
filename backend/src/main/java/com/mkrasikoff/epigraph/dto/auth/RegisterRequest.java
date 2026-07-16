@@ -11,16 +11,16 @@ import lombok.ToString;
 @ToString(exclude = "password")
 public class RegisterRequest {
 
-    @NotBlank(message = "Email обязателен")
-    @Email(message = "Некорректный формат email")
-    @Size(max = 255, message = "Email слишком длинный")
+    @NotBlank(message = "EMAIL_REQUIRED")
+    @Email(message = "EMAIL_INVALID")
+    @Size(max = 255, message = "EMAIL_TOO_LONG")
     private String email;
 
-    @NotBlank(message = "Пароль обязателен")
-    @Size(min = 8, max = 128, message = "Пароль должен содержать от 8 до 128 символов")
+    @NotBlank(message = "PASSWORD_REQUIRED")
+    @Size(min = 8, max = 128, message = "PASSWORD_LENGTH")
     @Pattern(
             regexp = "^(?=.*[A-Za-z])(?=.*[0-9]).{8,128}$",
-            message = "Пароль должен содержать минимум одну букву и одну цифру"
+            message = "PASSWORD_PATTERN"
     )
     private String password;
 }

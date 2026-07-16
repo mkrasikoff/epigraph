@@ -137,14 +137,14 @@ class AuthControllerTest {
         request.setCode("000000");
 
         when(authService.verify("user@example.com", "000000", null))
-                .thenThrow(new IllegalArgumentException("Неверный код"));
+                .thenThrow(new IllegalArgumentException("INVALID_OR_EXPIRED_CODE"));
 
         mockMvc.perform(post("/api/auth/verify")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Неверный код"));
+                .andExpect(jsonPath("$.message").value("INVALID_OR_EXPIRED_CODE"));
 
         verify(authService).verify("user@example.com", "000000", null);
     }
@@ -217,7 +217,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Неверный email или пароль"));
+                .andExpect(jsonPath("$.message").value("INVALID_CREDENTIALS"));
 
         verify(authService).login("user@example.com", "wrongpass1");
     }
@@ -324,7 +324,7 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+                .andExpect(jsonPath("$.message").value("USER_NOT_FOUND"));
     }
 
     @Test

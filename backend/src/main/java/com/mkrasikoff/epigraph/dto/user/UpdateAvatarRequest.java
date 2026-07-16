@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class UpdateAvatarRequest {
 
-    @NotBlank(message = "Иконка обязательна")
+    @NotBlank(message = "AVATAR_REQUIRED")
     @Pattern(
             regexp = "^(neutral|bear|cat|dog|hamster|rabbit|fox|owl|elephant|mouse|duck|seal)$",
-            message = "Недопустимая иконка"
+            message = "AVATAR_INVALID"
     )
     private String avatarIcon;
 }

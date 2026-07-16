@@ -10,11 +10,11 @@ import lombok.ToString;
 @ToString(exclude = "password")
 public class AuthRequest {
 
-    @NotBlank(message = "Email не должен быть пустым")
-    @Email(message = "Некорректный формат email")
+    @NotBlank(message = "EMAIL_REQUIRED")
+    @Email(message = "EMAIL_INVALID")
     private String email;
 
-    @NotBlank(message = "Пароль не должен быть пустым")
-    @Size(min = 6, message = "Пароль должен содержать минимум 6 символов")
+    @NotBlank(message = "PASSWORD_REQUIRED")
+    @Size(min = 6, message = "PASSWORD_TOO_SHORT")
     private String password;
 }
