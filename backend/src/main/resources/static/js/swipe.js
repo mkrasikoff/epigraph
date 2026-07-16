@@ -5,14 +5,14 @@
  * drag-with-tilt, fly-out animation, and snap-back behavior. On a completed swipe it
  * advances to a random quote via renderQod().
  *
- * Must be loaded after state.js (reads/writes module state) and after quotes.js
+ * Must be loaded after state.js (reads/writes module state) and after qod.js
  * (uses renderQod). Loaded before bootstrap.js per the script ordering.
  *
  * Depends on:
  * - isGuest          {boolean}  — defined in auth.js
  * - quotes           {Array}    — defined in state.js
  * - currentQodIndex  {number}   — defined in state.js
- * - renderQod()      {fn}       — defined in quotes.js
+ * - renderQod()      {fn}       — defined in qod.js
  */
 
 // Swipe on QOD card — Reigns-style drag with tilt and fly-out animation

@@ -412,7 +412,7 @@ window.addEventListener('resize', moveNavIndicator);
 // once the real font swaps in, short labels like "Today" can end up a visibly
 // different width than what the pill was sized for. Re-measure once fonts actually
 // settle to correct that drift (matches the document.fonts.ready pattern already used
-// for QoD card sizing in quotes.js).
+// for QoD card sizing in qod.js).
 document.fonts.ready.then(moveNavIndicator);
 
 /**
@@ -749,4 +749,45 @@ const sourceInput = document.getElementById('q-source');
 if (sourceInput) {
     updateInputCounter(sourceInput, 'sourceCounter', 200);
     sourceInput.addEventListener('input', () => updateInputCounter(sourceInput, 'sourceCounter', 200));
+}
+
+// =============================================================================
+// ANNOUNCEMENT BANNER
+// The dismissible announcement bar at the top of the app. Moved here from auth.js (TASK-127).
+// =============================================================================
+async function loadBanner() {
+    try {
+        const res = await fetch('/api/banner');
+        if (!res.ok) return;
+        const data = await res.json();
+        const msg = data.message?.trim();
+        if (!msg) return;
+
+        // Don't show again if dismissed in this session
+        const dismissed = sessionStorage.getItem('banner-dismissed');
+        if (dismissed === msg) return;
+
+        const banner = document.getElementById('announcement-banner');
+        const text   = document.getElementById('announcement-banner-text');
+        if (!banner || !text) return;
+
+        text.textContent = msg;
+        banner.style.display = 'flex';
+    } catch (e) {}
+}
+
+function dismissBanner() {
+    const banner = document.getElementById('announcement-banner');
+    const text   = document.getElementById('announcement-banner-text');
+    if (!banner) return;
+
+    // Remember this specific message was dismissed
+    if (text?.textContent) {
+        sessionStorage.setItem('banner-dismissed', text.textContent);
+    }
+
+    banner.style.transition = 'opacity 200ms ease, transform 200ms ease';
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateY(-6px)';
+    setTimeout(() => banner.style.display = 'none', 210);
 }
