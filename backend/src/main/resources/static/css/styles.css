@@ -486,7 +486,13 @@ body {
     color: var(--color-text);
     background: var(--color-bg);
     line-height: 1.6;
-    overflow-x: hidden;
+    /* `clip`, not `hidden`: still trims any horizontal overflow (decorative quote glyphs etc.),
+       but does NOT establish a scroll container. `overflow-x: hidden` here forced overflow-y to
+       compute as `auto` (per spec, a non-visible axis makes the other axis auto), so both <html>
+       (which also has overflow-x:hidden) AND <body> became vertical scroll containers — two
+       fighting scrollbars. With `clip`, body's overflow-y stays `visible` and <html> is the sole
+       scroller. */
+    overflow-x: clip;
 }
 
 img {
@@ -774,11 +780,16 @@ body.no-scroll {
     height: 100dvh;
 }
 
-/* Locks background scroll while the shared modal or the auth screen is open. Kept separate from
-   .no-scroll (owned by the qod fullscreen-fit logic) so the two don't fight over toggling it. */
+/* Locks background scroll while the shared modal is open. Pins the body with position:fixed
+   (the inline top:-scrollY offset is set by lockBackgroundScroll() in ui.js) so the page keeps
+   its scroll position visually under the blur instead of collapsing to the top. Kept separate
+   from .no-scroll (owned by the qod fullscreen-fit logic) so the two don't fight over it. */
 body.modal-lock-scroll {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
     overflow: hidden;
-    height: 100dvh;
 }
 
 /* =============================================================================
