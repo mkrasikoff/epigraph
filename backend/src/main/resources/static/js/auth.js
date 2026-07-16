@@ -662,7 +662,7 @@ async function submitPasswordReset(resetToken) {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorMismatch');
+            if (errorEl) errorEl.textContent = apiErrorMessage(data, 'changePasswordErrorMismatch');
             return;
         }
 

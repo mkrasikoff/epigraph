@@ -53,6 +53,8 @@ const TRANSLATIONS = {
         authErrorWrongCredentials:      'Неверный email или пароль',
         authErrorEmailAlreadyRegistered:'Этот email уже зарегистрирован',
         authErrorUserNotFound:          'Пользователь не найден',
+        resetLinkInvalid:               'Ссылка недействительна или истекла',
+        errBadRequest:                  'Некорректный запрос',
         authGeoBlocked:                 'Вход через Google недоступен в вашем регионе',
         authGeoBlockedYandex:           'Вход через Яндекс доступен только из России',
         authErrorInvalidEmailServer:    'Некорректный email',
@@ -486,6 +488,8 @@ const TRANSLATIONS = {
         authErrorWrongCredentials:      'Incorrect email or password',
         authErrorEmailAlreadyRegistered:'This email is already registered',
         authErrorUserNotFound:          'User not found',
+        resetLinkInvalid:               'The link is invalid or has expired',
+        errBadRequest:                  'Bad request',
         authGeoBlocked:                 'Google sign-in is unavailable in your region',
         authGeoBlockedYandex:           'Yandex sign-in is only available from Russia',
         authErrorInvalidEmailServer:    'Invalid email',
@@ -980,14 +984,19 @@ function t(key, variables) {
 
 /**
  * Maps a backend error code (returned as the `message`/`error` value of an error response) to a
- * translation key. The backend is language-agnostic — it sends stable codes (see ErrorCodes.java)
- * and the frontend localizes them here. Keep the code strings in sync with ErrorCodes.java.
+ * translation key. The backend is language-agnostic — it sends stable codes (see ApiCodes.java)
+ * and the frontend localizes them here. Keep the code strings in sync with ApiCodes.java.
+ *
+ * Only codes actually surfaced through apiErrorMessage() need an entry — some errors (e.g.
+ * THEME_LOCKED) are shown via a screen's own fixed toast and never go through this map.
  */
 const ERROR_CODE_KEYS = {
     INVALID_CREDENTIALS:      'authErrorWrongCredentials',
     EMAIL_ALREADY_REGISTERED: 'authErrorEmailAlreadyRegistered',
     USER_NOT_FOUND:           'authErrorUserNotFound',
     INVALID_OR_EXPIRED_CODE:  'verifyErrorInvalidCode',
+    RESET_LINK_INVALID:       'resetLinkInvalid',
+    BAD_REQUEST:              'errBadRequest',
 };
 
 /**

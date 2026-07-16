@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +47,7 @@ public class UserService {
      */
     @Transactional
     public void changePassword(Long userId, String newPassword) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setProvider("local");
@@ -74,7 +75,7 @@ public class UserService {
     public String getEmailByUserId(Long userId) {
         return userRepository.findById(userId)
                 .map(User::getEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -89,7 +90,7 @@ public class UserService {
     @Transactional
     public void updateUsername(Long userId, String username) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
         user.setUsername(username);
         userRepository.save(user);
@@ -104,7 +105,7 @@ public class UserService {
     @Transactional
     public void updateAvatarIcon(Long userId, String avatarIcon) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
         user.setAvatarIcon(avatarIcon);
         userRepository.save(user);
@@ -118,7 +119,7 @@ public class UserService {
     @Transactional
     public void updatePreferredLanguage(Long userId, String preferredLanguage) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
         user.setPreferredLanguage(preferredLanguage);
         userRepository.save(user);
@@ -134,10 +135,10 @@ public class UserService {
     @Transactional
     public void updateThemeStyle(Long userId, String themeStyle) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
         if (!themeStyle.equals("classic") && !achievementService.isRewardUnlocked(userId, "theme", themeStyle)) {
-            throw new IllegalArgumentException("Эта тема ещё не разблокирована");
+            throw new IllegalArgumentException(ApiCodes.THEME_LOCKED);
         }
 
         user.setThemeStyle(themeStyle);
