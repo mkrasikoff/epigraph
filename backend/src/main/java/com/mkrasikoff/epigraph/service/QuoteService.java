@@ -142,43 +142,15 @@ public class QuoteService {
     }
 
     /**
-     * Creates 3 onboarding instruction quotes for a newly registered user.
-     * Called right after registration (local and OAuth2).
+     * Creates the onboarding instruction quotes for a newly registered user. Called right after
+     * registration (local and OAuth2). The seed content itself lives in {@link
+     * OnboardingQuotesFactory} — this method only stamps each with the owner and persists it.
      */
     @Transactional
     public void createDefaultQuotes(Long userId) {
-        long now = System.currentTimeMillis();
-
-        List<Quote> defaults = List.of(
-                buildDefaultQuote(
-                        "⭐ Отмечайте любимые цитаты звёздочкой — они попадут в избранное. " +
-                                "На вкладке «На сегодня» каждый день вас ждёт одна из ваших цитат. Удалите эти карточки, когда освоитесь.",
-                        "Epigraph", null, "инструкция", now + 2),
-                buildDefaultQuote(
-                        "➕ Чтобы добавить цитату, перейдите в раздел «Добавить». " +
-                                "Укажите текст, автора, источник и теги — это поможет находить нужное через поиск.",
-                        "Epigraph", null, "инструкция", now + 1),
-                buildDefaultQuote(
-                        "👋 Добро пожаловать в Epigraph! Это ваше личное хранилище цитат. " +
-                                "Сохраняйте фразы, которые вас вдохновляют, удивляют или заставляют думать.",
-                        "Epigraph", null, "инструкция", now)
-        );
-
-        defaults.forEach(q -> {
+        OnboardingQuotesFactory.build(System.currentTimeMillis()).forEach(q -> {
             q.setUserId(userId);
             repo.save(q);
         });
-    }
-
-    private Quote buildDefaultQuote(String text, String author, String source, String tags, long added) {
-        Quote q = new Quote();
-
-        q.setText(text);
-        q.setAuthor(author);
-        q.setSource(source);
-        q.setTags(tags);
-        q.setAdded(added);
-
-        return q;
     }
 }
