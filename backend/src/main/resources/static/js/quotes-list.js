@@ -180,7 +180,13 @@ function highlightPendingSharedImport() {
     const card = document.querySelector(`.quote-card[data-id="${pendingId}"]`);
     if (!card) return;
 
-    card.scrollIntoView({behavior: 'smooth', block: 'center'});
+    // Jump straight to the card (no smooth scroll). In a large collection the target can be far
+    // down the list, and a smooth scroll takes long enough that the highlight's hold+fade would
+    // elapse before the viewport arrives — so the user would land on an already-faded card. An
+    // instant jump centres it immediately, so the highlight always plays in view.
+    // behavior:'instant' is REQUIRED: without it the call defaults to behavior:'auto', which
+    // resolves to the global `html { scroll-behavior: smooth }` in styles.css and animates anyway.
+    card.scrollIntoView({block: 'center', behavior: 'instant'});
     card.classList.add('just-shared');
 
     setTimeout(() => {

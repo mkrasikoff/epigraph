@@ -429,6 +429,15 @@ function moveToggleIndicator(container) {
     const active = container.querySelector('.import-source-tab.is-active');
     if (!indicator || !active) return;
 
+    // Bail while the container isn't laid out yet (its view/modal is still hidden) — offsetWidth
+    // reads 0. Positioning to 0 here, and especially adding `indicator-ready` (which switches on
+    // the CSS slide transition), would make the *next* call — the one that runs once the view is
+    // finally visible with real metrics — animate the pill in from the left edge every time the
+    // screen is opened. That's the "slider button jumps on screen change". Skipping entirely lets
+    // the first call that runs while the container is actually visible position the pill instantly
+    // (indicator-ready still absent → no transition), so only genuine tab switches animate.
+    if (!active.offsetWidth) return;
+
     indicator.style.left = active.offsetLeft + 'px';
     indicator.style.width = active.offsetWidth + 'px';
     container.classList.add('indicator-ready');
@@ -585,7 +594,35 @@ function showModal(title, body, actions, wide, centered) {
     modalEl.classList.toggle('modal--wide', !!wide);
     modalEl.classList.toggle('modal--centered', !!centered);
     document.getElementById('modal').classList.add('open');
+    lockBackgroundScroll();
+}
+
+/**
+ * Locks background scroll while a modal is open WITHOUT losing the scroll position — pins the
+ * body with position:fixed offset by the current scrollY, so the page stays visually in place
+ * under the blur instead of jumping to the top. Guarded so a modal that re-renders in place
+ * (e.g. import preview → summary calls showModal() again while already open) doesn't re-capture
+ * a now-zero scrollY and lose the original position.
+ */
+function lockBackgroundScroll() {
+    if (document.body.classList.contains('modal-lock-scroll')) return;
+    document.body.style.top = `-${window.scrollY}px`;
     document.body.classList.add('modal-lock-scroll');
+}
+
+/**
+ * Releases the scroll lock and restores the exact scroll position captured on lock.
+ */
+function unlockBackgroundScroll() {
+    if (!document.body.classList.contains('modal-lock-scroll')) return;
+    const scrollY = -parseInt(document.body.style.top || '0', 10);
+    document.body.classList.remove('modal-lock-scroll');
+    document.body.style.top = '';
+    // behavior:'instant' is REQUIRED here. Removing position:fixed drops the page to real scrollY 0
+    // (the top), then this call restores the saved position. A bare scrollTo(0, scrollY) inherits
+    // the global `html { scroll-behavior: smooth }`, so it would *animate* from top back down —
+    // the visible "jump to top then slide down" on close. Instant makes the restore imperceptible.
+    window.scrollTo({top: scrollY, left: 0, behavior: 'instant'});
 }
 
 /** Set while a long-running operation (e.g. bulk import) owns the open modal, to block Escape/overlay-click from closing it underneath that operation. */
@@ -597,7 +634,7 @@ let modalBusy = false;
 function closeModal() {
     if (modalBusy) return;
     document.getElementById('modal').classList.remove('open');
-    document.body.classList.remove('modal-lock-scroll');
+    unlockBackgroundScroll();
 }
 
 /**
