@@ -238,14 +238,14 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /api/auth/forgot-password: returns 202 on valid email")
     void forgotPassword_returnsAccepted() throws Exception {
-        doNothing().when(userService).initiatePasswordReset("user@example.com");
+        doNothing().when(userService).initiatePasswordReset("user@example.com", null);
 
         mockMvc.perform(post("/api/auth/forgot-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"user@example.com\"}"))
                 .andExpect(status().isAccepted());
 
-        verify(userService).initiatePasswordReset("user@example.com");
+        verify(userService).initiatePasswordReset("user@example.com", null);
     }
 
     @Test

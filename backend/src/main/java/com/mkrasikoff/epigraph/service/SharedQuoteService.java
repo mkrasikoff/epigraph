@@ -99,7 +99,7 @@ public class SharedQuoteService {
         }
 
         if (quoteRepo.countByUserId(importerUserId) >= MAX_QUOTES_PER_USER) {
-            throw new QuoteLimitExceededException(MAX_QUOTES_PER_USER);
+            throw new QuoteLimitExceededException();
         }
 
         Quote quote = new Quote();

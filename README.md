@@ -1,63 +1,61 @@
 # Epigraph
 
-Epigraph is a personal app for collecting and keeping quotes you love — from books, articles, conversations, or anywhere else. Open it and see a quote of the day. Add new ones, mark favourites, search by author or keyword, and export your collection any time.
-
-Your quotes are stored in a database and never lost between sessions.
+Epigraph is an app for collecting and keeping quotes you love — from books, articles,
+conversations, or anywhere else. Open it and see a quote of the day. Add new ones, mark
+favourites, search by author or keyword, earn achievements, and export your collection any time.
+The interface is bilingual (Russian / English) and your quotes are stored server-side, so they
+follow you across devices.
 
 ## Live app
 
-→ [epigraph.me](https://epigraph.me)
+→ **[epigraph.me](https://epigraph.me)**
 
 ---
 
 ## For developers
 
-### Project structure
-
-```
-epigraph/
-├── backend/
-│ ├── src/
-│ │ └── main/
-│ │ ├── java/com/mkrasikoff/epigraph/
-│ │ │ ├── config/ — Security, JWT filter, OAuth2, Scheduler, MDC logging
-│ │ │ ├── controller/ — AuthController, QuoteController, UserController, PushController
-│ │ │ ├── dto/ — Data Transfer Objects
-│ │ │ ├── exception/ — Exception handlers
-│ │ │ ├── model/ — Quote, User, PushSubscription, EmailVerification
-│ │ │ ├── repository/ — JPA repositories
-│ │ │ ├── service/ — AuthService, QuoteService, UserService, EmailService, JwtService, PushNotificationService
-│ │ │ └── EpigraphBackendApplication.java
-│ │ └── resources/
-│ │ ├── static/ — Frontend (index.html, styles.css, quotes.js, auth.js, api.js, ui.js, tags.js,
-│ │ │             i18n.js, notifications.js, sw.js, avatars.js, bootstrap.js, state.js, swipe.js,
-│ │ │             guest-quotes.js, yandex-import.js)
-│ │ ├── db/ — Flyway migrations
-│ │ ├── application.yaml
-│ │ ├── application-local.yaml
-│ │ └── application-prod.yaml
-│ └── build.gradle.kts
-├── README.md
-├── RELEASE_POLICY.md
-└── .gitignore
-```
-
 ### Tech stack
 
-| Layer         | Stack                                              |
-|---------------|----------------------------------------------------|
-| Backend       | Java 21, Spring Boot, Spring Security, JWT, OAuth2 |
-| Frontend      | Vanilla JS, HTML/CSS (served as Spring static)     |
-| Database      | PostgreSQL + Flyway (migrations)                   |
-| Notifications | Web Push (VAPID)                                   |
-| Deployment    | Railway                                            |
+| Layer         | Stack                                                              |
+|---------------|--------------------------------------------------------------------|
+| Backend       | Java 21, Spring Boot, Spring Security (JWT + OAuth2 Google/Yandex) |
+| Frontend      | Vanilla JS + HTML/CSS, no build step (served as Spring static)     |
+| Database      | PostgreSQL, Liquibase migrations                                   |
+| Notifications | Web Push (VAPID)                                                   |
+| Deployment    | Railway                                                            |
 
-### Localization
+### Architecture
 
-The UI is bilingual (Russian/English). All user-facing strings live in `TRANSLATIONS` in
-`static/i18n.js` (`TRANSLATIONS.ru` / `TRANSLATIONS.en`) and are looked up via `t('key')` — see the
-`epigraph-conventions` skill for the conventions around adding new strings and switching language
-at runtime.
+A single Spring Boot service that also serves the frontend — no separate web server or bundler.
+
+- **Backend** — a conventional layered Spring app under `com.mkrasikoff.epigraph`:
+  `controller` → `service` → `repository`, with `model` entities and feature-grouped `dto`
+  packages. Cross-cutting concerns live in their own packages: `security` (JWT filter, OAuth2
+  success handling), `geo` (region-based OAuth gating), `web` (request logging), and `config`.
+  Achievements have their own small domain package. Schema changes are Liquibase changesets in
+  `resources/db/postgres/`.
+- **Frontend** — plain ES modules in `resources/static/`, each loaded via a `<script>` tag in
+  `index.html` (no build step). All user-facing text goes through `i18n.js` (`t('key')`), so the
+  UI stays fully bilingual.
+
+> Repo-specific conventions and gotchas (adding an endpoint or a user field, the testing setup,
+> frontend i18n discipline) are documented in the `epigraph-conventions` skill under
+> `.claude/skills/`.
+
+### API overview
+
+Base URL: `/api`. All endpoints are JSON and, except auth and public share links, require a
+`Bearer <jwt>` token.
+
+- **Quotes** — list, create, update, delete, bulk import, and the deterministic quote-of-the-day.
+- **Auth** — email registration with a verification code, login, Google/Yandex OAuth, and
+  password reset by email link.
+- **User** — profile (username, avatar, theme, language), password change, account deletion.
+- **Sharing** — mint a public, view-only link for a quote and import a shared quote into your own
+  collection.
+- **Achievements & Push** — badge/theme progress, and Web Push quote-of-the-day opt-in.
+
+---
 
 ### Requirements
 
@@ -67,112 +65,42 @@ at runtime.
 | Gradle     | 8.14 (via wrapper, `./gradlew`) |
 | PostgreSQL | 14+                             |
 
----
-
 ### Local development
 
-#### 1. Database
-
-Start **Postgres.app** (menubar icon → Start) and create the database:
+**1. Database** — start Postgres and create the database:
 
 ```bash
-psql -U postgres
-CREATE DATABASE epigraph;
-\q
+psql -U postgres -c "CREATE DATABASE epigraph;"
 ```
 
-#### 2. Backend + Frontend
+**2. Backend + frontend** — one command runs both:
 
 ```bash
 cd backend
 ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
-The app starts at **http://localhost:8080** — frontend is included and served at the same address.
-
-Verify the API is running:
-```bash
-curl http://localhost:8080/api/quotes
-# Expected: [] (empty array — all good)
-```
-
----
-
-### Configuration
-
-#### Local (`application-local.yaml`)
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/epigraph
-    username: postgres
-    password: postgres
-```
-
-> This file is in `.gitignore` and is never committed.
-
-#### Production (Railway environment variables)
-
-| Variable                 | Value                        |
-|--------------------------|------------------------------|
-| `DATABASE_URL`           | set automatically by Railway |
-| `DB_USER`                | set automatically by Railway |
-| `DB_PASSWORD`            | set automatically by Railway |
-| `SPRING_PROFILES_ACTIVE` | `prod`                       |
-
----
-
-### API
-
-Base URL: `http://localhost:8080/api`
-
-#### Quotes
-
-| Method   | Path             | Description           |
-|----------|------------------|-----------------------|
-| `GET`    | `/quotes`        | Get user quotes       |
-| `POST`   | `/quotes`        | Add a quote           |
-| `PUT`    | `/quotes/{id}`   | Update a quote        |
-| `DELETE` | `/quotes/{id}`   | Delete a single quote |
-| `DELETE` | `/quotes`        | Delete all quotes     |
-
-#### Authentication
-
-| Method | Path                           | Description                 |
-|--------|--------------------------------|-----------------------------|
-| `POST` | `/auth/register`               | Register a new account      |
-| `POST` | `/auth/login`                  | Sign in with email/password |
-| `GET`  | `/oauth2/authorization/google` | Sign in with Google         |
-
-#### User
-
-| Method   | Path       | Description              |
-|----------|------------|--------------------------|
-| `GET`    | `/user/me` | Get current user profile |
-| `PUT`    | `/user/me` | Update profile           |
-| `DELETE` | `/user/me` | Delete account           |
-
-#### Quote object (JSON)
-
-```json
-{
-  "id": 1,
-  "text": "Quote text",
-  "author": "Author name",
-  "source": "Book title",
-  "fav": false,
-  "tags": "philosophy,motivation",
-  "added": 1712760000000
-}
-```
-
----
-
-### Quick start
+The app starts at **http://localhost:8080** — the frontend is served at the same address.
+Liquibase applies migrations on startup. Verify the API:
 
 ```bash
-cd backend && ./gradlew bootRun --args='--spring.profiles.active=local'
+curl http://localhost:8080/api/quotes   # → [] before you sign in
 ```
 
-Open **http://localhost:8080**
+Local config lives in `application-local.yaml` (git-ignored — never committed). External
+integrations (email delivery, Web Push, OAuth) need their own credentials to work locally; the
+core quote features run without them.
+
+### Production
+
+Deployed on Railway with `SPRING_PROFILES_ACTIVE=prod`; the database URL and credentials are
+injected as environment variables. Secrets are never committed — they are configured in the
+hosting environment.
+
+---
+
+### Tests
+
+```bash
+cd backend && ./gradlew test
+```

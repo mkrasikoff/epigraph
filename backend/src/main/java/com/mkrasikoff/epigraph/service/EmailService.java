@@ -77,27 +77,48 @@ public class EmailService {
             log.info("Verification email sent to {}", to);
         } catch (Exception e) {
             log.error("Failed to send verification email to {}: {}", to, e.getMessage());
-            throw new RuntimeException("Не удалось отправить письмо. Попробуйте позже.");
+            throw new RuntimeException("Failed to send email. Please try again later.");
         }
     }
 
     /**
-     * Sends a password-reset link via Resend HTTP API.
+     * Sends a password-reset link via Resend HTTP API, localized to the guest's language.
+     *
+     * @param language the guest-selected UI language ("en" for the English email; anything else,
+     *                 including null, falls back to Russian).
      */
-    public void sendPasswordResetLink(String to, String resetLink) {
+    public void sendPasswordResetLink(String to, String resetLink, String language) {
+        boolean en = "en".equals(language);
+
+        String subject = en
+                ? "Reset your Epigraph password"
+                : "Сброс пароля Epigraph";
+
+        String text = en
+                ? """
+                    You requested a password change for Epigraph.
+
+                    Follow this link to set a new password:
+                    %s
+
+                    The link is valid for 30 minutes.
+                    If you didn't request a password change, just ignore this email.
+                    """.formatted(resetLink)
+                : """
+                    Вы запросили смену пароля в Epigraph.
+
+                    Перейдите по ссылке, чтобы установить новый пароль:
+                    %s
+
+                    Ссылка действительна 30 минут.
+                    Если вы не запрашивали смену пароля — просто проигнорируйте это письмо.
+                    """.formatted(resetLink);
+
         Map<String, Object> body = Map.of(
                 "from", from,
                 "to", new String[]{to},
-                "subject", "Сброс пароля Epigraph",
-                "text", """
-                    Вы запросили смену пароля в Epigraph.
-                    
-                    Перейдите по ссылке, чтобы установить новый пароль:
-                    %s
-                    
-                    Ссылка действительна 30 минут.
-                    Если вы не запрашивали смену пароля — просто проигнорируйте это письмо.
-                    """.formatted(resetLink)
+                "subject", subject,
+                "text", text
         );
 
         try {
@@ -114,7 +135,7 @@ public class EmailService {
         } catch (Exception e) {
             log.error("Failed to send password reset email to {}: {}", to, e.getMessage());
 
-            throw new RuntimeException("Не удалось отправить письмо. Попробуйте позже.");
+            throw new RuntimeException("Failed to send email. Please try again later.");
         }
     }
 }
