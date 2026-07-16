@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.AchievementStatusResponse;
+import com.mkrasikoff.epigraph.dto.achievement.AchievementStatusResponse;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

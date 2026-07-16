@@ -1,12 +1,12 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.AuthResponse;
-import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
-import com.mkrasikoff.epigraph.dto.ErrorResponse;
-import com.mkrasikoff.epigraph.dto.UpdateAvatarRequest;
-import com.mkrasikoff.epigraph.dto.UpdatePreferredLanguageRequest;
-import com.mkrasikoff.epigraph.dto.UpdateThemeStyleRequest;
-import com.mkrasikoff.epigraph.dto.UpdateUsernameRequest;
+import com.mkrasikoff.epigraph.dto.auth.AuthResponse;
+import com.mkrasikoff.epigraph.dto.auth.ChangePasswordRequest;
+import com.mkrasikoff.epigraph.dto.common.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.user.UpdateAvatarRequest;
+import com.mkrasikoff.epigraph.dto.user.UpdatePreferredLanguageRequest;
+import com.mkrasikoff.epigraph.dto.user.UpdateThemeStyleRequest;
+import com.mkrasikoff.epigraph.dto.user.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;

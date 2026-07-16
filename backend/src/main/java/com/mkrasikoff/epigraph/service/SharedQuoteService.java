@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
-import com.mkrasikoff.epigraph.dto.ImportSharedQuoteResponse;
+import com.mkrasikoff.epigraph.dto.share.ImportSharedQuoteResponse;
 import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.exception.SharedQuoteNotFoundException;

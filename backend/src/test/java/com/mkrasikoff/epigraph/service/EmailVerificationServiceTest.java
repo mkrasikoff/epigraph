@@ -44,7 +44,7 @@ class EmailVerificationServiceTest {
     @Test
     @DisplayName("sendCode: invalidates previous codes and saves new one")
     void sendCode_invalidatesPreviousAndSavesNew() {
-        service.sendCode("user@mail.com");
+        service.sendCode("user@mail.com", "en");
 
         verify(repo).invalidateAll("user@mail.com");
         verify(repo).save(any(EmailVerification.class));
@@ -55,7 +55,7 @@ class EmailVerificationServiceTest {
     void sendCode_savedCodeIsSixDigits() {
         ArgumentCaptor<EmailVerification> captor = ArgumentCaptor.forClass(EmailVerification.class);
 
-        service.sendCode("user@mail.com");
+        service.sendCode("user@mail.com", "en");
 
         verify(repo).save(captor.capture());
         String code = captor.getValue().getCode();
@@ -67,7 +67,7 @@ class EmailVerificationServiceTest {
     void sendCode_savedVerificationHasCorrectFields() {
         ArgumentCaptor<EmailVerification> captor = ArgumentCaptor.forClass(EmailVerification.class);
 
-        service.sendCode("user@mail.com");
+        service.sendCode("user@mail.com", "en");
 
         verify(repo).save(captor.capture());
         EmailVerification saved = captor.getValue();
@@ -81,11 +81,11 @@ class EmailVerificationServiceTest {
     void sendCode_sendsEmail() {
         ArgumentCaptor<EmailVerification> captor = ArgumentCaptor.forClass(EmailVerification.class);
 
-        service.sendCode("user@mail.com");
+        service.sendCode("user@mail.com", "en");
 
         verify(repo).save(captor.capture());
         String code = captor.getValue().getCode();
-        verify(emailService).sendVerificationCode("user@mail.com", code);
+        verify(emailService).sendVerificationCode("user@mail.com", code, "en");
     }
 
     @Test

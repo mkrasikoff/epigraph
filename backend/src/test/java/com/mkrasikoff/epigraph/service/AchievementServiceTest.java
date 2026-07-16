@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
-import com.mkrasikoff.epigraph.dto.AchievementStatusResponse;
+import com.mkrasikoff.epigraph.dto.achievement.AchievementStatusResponse;
 import com.mkrasikoff.epigraph.model.AchievementProgress;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.model.UserActivityDay;

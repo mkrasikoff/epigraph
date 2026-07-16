@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.AchievementStatusResponse;
+import com.mkrasikoff.epigraph.dto.achievement.AchievementStatusResponse;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

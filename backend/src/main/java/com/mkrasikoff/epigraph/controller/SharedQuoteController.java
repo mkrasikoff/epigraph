@@ -1,8 +1,8 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.dto.ImportSharedQuoteResponse;
-import com.mkrasikoff.epigraph.dto.PublicSharedQuoteResponse;
-import com.mkrasikoff.epigraph.dto.SharedQuoteLinkResponse;
+import com.mkrasikoff.epigraph.dto.share.ImportSharedQuoteResponse;
+import com.mkrasikoff.epigraph.dto.share.PublicSharedQuoteResponse;
+import com.mkrasikoff.epigraph.dto.share.SharedQuoteLinkResponse;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.SharedQuote;
 import com.mkrasikoff.epigraph.service.AchievementService;
