@@ -429,6 +429,15 @@ function moveToggleIndicator(container) {
     const active = container.querySelector('.import-source-tab.is-active');
     if (!indicator || !active) return;
 
+    // Bail while the container isn't laid out yet (its view/modal is still hidden) — offsetWidth
+    // reads 0. Positioning to 0 here, and especially adding `indicator-ready` (which switches on
+    // the CSS slide transition), would make the *next* call — the one that runs once the view is
+    // finally visible with real metrics — animate the pill in from the left edge every time the
+    // screen is opened. That's the "slider button jumps on screen change". Skipping entirely lets
+    // the first call that runs while the container is actually visible position the pill instantly
+    // (indicator-ready still absent → no transition), so only genuine tab switches animate.
+    if (!active.offsetWidth) return;
+
     indicator.style.left = active.offsetLeft + 'px';
     indicator.style.width = active.offsetWidth + 'px';
     container.classList.add('indicator-ready');

@@ -486,7 +486,13 @@ body {
     color: var(--color-text);
     background: var(--color-bg);
     line-height: 1.6;
-    overflow-x: hidden;
+    /* `clip`, not `hidden`: still trims any horizontal overflow (decorative quote glyphs etc.),
+       but does NOT establish a scroll container. `overflow-x: hidden` here forced overflow-y to
+       compute as `auto` (per spec, a non-visible axis makes the other axis auto), so both <html>
+       (which also has overflow-x:hidden) AND <body> became vertical scroll containers — two
+       fighting scrollbars. With `clip`, body's overflow-y stays `visible` and <html> is the sole
+       scroller. */
+    overflow-x: clip;
 }
 
 img {
