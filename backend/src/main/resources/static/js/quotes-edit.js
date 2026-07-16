@@ -70,7 +70,7 @@ async function addQuote(e) {
 
         if (!res.ok) {
             const err = await res.json();
-            const message = err.text || err.error || t('toastValidationError');
+            const message = codeToText(err.text || err.error, 'toastValidationError');
             toast(message, 'error');
             return;
         }

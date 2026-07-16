@@ -72,7 +72,7 @@ public class SharePageController {
 
             String html = template
                     .replace("{{OG_TITLE}}", "Epigraph")
-                    .replace("{{OG_DESCRIPTION}}", "Ваши цитаты. Каждый день.")
+                    .replace("{{OG_DESCRIPTION}}", "Your quotes. Every day.")
                     .replace("{{OG_URL}}", HtmlUtils.htmlEscape(url))
                     .replace("{{BODY}}", buildNotFoundBody());
 

@@ -24,6 +24,7 @@ public final class ApiCodes {
     public static final String THEME_LOCKED = "THEME_LOCKED";
     public static final String RESET_LINK_INVALID = "RESET_LINK_INVALID";
     public static final String BAD_REQUEST = "BAD_REQUEST";
+    public static final String QUOTE_LIMIT_EXCEEDED = "QUOTE_LIMIT_EXCEEDED";
 
     // Success confirmations (not displayed to the client — see class doc)
     public static final String PASSWORD_CHANGED = "PASSWORD_CHANGED";

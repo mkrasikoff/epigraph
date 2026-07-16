@@ -138,11 +138,12 @@ public class AuthController {
      */
     @PostMapping("/forgot-password")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void forgotPassword(@RequestBody Map<String, String> body) {
+    public void forgotPassword(@RequestBody Map<String, String> body,
+                               @CookieValue(value = "epigraph_lang", required = false) String language) {
         String email = body.get("email");
         if (email == null || email.isBlank()) return;
 
-        userService.initiatePasswordReset(email);
+        userService.initiatePasswordReset(email, language);
 
         log.info("Password reset requested — email = {}", email);
     }
