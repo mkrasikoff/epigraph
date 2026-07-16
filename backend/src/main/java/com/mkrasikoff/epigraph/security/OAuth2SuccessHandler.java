@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.security;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AuthService;
 import com.mkrasikoff.epigraph.service.JwtService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
@@ -60,9 +61,24 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             suggestedUsername = login != null ? login : displayName;
         }
 
-        User user = authService.provisionOAuthUser(email, provider, providerId, suggestedUsername);
+        String language = readLangCookie(request);
+        User user = authService.provisionOAuthUser(email, provider, providerId, suggestedUsername, language);
         String token = jwtService.generateToken(user.getId(), user.getEmail());
 
         response.sendRedirect("/?token=" + token);
+    }
+
+    /**
+     * Reads the guest-selected UI language from the {@code epigraph_lang} cookie, which the client
+     * sets before initiating OAuth. Present on the provider callback (a SameSite=Lax top-level
+     * navigation), so the new account can be seeded in the right language. Null when absent.
+     */
+    private static String readLangCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("epigraph_lang".equals(cookie.getName())) return cookie.getValue();
+        }
+        return null;
     }
 }

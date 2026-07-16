@@ -142,13 +142,16 @@ public class QuoteService {
     }
 
     /**
-     * Creates the onboarding instruction quotes for a newly registered user. Called right after
-     * registration (local and OAuth2). The seed content itself lives in {@link
-     * OnboardingQuotesFactory} — this method only stamps each with the owner and persists it.
+     * Creates the onboarding instruction quotes for a newly registered user, localized to their
+     * preferred language. Called right after registration (local and OAuth2). The seed content
+     * itself lives in {@link OnboardingQuotesFactory} — this method only stamps each with the
+     * owner and persists it.
+     *
+     * @param language the account's preferred language ("en" for English; anything else → Russian).
      */
     @Transactional
-    public void createDefaultQuotes(Long userId) {
-        OnboardingQuotesFactory.build(System.currentTimeMillis()).forEach(q -> {
+    public void createDefaultQuotes(Long userId, String language) {
+        OnboardingQuotesFactory.build(language, System.currentTimeMillis()).forEach(q -> {
             q.setUserId(userId);
             repo.save(q);
         });

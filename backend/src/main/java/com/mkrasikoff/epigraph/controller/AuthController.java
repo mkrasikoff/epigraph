@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,10 +44,11 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void register(@Valid @RequestBody RegisterRequest request) {
+    public void register(@Valid @RequestBody RegisterRequest request,
+                         @CookieValue(value = "epigraph_lang", required = false) String language) {
         log.info("Registration attempt — email = {}", request.getEmail());
 
-        authService.register(request.getEmail(), request.getPassword());
+        authService.register(request.getEmail(), request.getPassword(), language);
 
         log.info("Verification code sent — email = {}", request.getEmail());
     }
@@ -89,9 +91,10 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verify(@Valid @RequestBody VerifyRequest request) {
+    public ResponseEntity<?> verify(@Valid @RequestBody VerifyRequest request,
+                                    @CookieValue(value = "epigraph_lang", required = false) String preferredLanguage) {
         try {
-            String token = authService.verify(request.getEmail(), request.getCode());
+            String token = authService.verify(request.getEmail(), request.getCode(), preferredLanguage);
 
             log.info("New user verified and registered — email = {}", request.getEmail());
 
@@ -103,11 +106,12 @@ public class AuthController {
 
     @PostMapping("/resend")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void resend(@RequestBody Map<String, String> body) {
+    public void resend(@RequestBody Map<String, String> body,
+                       @CookieValue(value = "epigraph_lang", required = false) String language) {
         String email = body.get("email");
         if (email == null || email.isBlank()) return;
 
-        authService.resendCode(email);
+        authService.resendCode(email, language);
 
         log.info("Verification code resent — email = {}", email);
     }

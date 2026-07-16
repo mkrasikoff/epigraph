@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,14 +61,14 @@ class AuthControllerTest {
         request.setEmail("user@example.com");
         request.setPassword("password1");
 
-        doNothing().when(authService).register(eq("user@example.com"), anyString());
+        doNothing().when(authService).register(eq("user@example.com"), anyString(), isNull());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted());
 
-        verify(authService).register(eq("user@example.com"), anyString());
+        verify(authService).register(eq("user@example.com"), anyString(), isNull());
     }
 
     @Test
@@ -116,7 +117,7 @@ class AuthControllerTest {
         request.setEmail("user@example.com");
         request.setCode("123456");
 
-        when(authService.verify("user@example.com", "123456")).thenReturn("jwt-token");
+        when(authService.verify("user@example.com", "123456", null)).thenReturn("jwt-token");
 
         mockMvc.perform(post("/api/auth/verify")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +126,7 @@ class AuthControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.token").value("jwt-token"));
 
-        verify(authService).verify("user@example.com", "123456");
+        verify(authService).verify("user@example.com", "123456", null);
     }
 
     @Test
@@ -135,7 +136,7 @@ class AuthControllerTest {
         request.setEmail("user@example.com");
         request.setCode("000000");
 
-        when(authService.verify("user@example.com", "000000"))
+        when(authService.verify("user@example.com", "000000", null))
                 .thenThrow(new IllegalArgumentException("Неверный код"));
 
         mockMvc.perform(post("/api/auth/verify")
@@ -145,7 +146,7 @@ class AuthControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Неверный код"));
 
-        verify(authService).verify("user@example.com", "000000");
+        verify(authService).verify("user@example.com", "000000", null);
     }
 
     @Test
@@ -164,14 +165,14 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /api/auth/resend: returns 202 on valid email")
     void resend_returnsAccepted() throws Exception {
-        doNothing().when(authService).resendCode("user@example.com");
+        doNothing().when(authService).resendCode("user@example.com", null);
 
         mockMvc.perform(post("/api/auth/resend")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"user@example.com\"}"))
                 .andExpect(status().isAccepted());
 
-        verify(authService).resendCode("user@example.com");
+        verify(authService).resendCode("user@example.com", null);
     }
 
     @Test

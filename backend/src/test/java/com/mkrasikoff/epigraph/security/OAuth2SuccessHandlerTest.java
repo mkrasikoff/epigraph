@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.security;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AuthService;
 import com.mkrasikoff.epigraph.service.JwtService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -70,13 +71,13 @@ class OAuth2SuccessHandlerTest {
         OAuth2User oauthUser = googleUser("user@gmail.com", "sub-123", "Mikhail", "Mikhail Krasikov");
         Authentication authentication = new TestingAuthenticationToken(oauthUser, null);
 
-        when(authService.provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail"))
+        when(authService.provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail", null))
                 .thenReturn(user(1L, "user@gmail.com"));
         when(jwtService.generateToken(1L, "user@gmail.com")).thenReturn("jwt-token");
 
         handler().onAuthenticationSuccess(request, response, authentication);
 
-        verify(authService).provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail");
+        verify(authService).provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail", null);
         verify(response).sendRedirect("/?token=jwt-token");
     }
 
@@ -86,13 +87,13 @@ class OAuth2SuccessHandlerTest {
         OAuth2User oauthUser = googleUser("user@gmail.com", "sub-123", null, "Mikhail Krasikov");
         Authentication authentication = new TestingAuthenticationToken(oauthUser, null);
 
-        when(authService.provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail Krasikov"))
+        when(authService.provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail Krasikov", null))
                 .thenReturn(user(1L, "user@gmail.com"));
         when(jwtService.generateToken(1L, "user@gmail.com")).thenReturn("jwt-token");
 
         handler().onAuthenticationSuccess(request, response, authentication);
 
-        verify(authService).provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail Krasikov");
+        verify(authService).provisionOAuthUser("user@gmail.com", "google", "sub-123", "Mikhail Krasikov", null);
     }
 
     @Test
@@ -101,13 +102,13 @@ class OAuth2SuccessHandlerTest {
         OAuth2User oauthUser = yandexUser("user@yandex.ru", "yid-1", "mkrasikoff", "Mikhail K.");
         Authentication authentication = new TestingAuthenticationToken(oauthUser, null);
 
-        when(authService.provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "mkrasikoff"))
+        when(authService.provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "mkrasikoff", null))
                 .thenReturn(user(2L, "user@yandex.ru"));
         when(jwtService.generateToken(2L, "user@yandex.ru")).thenReturn("jwt-token");
 
         handler().onAuthenticationSuccess(request, response, authentication);
 
-        verify(authService).provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "mkrasikoff");
+        verify(authService).provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "mkrasikoff", null);
         verify(response).sendRedirect("/?token=jwt-token");
     }
 
@@ -117,12 +118,28 @@ class OAuth2SuccessHandlerTest {
         OAuth2User oauthUser = yandexUser("user@yandex.ru", "yid-1", null, "Mikhail K");
         Authentication authentication = new TestingAuthenticationToken(oauthUser, null);
 
-        when(authService.provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "Mikhail K"))
+        when(authService.provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "Mikhail K", null))
                 .thenReturn(user(2L, "user@yandex.ru"));
         when(jwtService.generateToken(2L, "user@yandex.ru")).thenReturn("jwt-token");
 
         handler().onAuthenticationSuccess(request, response, authentication);
 
-        verify(authService).provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "Mikhail K");
+        verify(authService).provisionOAuthUser("user@yandex.ru", "yandex", "yid-1", "Mikhail K", null);
+    }
+
+    @Test
+    @DisplayName("onAuthenticationSuccess: epigraph_lang cookie is passed through as the provisioning language")
+    void passesLanguageFromCookie() throws Exception {
+        OAuth2User oauthUser = googleUser("user@gmail.com", "sub-123", "Jane", null);
+        Authentication authentication = new TestingAuthenticationToken(oauthUser, null);
+
+        when(request.getCookies()).thenReturn(new Cookie[]{new Cookie("epigraph_lang", "en")});
+        when(authService.provisionOAuthUser("user@gmail.com", "google", "sub-123", "Jane", "en"))
+                .thenReturn(user(1L, "user@gmail.com"));
+        when(jwtService.generateToken(1L, "user@gmail.com")).thenReturn("jwt-token");
+
+        handler().onAuthenticationSuccess(request, response, authentication);
+
+        verify(authService).provisionOAuthUser("user@gmail.com", "google", "sub-123", "Jane", "en");
     }
 }

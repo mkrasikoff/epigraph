@@ -49,7 +49,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("pass123")).thenReturn("encoded");
 
-        authService.register("test@mail.com", "pass123");
+        authService.register("test@mail.com", "pass123", null);
 
         verify(userRepository).save(argThat(u ->
                 "test@mail.com".equals(u.getEmail()) &&
@@ -58,7 +58,7 @@ class AuthServiceTest {
                         "local".equals(u.getProvider()) &&
                         "test".equals(u.getUsername())
         ));
-        verify(emailVerificationService).sendCode("test@mail.com");
+        verify(emailVerificationService).sendCode("test@mail.com", null);
     }
 
     @Test
@@ -67,9 +67,9 @@ class AuthServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(any())).thenReturn("encoded");
 
-        authService.register("ivan.petrov+news@mail.com", "pass123");
-        authService.register("a@x.com", "pass123");
-        authService.register("ThisIsAVeryLongLocalPartOfAnEmail@mail.com", "pass123");
+        authService.register("ivan.petrov+news@mail.com", "pass123", null);
+        authService.register("a@x.com", "pass123", null);
+        authService.register("ThisIsAVeryLongLocalPartOfAnEmail@mail.com", "pass123", null);
 
         verify(userRepository).save(argThat(u -> "ivanpetrovnews".equals(u.getUsername())));
         verify(userRepository).save(argThat(u -> "a__".equals(u.getUsername())));
@@ -82,7 +82,7 @@ class AuthServiceTest {
         User existing = buildUser(1L, "test@mail.com", true);
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> authService.register("test@mail.com", "pass"))
+        assertThatThrownBy(() -> authService.register("test@mail.com", "pass", null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("уже зарегистрирован");
     }
@@ -94,12 +94,12 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(stale));
         when(passwordEncoder.encode(any())).thenReturn("encoded");
 
-        authService.register("test@mail.com", "newpass");
+        authService.register("test@mail.com", "newpass", null);
 
         verify(userRepository).delete(stale);
         verify(userRepository).flush();
         verify(userRepository).save(any(User.class));
-        verify(emailVerificationService).sendCode("test@mail.com");
+        verify(emailVerificationService).sendCode("test@mail.com", null);
     }
 
     @Test
@@ -109,12 +109,12 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
         when(jwtService.generateToken(1L, "test@mail.com")).thenReturn("jwt-token");
 
-        String token = authService.verify("test@mail.com", "123456");
+        String token = authService.verify("test@mail.com", "123456", null);
 
         verify(emailVerificationService).verifyCode("test@mail.com", "123456");
         assertThat(user.isEmailVerified()).isTrue();
         verify(userRepository).save(user);
-        verify(quoteService).createDefaultQuotes(1L);
+        verify(quoteService).createDefaultQuotes(1L, "ru");
         assertThat(token).isEqualTo("jwt-token");
     }
 
@@ -123,7 +123,7 @@ class AuthServiceTest {
     void verify_throws_whenUserNotFound() {
         when(userRepository.findByEmail("ghost@mail.com")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.verify("ghost@mail.com", "000000"))
+        assertThatThrownBy(() -> authService.verify("ghost@mail.com", "000000", null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("не найден");
     }
@@ -134,9 +134,9 @@ class AuthServiceTest {
         User user = buildUser(1L, "test@mail.com", false);
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
 
-        authService.resendCode("test@mail.com");
+        authService.resendCode("test@mail.com", null);
 
-        verify(emailVerificationService).sendCode("test@mail.com");
+        verify(emailVerificationService).sendCode("test@mail.com", null);
     }
 
     @Test
@@ -145,9 +145,9 @@ class AuthServiceTest {
         User user = buildUser(1L, "test@mail.com", true);
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
 
-        authService.resendCode("test@mail.com");
+        authService.resendCode("test@mail.com", null);
 
-        verify(emailVerificationService, never()).sendCode(any());
+        verify(emailVerificationService, never()).sendCode(any(), any());
     }
 
     @Test
@@ -155,9 +155,9 @@ class AuthServiceTest {
     void resendCode_doesNothing_whenEmailUnknown() {
         when(userRepository.findByEmail("unknown@mail.com")).thenReturn(Optional.empty());
 
-        authService.resendCode("unknown@mail.com");
+        authService.resendCode("unknown@mail.com", null);
 
-        verify(emailVerificationService, never()).sendCode(any());
+        verify(emailVerificationService, never()).sendCode(any(), any());
     }
 
     @Test
@@ -218,7 +218,7 @@ class AuthServiceTest {
             return u;
         });
 
-        User result = authService.provisionOAuthUser("new@gmail.com", "google", "sub-9", "Mikhail Krasikov");
+        User result = authService.provisionOAuthUser("new@gmail.com", "google", "sub-9", "Mikhail Krasikov", null);
 
         verify(userRepository).save(argThat(u ->
                 "new@gmail.com".equals(u.getEmail()) &&
@@ -226,7 +226,7 @@ class AuthServiceTest {
                         "sub-9".equals(u.getProviderId()) &&
                         "MikhailKrasikov".equals(u.getUsername())
         ));
-        verify(quoteService).createDefaultQuotes(7L);
+        verify(quoteService).createDefaultQuotes(7L, "ru");
         assertThat(result.getId()).isEqualTo(7L);
     }
 
@@ -236,11 +236,11 @@ class AuthServiceTest {
         User existing = buildUser(5L, "user@gmail.com", true);
         when(userRepository.findByEmail("user@gmail.com")).thenReturn(Optional.of(existing));
 
-        User result = authService.provisionOAuthUser("user@gmail.com", "google", "sub-1", "Whatever");
+        User result = authService.provisionOAuthUser("user@gmail.com", "google", "sub-1", "Whatever", null);
 
         assertThat(result).isSameAs(existing);
         verify(userRepository, never()).save(any());
-        verify(quoteService, never()).createDefaultQuotes(any());
+        verify(quoteService, never()).createDefaultQuotes(any(), any());
     }
 
     @Test
@@ -253,7 +253,7 @@ class AuthServiceTest {
             return u;
         });
 
-        authService.provisionOAuthUser("x@gmail.com", "google", "sub", "A!");
+        authService.provisionOAuthUser("x@gmail.com", "google", "sub", "A!", null);
 
         verify(userRepository).save(argThat(u -> u.getUsername() == null));
     }
@@ -268,12 +268,41 @@ class AuthServiceTest {
             return u;
         });
 
-        authService.provisionOAuthUser("x@gmail.com", "google", "sub", "ThisIsAVeryLongGivenNameIndeed");
+        authService.provisionOAuthUser("x@gmail.com", "google", "sub", "ThisIsAVeryLongGivenNameIndeed", null);
 
         verify(userRepository).save(argThat(u ->
                 u.getUsername() != null &&
                         u.getUsername().length() == 20 &&
                         "ThisIsAVeryLongGiven".equals(u.getUsername())
         ));
+    }
+
+    @Test
+    @DisplayName("verify: language 'en' sets the account language and seeds English quotes")
+    void verify_en_setsLanguageAndSeedsEnglish() {
+        User user = buildUser(1L, "en@mail.com", false);
+        when(userRepository.findByEmail("en@mail.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(1L, "en@mail.com")).thenReturn("jwt-token");
+
+        authService.verify("en@mail.com", "123456", "en");
+
+        assertThat(user.getPreferredLanguage()).isEqualTo("en");
+        verify(quoteService).createDefaultQuotes(1L, "en");
+    }
+
+    @Test
+    @DisplayName("provisionOAuthUser: language 'en' sets the account language and seeds English quotes")
+    void provisionOAuthUser_en_setsLanguageAndSeedsEnglish() {
+        when(userRepository.findByEmail("en@gmail.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            u.setId(9L);
+            return u;
+        });
+
+        authService.provisionOAuthUser("en@gmail.com", "google", "sub-en", "Jane", "en");
+
+        verify(userRepository).save(argThat(u -> "en".equals(u.getPreferredLanguage())));
+        verify(quoteService).createDefaultQuotes(9L, "en");
     }
 }

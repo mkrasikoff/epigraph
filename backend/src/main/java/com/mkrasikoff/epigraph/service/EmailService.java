@@ -28,22 +28,42 @@ public class EmailService {
     }
 
     /**
-     * Sends a 6-digit verification code via Resend HTTP API.
+     * Sends a 6-digit verification code via Resend HTTP API, localized to the guest's language.
      * Uses HTTPS (port 443) — works on all hosting providers including Railway.
+     *
+     * @param language the guest-selected UI language ("en" for the English email; anything else,
+     *                 including null, falls back to Russian).
      */
-    public void sendVerificationCode(String to, String code) {
+    public void sendVerificationCode(String to, String code, String language) {
+        boolean en = "en".equals(language);
+
+        String subject = en
+                ? "Your Epigraph verification code"
+                : "Ваш код подтверждения Epigraph";
+
+        String text = en
+                ? """
+                        Welcome to Epigraph!
+
+                        Your verification code: %s
+
+                        The code is valid for 15 minutes.
+                        If you didn't sign up, just ignore this email.
+                        """.formatted(code)
+                : """
+                        Добро пожаловать в Epigraph!
+
+                        Ваш код подтверждения: %s
+
+                        Код действителен 15 минут.
+                        Если вы не регистрировались — просто проигнорируйте это письмо.
+                        """.formatted(code);
+
         Map<String, Object> body = Map.of(
                 "from", from,
                 "to", new String[]{to},
-                "subject", "Ваш код подтверждения Epigraph",
-                "text", """
-                        Добро пожаловать в Epigraph!
-                        
-                        Ваш код подтверждения: %s
-                        
-                        Код действителен 15 минут.
-                        Если вы не регистрировались — просто проигнорируйте это письмо.
-                        """.formatted(code)
+                "subject", subject,
+                "text", text
         );
 
         try {

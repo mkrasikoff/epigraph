@@ -13,36 +13,56 @@ class OnboardingQuotesFactoryTest {
     private static final long BASE = 1_000_000L;
 
     @Test
-    @DisplayName("build: returns exactly 3 onboarding quotes")
+    @DisplayName("build: returns exactly 3 onboarding quotes for either language")
     void build_returnsThreeQuotes() {
-        assertThat(OnboardingQuotesFactory.build(BASE)).hasSize(3);
+        assertThat(OnboardingQuotesFactory.build("ru", BASE)).hasSize(3);
+        assertThat(OnboardingQuotesFactory.build("en", BASE)).hasSize(3);
     }
 
     @Test
-    @DisplayName("build: every quote is attributed to Epigraph and tagged as an instruction")
-    void build_hasConsistentAuthorAndTag() {
-        assertThat(OnboardingQuotesFactory.build(BASE))
+    @DisplayName("build(ru): quotes are in Russian, attributed to Epigraph and tagged инструкция")
+    void build_russianSet() {
+        assertThat(OnboardingQuotesFactory.build("ru", BASE))
                 .allSatisfy(q -> {
                     assertThat(q.getAuthor()).isEqualTo("Epigraph");
                     assertThat(q.getTags()).isEqualTo("инструкция");
                     assertThat(q.getText()).isNotBlank();
                 });
+        assertThat(OnboardingQuotesFactory.build("ru", BASE).get(2).getText()).contains("Добро пожаловать");
+    }
+
+    @Test
+    @DisplayName("build(en): quotes are in English, attributed to Epigraph and tagged guide")
+    void build_englishSet() {
+        assertThat(OnboardingQuotesFactory.build("en", BASE))
+                .allSatisfy(q -> {
+                    assertThat(q.getAuthor()).isEqualTo("Epigraph");
+                    assertThat(q.getTags()).isEqualTo("guide");
+                    assertThat(q.getText()).isNotBlank();
+                });
+        assertThat(OnboardingQuotesFactory.build("en", BASE).get(2).getText()).contains("Welcome to Epigraph");
+    }
+
+    @Test
+    @DisplayName("build: unknown/null language falls back to the Russian set")
+    void build_fallsBackToRussian() {
+        assertThat(OnboardingQuotesFactory.build(null, BASE).get(0).getTags()).isEqualTo("инструкция");
+        assertThat(OnboardingQuotesFactory.build("fr", BASE).get(0).getTags()).isEqualTo("инструкция");
     }
 
     @Test
     @DisplayName("build: quotes are ordered newest-first so the welcome card sorts to the top")
     void build_ordersWelcomeCardLast() {
-        List<Quote> quotes = OnboardingQuotesFactory.build(BASE);
+        List<Quote> quotes = OnboardingQuotesFactory.build("en", BASE);
 
         // Descending added offsets: base+2, base+1, base — the welcome card is the last element
         // (lowest timestamp) and every quote carries a distinct, base-anchored timestamp.
         assertThat(quotes).extracting(Quote::getAdded).containsExactly(BASE + 2, BASE + 1, BASE);
-        assertThat(quotes.get(2).getText()).contains("Добро пожаловать");
     }
 
     @Test
     @DisplayName("build: does not assign a userId — that is the caller's job")
     void build_leavesUserIdUnset() {
-        assertThat(OnboardingQuotesFactory.build(BASE)).allSatisfy(q -> assertThat(q.getUserId()).isNull());
+        assertThat(OnboardingQuotesFactory.build("ru", BASE)).allSatisfy(q -> assertThat(q.getUserId()).isNull());
     }
 }
