@@ -14,7 +14,7 @@
  * - updateCharCounter() / updateInputCounter() {fn} — defined in ui.js
  * - renderTags() / renderEditTags() {fn} — defined in tags.js
  * - renderList() {fn} — defined in quotes-list.js
- * - checkForNewAchievements() {fn} — defined in auth.js
+ * - checkForNewAchievements() {fn} — defined in achievements.js
  *
  * Provides (globals): addQuote(), resetForm(), toggleFav(), copyQuote(), shareQuote(),
  *   editQuote(), saveEditQuote(), deleteQuote(), MAX_QUOTES_PER_USER.

@@ -10,7 +10,7 @@
  * - Api              {Object}   — defined in api.js
  * - t()              {fn}       — defined in i18n.js
  * - escHtml() / moveNavIndicator() {fn} — defined in ui.js
- * - toggleFav() / copyQuote() / shareQuote() / editQuote() / deleteQuote() {fn} — defined in quotes.js
+ * - toggleFav() / copyQuote() / shareQuote() / editQuote() / deleteQuote() {fn} — defined in quotes-edit.js
  *
  * Provides (globals): renderList(), setFilter(), searchByTag(), selectSort(), sortQuotes(),
  *   loadMoreQuotes(), hasPendingSharedImport(), highlightPendingSharedImport(), SORT_LABEL_KEYS.
