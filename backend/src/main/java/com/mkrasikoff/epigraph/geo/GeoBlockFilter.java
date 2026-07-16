@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.config;
+package com.mkrasikoff.epigraph.geo;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

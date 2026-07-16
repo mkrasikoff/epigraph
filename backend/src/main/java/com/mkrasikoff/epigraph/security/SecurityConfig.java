@@ -1,5 +1,6 @@
-package com.mkrasikoff.epigraph.config;
+package com.mkrasikoff.epigraph.security;
 
+import com.mkrasikoff.epigraph.geo.GeoBlockFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

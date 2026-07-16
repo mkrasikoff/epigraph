@@ -1,6 +1,6 @@
 package com.mkrasikoff.epigraph.controller;
 
-import com.mkrasikoff.epigraph.config.GeoIpService;
+import com.mkrasikoff.epigraph.geo.GeoIpService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

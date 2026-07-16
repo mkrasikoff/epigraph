@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.config;
+package com.mkrasikoff.epigraph.security;
 
 import com.mkrasikoff.epigraph.service.JwtService;
 import jakarta.servlet.FilterChain;

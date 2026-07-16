@@ -1,4 +1,4 @@
-package com.mkrasikoff.epigraph.config;
+package com.mkrasikoff.epigraph.geo;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
