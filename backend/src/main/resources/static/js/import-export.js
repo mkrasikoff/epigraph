@@ -11,8 +11,8 @@
  * - t() / quoteCountWord() {fn} — defined in i18n.js
  * - escHtml() / formatQuoteAsText() / showModal() / closeModal() / toast() {fn} — defined in ui.js
  * - tagsToCsv()      {fn}       — defined in state.js
- * - renderList()     {fn}       — defined in quotes.js
- * - checkForNewAchievements() {fn} — defined in auth.js
+ * - renderList()     {fn}       — defined in quotes-list.js
+ * - checkForNewAchievements() {fn} — defined in achievements.js
  *
  * Provides (globals): importJSON(), exportJSON(), copyAll(), confirmClear(),
  *   downloadRejectedQuotes().

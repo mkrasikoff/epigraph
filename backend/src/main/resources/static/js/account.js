@@ -1,18 +1,23 @@
 /**
- * account.js — Account settings actions for Epigraph.
+ * account.js — Account & profile settings for Epigraph.
  *
- * Change-password and delete-account flows (Settings → account). Extracted from quotes.js
- * (TASK-127); the username/avatar/profile-setup UI is planned to move here from auth.js in a
- * later step of the same refactor.
+ * The Settings account panel, avatar picker, username edit, first-run profile setup, the
+ * app-version badge, and the change-password / delete-account flows. Assembled during the
+ * TASK-127 refactor from the quotes.js tail (password/delete) and the auth.js profile UI.
  *
  * Depends on:
- * - quotes           {Array}    — defined in state.js
+ * - quotes / currentUser / isGuest {globals} — defined in state.js / auth.js
+ * - AVATAR_ICONS / avatarIconLabelKey() {globals} — defined in avatars.js
+ * - Api              {Object}   — defined in api.js
  * - t()              {fn}       — defined in i18n.js
  * - showModal() / closeModal() / toast() {fn} — defined in ui.js
- * - authHeaders() / clearToken() {fn} — defined in auth.js
+ * - authHeaders() / clearToken() {fn} — defined in session.js
+ * - refreshAchievementsUi() / renderBadgePill() {fn} — defined in achievements.js
  *
- * Provides (globals): confirmDeleteAccount(), deleteAccount(),
- *   showChangePasswordModal(), submitChangePassword().
+ * Provides (globals): updateSettingsAccount(), showAvatarPickerModal(), submitAvatarIcon(),
+ *   showEditUsernameModal(), submitEditUsername(), showProfileSetupModal(), submitProfileSetup(),
+ *   loadAppVersion(), showChangePasswordModal(), submitChangePassword(),
+ *   confirmDeleteAccount(), deleteAccount().
  */
 
 // =============================================================================

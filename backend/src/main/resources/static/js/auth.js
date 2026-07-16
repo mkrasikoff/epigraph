@@ -6,8 +6,8 @@
  * - quotes           {Array}    — global mutable quotes array, defined in index.html CONSTANTS
  * - currentQodIndex  {number}   — defined in index.html CONSTANTS
  * - loadData()       {fn}       — defined in api.js
- * - renderQod()      {fn}       — defined in quotes.js
- * - renderQodAnimated() {fn}    — defined in quotes.js
+ * - renderQod()      {fn}       — defined in qod.js
+ * - renderQodAnimated() {fn}    — defined in qod.js
  * - switchView()     {fn}       — defined in index.html NAVIGATION
  * - t()              {fn}       — defined in i18n.js
  * - setLanguage()    {fn}       — defined in i18n.js
@@ -78,44 +78,6 @@ function hideGuestMode() {
         document.getElementById('tab-' + id)?.classList.remove('guest-locked');
         document.getElementById('btn-fav-qod')?.classList.remove('guest-locked');
     });
-}
-
-// ── Banner ──────────────────────────────────────────────────────────
-async function loadBanner() {
-    try {
-        const res = await fetch('/api/banner');
-        if (!res.ok) return;
-        const data = await res.json();
-        const msg = data.message?.trim();
-        if (!msg) return;
-
-        // Don't show again if dismissed in this session
-        const dismissed = sessionStorage.getItem('banner-dismissed');
-        if (dismissed === msg) return;
-
-        const banner = document.getElementById('announcement-banner');
-        const text   = document.getElementById('announcement-banner-text');
-        if (!banner || !text) return;
-
-        text.textContent = msg;
-        banner.style.display = 'flex';
-    } catch (e) {}
-}
-
-function dismissBanner() {
-    const banner = document.getElementById('announcement-banner');
-    const text   = document.getElementById('announcement-banner-text');
-    if (!banner) return;
-
-    // Remember this specific message was dismissed
-    if (text?.textContent) {
-        sessionStorage.setItem('banner-dismissed', text.textContent);
-    }
-
-    banner.style.transition = 'opacity 200ms ease, transform 200ms ease';
-    banner.style.opacity = '0';
-    banner.style.transform = 'translateY(-6px)';
-    setTimeout(() => banner.style.display = 'none', 210);
 }
 
 function toggleAuthMode() {

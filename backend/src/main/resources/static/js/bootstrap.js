@@ -14,21 +14,21 @@
  * - quotes           {Array}    — defined in state.js
  * - currentSort      {string}   — defined in state.js
  * - isGuest          {boolean}  — defined in auth.js
- * - loadBanner()              {fn}  — defined in auth.js
+ * - loadBanner()              {fn}  — defined in ui.js
  * - handleResetTokenFromUrl() {fn}  — defined in auth.js
  * - showGuestMode()           {fn}  — defined in auth.js
  * - hideGuestMode()           {fn}  — defined in auth.js
- * - getToken()                {fn}  — defined in auth.js
- * - setToken()                {fn}  — defined in auth.js
- * - clearToken()              {fn}  — defined in auth.js
- * - authHeaders()             {fn}  — defined in auth.js
- * - loadCurrentUser()         {fn}  — defined in auth.js
- * - syncPreferredLanguage()   {fn}  — defined in auth.js
- * - applyHashRoute()          {fn}  — defined in auth.js
+ * - getToken()                {fn}  — defined in session.js
+ * - setToken()                {fn}  — defined in session.js
+ * - clearToken()              {fn}  — defined in session.js
+ * - authHeaders()             {fn}  — defined in session.js
+ * - loadCurrentUser()         {fn}  — defined in session.js
+ * - syncPreferredLanguage()   {fn}  — defined in session.js
+ * - applyHashRoute()          {fn}  — defined in router.js
  * - hideLoadingOverlay()      {fn}  — defined in auth.js
  * - authSubmit()              {fn}  — defined in auth.js
- * - SORT_LABEL_KEYS  {Object}  — defined in quotes.js
- * - randomQuote()    {fn}      — defined in quotes.js
+ * - SORT_LABEL_KEYS  {Object}  — defined in quotes-list.js
+ * - randomQuote()    {fn}      — defined in qod.js
  * - initNotifications()       {fn}  — defined in notifications.js
  * - applyI18n()               {fn}  — defined in i18n.js
  */
