@@ -84,7 +84,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.register("test@mail.com", "pass", null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("уже зарегистрирован");
+                .hasMessageContaining("EMAIL_ALREADY_REGISTERED");
     }
 
     @Test
@@ -125,7 +125,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.verify("ghost@mail.com", "000000", null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не найден");
+                .hasMessageContaining("USER_NOT_FOUND");
     }
 
     @Test

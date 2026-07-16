@@ -6,6 +6,7 @@ import com.mkrasikoff.epigraph.dto.common.ErrorResponse;
 import com.mkrasikoff.epigraph.dto.auth.MeResponse;
 import com.mkrasikoff.epigraph.dto.auth.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.auth.VerifyRequest;
+import com.mkrasikoff.epigraph.exception.ErrorCodes;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;
@@ -87,7 +88,7 @@ public class AuthController {
                     return ResponseEntity.ok(new MeResponse(refreshed.getId(), refreshed.getEmail(), refreshed.getUsername(), refreshed.getAvatarIcon(), refreshed.getPreferredLanguage(), refreshed.getThemeStyle(), refreshed.getEquippedBadge()));
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ErrorResponse("Пользователь не найден")));
+                        .body(new ErrorResponse(ErrorCodes.USER_NOT_FOUND)));
     }
 
     @PostMapping("/verify")
@@ -123,7 +124,7 @@ public class AuthController {
         if (token == null) {
             log.info("Login failed — email = {}", request.getEmail());
 
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Неверный email или пароль"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ErrorCodes.INVALID_CREDENTIALS));
         }
 
         log.info("User logged in — email = {}", request.getEmail());

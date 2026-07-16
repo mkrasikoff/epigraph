@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.exception.ErrorCodes;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -48,7 +49,7 @@ public class AuthService {
     public void register(String email, String rawPassword, String language) {
         userRepository.findByEmail(email).ifPresent(existing -> {
             if (existing.isEmailVerified()) {
-                throw new IllegalArgumentException("Этот email уже зарегистрирован");
+                throw new IllegalArgumentException(ErrorCodes.EMAIL_ALREADY_REGISTERED);
             }
             // Unverified user — delete stale record and flush immediately
             // so the subsequent INSERT does not hit the unique constraint
@@ -104,7 +105,7 @@ public class AuthService {
         emailVerificationService.verifyCode(email, code);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorCodes.USER_NOT_FOUND));
 
         user.setEmailVerified(true);
         if ("en".equals(language)) {

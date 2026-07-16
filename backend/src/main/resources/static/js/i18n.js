@@ -51,6 +51,8 @@ const TRANSLATIONS = {
         authErrorPasswordNoDigit:       'Пароль должен содержать минимум одну цифру',
         authErrorPasswordPattern:       'Минимум 8 символов, буква и цифра.',
         authErrorWrongCredentials:      'Неверный email или пароль',
+        authErrorEmailAlreadyRegistered:'Этот email уже зарегистрирован',
+        authErrorUserNotFound:          'Пользователь не найден',
         authGeoBlocked:                 'Вход через Google недоступен в вашем регионе',
         authGeoBlockedYandex:           'Вход через Яндекс доступен только из России',
         authErrorInvalidEmailServer:    'Некорректный email',
@@ -482,6 +484,8 @@ const TRANSLATIONS = {
         authErrorPasswordNoDigit:       'Password must contain at least one digit',
         authErrorPasswordPattern:       'At least 8 characters, with a letter and a digit.',
         authErrorWrongCredentials:      'Incorrect email or password',
+        authErrorEmailAlreadyRegistered:'This email is already registered',
+        authErrorUserNotFound:          'User not found',
         authGeoBlocked:                 'Google sign-in is unavailable in your region',
         authGeoBlockedYandex:           'Yandex sign-in is only available from Russia',
         authErrorInvalidEmailServer:    'Invalid email',
@@ -972,6 +976,33 @@ function t(key, variables) {
     }
 
     return string;
+}
+
+/**
+ * Maps a backend error code (returned as the `message`/`error` value of an error response) to a
+ * translation key. The backend is language-agnostic — it sends stable codes (see ErrorCodes.java)
+ * and the frontend localizes them here. Keep the code strings in sync with ErrorCodes.java.
+ */
+const ERROR_CODE_KEYS = {
+    INVALID_CREDENTIALS:      'authErrorWrongCredentials',
+    EMAIL_ALREADY_REGISTERED: 'authErrorEmailAlreadyRegistered',
+    USER_NOT_FOUND:           'authErrorUserNotFound',
+    INVALID_OR_EXPIRED_CODE:  'verifyErrorInvalidCode',
+};
+
+/**
+ * Resolves a user-facing error message from an API error body: if it carries a known backend
+ * error code, returns its localized translation; otherwise returns the given fallback key's
+ * translation. Never surfaces a raw backend string — display language always comes from t().
+ *
+ * @param {Object|null} data - Parsed error response body ({message}/{error} may hold a code).
+ * @param {string} fallbackKey - Translation key to use when there's no recognized code.
+ * @returns {string}
+ */
+function apiErrorMessage(data, fallbackKey) {
+    const code = data && (data.message || data.error);
+    if (code && ERROR_CODE_KEYS[code]) return t(ERROR_CODE_KEYS[code]);
+    return t(fallbackKey);
 }
 
 
