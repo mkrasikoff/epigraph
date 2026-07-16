@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.model.EmailVerification;
 import com.mkrasikoff.epigraph.repository.EmailVerificationRepository;
 import org.springframework.stereotype.Service;
@@ -52,10 +53,10 @@ public class EmailVerificationService {
     public void verifyCode(String email, String code) {
         EmailVerification verification = repo
                 .findValidCode(email, System.currentTimeMillis())
-                .orElseThrow(() -> new IllegalArgumentException("Неверный или истёкший код"));
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.INVALID_OR_EXPIRED_CODE));
 
         if (!verification.getCode().equals(code)) {
-            throw new IllegalArgumentException("Неверный или истёкший код");
+            throw new IllegalArgumentException(ApiCodes.INVALID_OR_EXPIRED_CODE);
         }
 
         verification.setUsed(true);

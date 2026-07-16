@@ -164,7 +164,7 @@ async function authSubmit() {
 
         if (!res.ok) {
             if (data.password) {
-                errorEl.textContent = data.password;
+                errorEl.textContent = codeToText(data.password, 'authErrorPasswordPattern');
                 return;
             }
 
@@ -173,7 +173,7 @@ async function authSubmit() {
                 return;
             }
 
-            errorEl.textContent = data.message || t('authErrorWrongCredentials');
+            errorEl.textContent = apiErrorMessage(data, 'authErrorWrongCredentials');
 
             return;
         }
@@ -239,7 +239,7 @@ async function authSubmitRegister() {
         const data = res.status === 202 ? null : await res.json().catch(() => null);
 
         if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('authErrorWrongCredentials');
+            if (errorEl) errorEl.textContent = apiErrorMessage(data, 'authErrorWrongCredentials');
             return;
         }
 
@@ -378,7 +378,7 @@ async function submitVerifyCode(email) {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('verifyErrorInvalidCode');
+            if (errorEl) errorEl.textContent = apiErrorMessage(data, 'verifyErrorInvalidCode');
             return;
         }
 
@@ -662,7 +662,7 @@ async function submitPasswordReset(resetToken) {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorMismatch');
+            if (errorEl) errorEl.textContent = apiErrorMessage(data, 'changePasswordErrorMismatch');
             return;
         }
 

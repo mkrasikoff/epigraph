@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class UpdatePreferredLanguageRequest {
 
-    @NotBlank(message = "Язык обязателен")
+    @NotBlank(message = "LANGUAGE_REQUIRED")
     @Pattern(
             regexp = "^(ru|en)$",
-            message = "Недопустимый язык"
+            message = "LANGUAGE_INVALID"
     )
     private String preferredLanguage;
 }

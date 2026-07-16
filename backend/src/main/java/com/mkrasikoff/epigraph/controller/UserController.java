@@ -7,6 +7,7 @@ import com.mkrasikoff.epigraph.dto.user.UpdateAvatarRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdatePreferredLanguageRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdateThemeStyleRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdateUsernameRequest;
+import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;
@@ -59,7 +60,7 @@ public class UserController {
             userService.changePassword(userId, request.getNewPassword());
             log.info("Password changed — userId = {}", userId);
 
-            return ResponseEntity.ok(new ErrorResponse("Пароль успешно изменён"));
+            return ResponseEntity.ok(new ErrorResponse(ApiCodes.PASSWORD_CHANGED));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
@@ -76,7 +77,7 @@ public class UserController {
             userService.updateUsername(userId, request.getUsername());
             log.info("Username updated — userId = {}", userId);
 
-            return ResponseEntity.ok(new ErrorResponse("Имя пользователя обновлено"));
+            return ResponseEntity.ok(new ErrorResponse(ApiCodes.USERNAME_UPDATED));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
@@ -92,7 +93,7 @@ public class UserController {
             userService.updateAvatarIcon(userId, request.getAvatarIcon());
             log.info("Avatar icon updated — userId = {}", userId);
 
-            return ResponseEntity.ok(new ErrorResponse("Иконка обновлена"));
+            return ResponseEntity.ok(new ErrorResponse(ApiCodes.AVATAR_UPDATED));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
@@ -108,7 +109,7 @@ public class UserController {
             userService.updatePreferredLanguage(userId, request.getPreferredLanguage());
             log.info("Preferred language updated — userId = {}", userId);
 
-            return ResponseEntity.ok(new ErrorResponse("Язык обновлён"));
+            return ResponseEntity.ok(new ErrorResponse(ApiCodes.LANGUAGE_UPDATED));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
@@ -124,7 +125,7 @@ public class UserController {
             userService.updateThemeStyle(userId, request.getThemeStyle());
             log.info("Theme style updated — userId = {}", userId);
 
-            return ResponseEntity.ok(new ErrorResponse("Тема обновлена"));
+            return ResponseEntity.ok(new ErrorResponse(ApiCodes.THEME_UPDATED));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
@@ -140,11 +141,11 @@ public class UserController {
         String newPassword = body.get("newPassword");
 
         if (resetToken == null || resetToken.isBlank() || newPassword == null || newPassword.isBlank()) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Некорректный запрос"));
+            return ResponseEntity.badRequest().body(new ErrorResponse(ApiCodes.BAD_REQUEST));
         }
 
         if (!jwtService.isResetTokenValid(resetToken)) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Ссылка недействительна или истекла"));
+            return ResponseEntity.badRequest().body(new ErrorResponse(ApiCodes.RESET_LINK_INVALID));
         }
 
         try {

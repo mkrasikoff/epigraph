@@ -73,7 +73,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Пароль успешно изменён"));
+                .andExpect(jsonPath("$.message").value("PASSWORD_CHANGED"));
 
         verify(userService).changePassword(isNull(), eq("newPass1234"));
     }
@@ -83,7 +83,7 @@ class UserControllerTest {
     void changePassword_returnsBadRequest_whenServiceThrows() throws Exception {
         ChangePasswordRequest request = new ChangePasswordRequest();
         request.setNewPassword("newPass1234");
-        doThrow(new IllegalArgumentException("Новый пароль совпадает с текущим"))
+        doThrow(new IllegalArgumentException("USER_NOT_FOUND"))
                 .when(userService).changePassword(isNull(), eq("newPass1234"));
 
         mockMvc.perform(patch("/api/user/me/password")
@@ -91,7 +91,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Новый пароль совпадает с текущим"));
+                .andExpect(jsonPath("$.message").value("USER_NOT_FOUND"));
 
         verify(userService).changePassword(isNull(), eq("newPass1234"));
     }
@@ -152,7 +152,7 @@ class UserControllerTest {
                         .content("{\"resetToken\":\"expired-token\",\"newPassword\":\"newPass1234\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Ссылка недействительна или истекла"));
+                .andExpect(jsonPath("$.message").value("RESET_LINK_INVALID"));
 
         verify(jwtService).isResetTokenValid("expired-token");
     }
@@ -164,7 +164,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"newPassword\":\"newPass1234\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Некорректный запрос"));
+                .andExpect(jsonPath("$.message").value("BAD_REQUEST"));
     }
 
     @Test
@@ -174,7 +174,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"resetToken\":\"valid-reset-token\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Некорректный запрос"));
+                .andExpect(jsonPath("$.message").value("BAD_REQUEST"));
     }
 
     @Test
@@ -182,14 +182,14 @@ class UserControllerTest {
     void resetPassword_returnsBadRequest_whenServiceThrows() throws Exception {
         when(jwtService.isResetTokenValid("valid-reset-token")).thenReturn(true);
         when(jwtService.extractUserId("valid-reset-token")).thenReturn(42L);
-        doThrow(new IllegalArgumentException("Слабый пароль"))
+        doThrow(new IllegalArgumentException("USER_NOT_FOUND"))
                 .when(userService).changePassword(42L, "weak");
 
         mockMvc.perform(patch("/api/user/reset-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"resetToken\":\"valid-reset-token\",\"newPassword\":\"weak\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Слабый пароль"));
+                .andExpect(jsonPath("$.message").value("USER_NOT_FOUND"));
     }
 
     @Test
@@ -204,7 +204,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Имя пользователя обновлено"));
+                .andExpect(jsonPath("$.message").value("USERNAME_UPDATED"));
 
         verify(userService).updateUsername(isNull(), eq("newname"));
     }
@@ -214,14 +214,14 @@ class UserControllerTest {
     void updateUsername_returnsBadRequest_whenServiceThrows() throws Exception {
         UpdateUsernameRequest request = new UpdateUsernameRequest();
         request.setUsername("newname");
-        doThrow(new IllegalArgumentException("Пользователь не найден"))
+        doThrow(new IllegalArgumentException("USER_NOT_FOUND"))
                 .when(userService).updateUsername(isNull(), eq("newname"));
 
         mockMvc.perform(patch("/api/user/me/username")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+                .andExpect(jsonPath("$.message").value("USER_NOT_FOUND"));
     }
 
     @Test
@@ -284,7 +284,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Иконка обновлена"));
+                .andExpect(jsonPath("$.message").value("AVATAR_UPDATED"));
 
         verify(userService).updateAvatarIcon(isNull(), eq("cat"));
     }
@@ -294,14 +294,14 @@ class UserControllerTest {
     void updateAvatarIcon_returnsBadRequest_whenServiceThrows() throws Exception {
         UpdateAvatarRequest request = new UpdateAvatarRequest();
         request.setAvatarIcon("cat");
-        doThrow(new IllegalArgumentException("Пользователь не найден"))
+        doThrow(new IllegalArgumentException("USER_NOT_FOUND"))
                 .when(userService).updateAvatarIcon(isNull(), eq("cat"));
 
         mockMvc.perform(patch("/api/user/me/avatar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+                .andExpect(jsonPath("$.message").value("USER_NOT_FOUND"));
     }
 
     @Test
@@ -340,7 +340,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Язык обновлён"));
+                .andExpect(jsonPath("$.message").value("LANGUAGE_UPDATED"));
 
         verify(userService).updatePreferredLanguage(isNull(), eq("en"));
     }
@@ -350,14 +350,14 @@ class UserControllerTest {
     void updatePreferredLanguage_returnsBadRequest_whenServiceThrows() throws Exception {
         UpdatePreferredLanguageRequest request = new UpdatePreferredLanguageRequest();
         request.setPreferredLanguage("en");
-        doThrow(new IllegalArgumentException("Пользователь не найден"))
+        doThrow(new IllegalArgumentException("USER_NOT_FOUND"))
                 .when(userService).updatePreferredLanguage(isNull(), eq("en"));
 
         mockMvc.perform(patch("/api/user/me/language")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+                .andExpect(jsonPath("$.message").value("USER_NOT_FOUND"));
     }
 
     @Test
@@ -396,7 +396,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Тема обновлена"));
+                .andExpect(jsonPath("$.message").value("THEME_UPDATED"));
 
         verify(userService).updateThemeStyle(isNull(), eq("forest"));
     }
@@ -406,14 +406,14 @@ class UserControllerTest {
     void updateThemeStyle_returnsBadRequest_whenServiceThrows() throws Exception {
         UpdateThemeStyleRequest request = new UpdateThemeStyleRequest();
         request.setThemeStyle("forest");
-        doThrow(new IllegalArgumentException("Пользователь не найден"))
+        doThrow(new IllegalArgumentException("USER_NOT_FOUND"))
                 .when(userService).updateThemeStyle(isNull(), eq("forest"));
 
         mockMvc.perform(patch("/api/user/me/theme")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Пользователь не найден"));
+                .andExpect(jsonPath("$.message").value("USER_NOT_FOUND"));
     }
 
     @Test

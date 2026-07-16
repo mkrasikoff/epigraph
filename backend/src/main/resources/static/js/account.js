@@ -182,7 +182,7 @@ async function submitChangePassword() {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorMismatch');
+            if (errorEl) errorEl.textContent = apiErrorMessage(data, 'changePasswordErrorMismatch');
             return;
         }
 
@@ -305,7 +305,7 @@ async function submitAvatarIcon(key) {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-            toast(data?.message || t('avatarPickerError'));
+            toast(apiErrorMessage(data, 'avatarPickerError'));
             return;
         }
 
@@ -412,7 +412,7 @@ async function submitEditUsername() {
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('editUsernameErrorInvalid');
+            if (errorEl) errorEl.textContent = apiErrorMessage(data, 'editUsernameErrorInvalid');
             return;
         }
 
@@ -531,7 +531,7 @@ async function submitProfileSetup() {
             const data = await res.json().catch(() => null);
 
             if (!res.ok) {
-                if (errorEl) errorEl.textContent = data?.message || t('editUsernameErrorInvalid');
+                if (errorEl) errorEl.textContent = apiErrorMessage(data, 'editUsernameErrorInvalid');
                 return;
             }
             if (currentUser) currentUser.username = username;

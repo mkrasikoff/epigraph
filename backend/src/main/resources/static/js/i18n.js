@@ -51,6 +51,10 @@ const TRANSLATIONS = {
         authErrorPasswordNoDigit:       'Пароль должен содержать минимум одну цифру',
         authErrorPasswordPattern:       'Минимум 8 символов, буква и цифра.',
         authErrorWrongCredentials:      'Неверный email или пароль',
+        authErrorEmailAlreadyRegistered:'Этот email уже зарегистрирован',
+        authErrorUserNotFound:          'Пользователь не найден',
+        resetLinkInvalid:               'Ссылка недействительна или истекла',
+        errBadRequest:                  'Некорректный запрос',
         authGeoBlocked:                 'Вход через Google недоступен в вашем регионе',
         authGeoBlockedYandex:           'Вход через Яндекс доступен только из России',
         authErrorInvalidEmailServer:    'Некорректный email',
@@ -261,6 +265,10 @@ const TRANSLATIONS = {
         importSummaryStopped:           'Импорт остановлен. Успело добавиться {count} из {total} {word}.',
         importSummaryError:             'Импорт прерван из-за ошибки соединения. Успело добавиться {count} из {total} {word}.',
         importSummarySkipped:           'Пропущено {count} {word} — не прошли проверку (слишком длинный текст, автор или источник).',
+        importErrorQuoteTooLong:        'Цитата длиннее 1000 символов',
+        importErrorAuthorTooLong:       'Имя автора длиннее 100 символов',
+        importErrorSourceTooLong:       'Источник длиннее 200 символов',
+        importErrorGeneric:             'Не прошло проверку',
         importDownloadRejectedBtn:      'Скачать JSON с этими цитатами',
 
         // ── Import from Yandex Books ──────────────────────────────────────────
@@ -482,6 +490,10 @@ const TRANSLATIONS = {
         authErrorPasswordNoDigit:       'Password must contain at least one digit',
         authErrorPasswordPattern:       'At least 8 characters, with a letter and a digit.',
         authErrorWrongCredentials:      'Incorrect email or password',
+        authErrorEmailAlreadyRegistered:'This email is already registered',
+        authErrorUserNotFound:          'User not found',
+        resetLinkInvalid:               'The link is invalid or has expired',
+        errBadRequest:                  'Bad request',
         authGeoBlocked:                 'Google sign-in is unavailable in your region',
         authGeoBlockedYandex:           'Yandex sign-in is only available from Russia',
         authErrorInvalidEmailServer:    'Invalid email',
@@ -692,6 +704,10 @@ const TRANSLATIONS = {
         importSummaryStopped:           'Import stopped. Added {count} of {total} {word}.',
         importSummaryError:             'Import interrupted by a connection error. Added {count} of {total} {word}.',
         importSummarySkipped:           'Skipped {count} {word} — failed validation (text, author, or source too long).',
+        importErrorQuoteTooLong:        'Quote is longer than 1000 characters',
+        importErrorAuthorTooLong:       'Author is longer than 100 characters',
+        importErrorSourceTooLong:       'Source is longer than 200 characters',
+        importErrorGeneric:             'Failed validation',
         importDownloadRejectedBtn:      'Download JSON with these quotes',
 
         // ── Import from Yandex Books ──────────────────────────────────────────
@@ -972,6 +988,53 @@ function t(key, variables) {
     }
 
     return string;
+}
+
+/**
+ * Maps a backend error code (returned as the `message`/`error` value of an error response) to a
+ * translation key. The backend is language-agnostic — it sends stable codes (see ApiCodes.java)
+ * and the frontend localizes them here. Keep the code strings in sync with ApiCodes.java.
+ *
+ * Only codes actually surfaced through apiErrorMessage() need an entry — some errors (e.g.
+ * THEME_LOCKED) are shown via a screen's own fixed toast and never go through this map.
+ */
+const ERROR_CODE_KEYS = {
+    INVALID_CREDENTIALS:      'authErrorWrongCredentials',
+    EMAIL_ALREADY_REGISTERED: 'authErrorEmailAlreadyRegistered',
+    USER_NOT_FOUND:           'authErrorUserNotFound',
+    INVALID_OR_EXPIRED_CODE:  'verifyErrorInvalidCode',
+    RESET_LINK_INVALID:       'resetLinkInvalid',
+    BAD_REQUEST:              'errBadRequest',
+    // Quote bean-validation codes surfaced per-item in the import-rejected report.
+    QUOTE_TOO_LONG:           'importErrorQuoteTooLong',
+    AUTHOR_TOO_LONG:          'importErrorAuthorTooLong',
+    SOURCE_TOO_LONG:          'importErrorSourceTooLong',
+};
+
+/**
+ * Translates a single backend code to its localized text, or the fallback key's text when the
+ * code is unknown/absent. Never surfaces a raw backend string — display language always comes
+ * from t(). Used for both top-level error bodies and per-field/per-item validation codes.
+ *
+ * @param {string|null|undefined} code - A backend code (e.g. from data.message or a field value).
+ * @param {string} fallbackKey - Translation key to use when there's no recognized code.
+ * @returns {string}
+ */
+function codeToText(code, fallbackKey) {
+    if (code && ERROR_CODE_KEYS[code]) return t(ERROR_CODE_KEYS[code]);
+    return t(fallbackKey);
+}
+
+/**
+ * Resolves a user-facing error message from an API error body: if it carries a known backend
+ * error code (as `message` or `error`), returns its localized translation; otherwise the fallback.
+ *
+ * @param {Object|null} data - Parsed error response body ({message}/{error} may hold a code).
+ * @param {string} fallbackKey - Translation key to use when there's no recognized code.
+ * @returns {string}
+ */
+function apiErrorMessage(data, fallbackKey) {
+    return codeToText(data && (data.message || data.error), fallbackKey);
 }
 
 

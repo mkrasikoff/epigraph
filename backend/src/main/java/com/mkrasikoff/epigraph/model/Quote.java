@@ -25,15 +25,15 @@ public class Quote {
     private Long userId;
 
     @NotBlank(message = "Quote text must not be empty")
-    @Size(max = 1000, message = "Размер цитаты не должен превышать 1000 символов")
+    @Size(max = 1000, message = "QUOTE_TOO_LONG")
     @Column(length = 3000)
     private String text;
 
-    @Size(max = 100, message = "Имя автора не должна превышать 100 символов")
+    @Size(max = 100, message = "AUTHOR_TOO_LONG")
     @Column(length = 255)
     private String author;
 
-    @Size(max = 200, message = "Длина источника не должна превышать 200 символов")
+    @Size(max = 200, message = "SOURCE_TOO_LONG")
     @Column(length = 500)
     private String source;
 

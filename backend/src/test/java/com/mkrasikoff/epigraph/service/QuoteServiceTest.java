@@ -207,7 +207,7 @@ class QuoteServiceTest {
         Quote invalid = buildQuote(null, "Too long, pretend");
         @SuppressWarnings("unchecked")
         ConstraintViolation<Quote> violation = mock(ConstraintViolation.class);
-        when(violation.getMessage()).thenReturn("Размер цитаты не должен превышать 1000 символов");
+        when(violation.getMessage()).thenReturn("QUOTE_TOO_LONG");
         when(validator.validate(valid)).thenReturn(Collections.emptySet());
         when(validator.validate(invalid)).thenReturn(Set.of(violation));
         when(repo.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
@@ -218,7 +218,7 @@ class QuoteServiceTest {
         assertThat(result.getSaved().get(0).getText()).isEqualTo("Valid quote");
         assertThat(result.getRejected()).hasSize(1);
         assertThat(result.getRejected().get(0).getQuote().getText()).isEqualTo("Too long, pretend");
-        assertThat(result.getRejected().get(0).getErrors()).containsExactly("Размер цитаты не должен превышать 1000 символов");
+        assertThat(result.getRejected().get(0).getErrors()).containsExactly("QUOTE_TOO_LONG");
         verify(repo).saveAll(List.of(valid));
     }
 
