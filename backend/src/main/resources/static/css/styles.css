@@ -774,11 +774,16 @@ body.no-scroll {
     height: 100dvh;
 }
 
-/* Locks background scroll while the shared modal or the auth screen is open. Kept separate from
-   .no-scroll (owned by the qod fullscreen-fit logic) so the two don't fight over toggling it. */
+/* Locks background scroll while the shared modal is open. Pins the body with position:fixed
+   (the inline top:-scrollY offset is set by lockBackgroundScroll() in ui.js) so the page keeps
+   its scroll position visually under the blur instead of collapsing to the top. Kept separate
+   from .no-scroll (owned by the qod fullscreen-fit logic) so the two don't fight over it. */
 body.modal-lock-scroll {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
     overflow: hidden;
-    height: 100dvh;
 }
 
 /* =============================================================================
