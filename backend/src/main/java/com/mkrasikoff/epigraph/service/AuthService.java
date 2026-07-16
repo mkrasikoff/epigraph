@@ -7,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
@@ -120,5 +122,52 @@ public class AuthService {
                 .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
                 .map(user -> jwtService.generateToken(user.getId(), user.getEmail()))
                 .orElse(null);
+    }
+
+    /**
+     * Provisions an OAuth2 (Google/Yandex) user: returns the account already registered under
+     * this email if one exists, otherwise creates a fresh account, seeds its onboarding quotes,
+     * and returns it. This mirrors the local register()+verify() outcome (a usable account with
+     * default quotes) for the OAuth path, keeping {@code OAuth2SuccessHandler} a thin web adapter
+     * that only extracts provider attributes and issues the redirect. OAuth accounts are verified
+     * on creation via the {@code emailVerified = true} entity default — the provider vouches for
+     * the address.
+     *
+     * @param suggestedUsername raw display name pulled from the provider; sanitized here to the
+     *                          username policy (may resolve to null when nothing usable remains,
+     *                          in which case the client shows a fallback).
+     */
+    @Transactional
+    public User provisionOAuthUser(String email, String provider, String providerId, String suggestedUsername) {
+        Optional<User> existing = userRepository.findByEmail(email);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        User user = new User();
+        user.setEmail(email);
+        user.setProvider(provider);
+        user.setProviderId(providerId);
+        user.setUsername(sanitizeUsername(suggestedUsername));
+        user.setCreatedAt(System.currentTimeMillis());
+        user = userRepository.save(user);
+
+        quoteService.createDefaultQuotes(user.getId());
+
+        return user;
+    }
+
+    /**
+     * Cleans up a name pulled from an OAuth provider so it fits the username constraints
+     * (3–20 chars, letters/digits/underscore only). Returns null when nothing usable is left —
+     * the client will then show a fallback.
+     */
+    private String sanitizeUsername(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+
+        String cleaned = raw.trim().replaceAll("[^a-zA-Z0-9_]", "");
+        if (cleaned.length() > 20) cleaned = cleaned.substring(0, 20);
+
+        return cleaned.length() >= 3 ? cleaned : null;
     }
 }

@@ -207,4 +207,73 @@ class AuthServiceTest {
 
         assertThat(token).isNull();
     }
+
+    @Test
+    @DisplayName("provisionOAuthUser: creates new user, sanitizes username, and seeds onboarding quotes")
+    void provisionOAuthUser_createsNewUserAndSeedsQuotes() {
+        when(userRepository.findByEmail("new@gmail.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            u.setId(7L);
+            return u;
+        });
+
+        User result = authService.provisionOAuthUser("new@gmail.com", "google", "sub-9", "Mikhail Krasikov");
+
+        verify(userRepository).save(argThat(u ->
+                "new@gmail.com".equals(u.getEmail()) &&
+                        "google".equals(u.getProvider()) &&
+                        "sub-9".equals(u.getProviderId()) &&
+                        "MikhailKrasikov".equals(u.getUsername())
+        ));
+        verify(quoteService).createDefaultQuotes(7L);
+        assertThat(result.getId()).isEqualTo(7L);
+    }
+
+    @Test
+    @DisplayName("provisionOAuthUser: returns existing user without re-saving or seeding quotes")
+    void provisionOAuthUser_returnsExistingUser() {
+        User existing = buildUser(5L, "user@gmail.com", true);
+        when(userRepository.findByEmail("user@gmail.com")).thenReturn(Optional.of(existing));
+
+        User result = authService.provisionOAuthUser("user@gmail.com", "google", "sub-1", "Whatever");
+
+        assertThat(result).isSameAs(existing);
+        verify(userRepository, never()).save(any());
+        verify(quoteService, never()).createDefaultQuotes(any());
+    }
+
+    @Test
+    @DisplayName("provisionOAuthUser: username too short after sanitizing becomes null")
+    void provisionOAuthUser_shortUsernameBecomesNull() {
+        when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            u.setId(1L);
+            return u;
+        });
+
+        authService.provisionOAuthUser("x@gmail.com", "google", "sub", "A!");
+
+        verify(userRepository).save(argThat(u -> u.getUsername() == null));
+    }
+
+    @Test
+    @DisplayName("provisionOAuthUser: username longer than 20 chars is truncated")
+    void provisionOAuthUser_longUsernameTruncated() {
+        when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            u.setId(1L);
+            return u;
+        });
+
+        authService.provisionOAuthUser("x@gmail.com", "google", "sub", "ThisIsAVeryLongGivenNameIndeed");
+
+        verify(userRepository).save(argThat(u ->
+                u.getUsername() != null &&
+                        u.getUsername().length() == 20 &&
+                        "ThisIsAVeryLongGiven".equals(u.getUsername())
+        ));
+    }
 }
