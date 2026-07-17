@@ -87,9 +87,10 @@ Liquibase applies migrations on startup. Verify the API:
 curl http://localhost:8080/api/quotes   # → [] before you sign in
 ```
 
-Local config lives in `application-local.yaml` (git-ignored — never committed). External
-integrations (email delivery, Web Push, OAuth) need their own credentials to work locally; the
-core quote features run without them.
+Local config lives in `application-local.yaml`, committed as a template: every secret is an
+`${ENV_VAR}` placeholder, so no real credentials live in the repo. Supply them through environment
+variables (or your IDE run configuration) when you need the external integrations — email delivery,
+Web Push, and OAuth. The core quote features run without any of them.
 
 ### Production
 

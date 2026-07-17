@@ -53,7 +53,9 @@ app:
 
   # Jwt Service
   jwt:
-    secret: dGhpcy1pcy1hLXZlcnktc2VjcmV0LWtleS1mb3ItZXBpZ3JhcGgtYXBw
+    # Local-only signing key. Real secrets are supplied via env vars — never hardcode one here.
+    # Prod uses ${JWT_SECRET} (see application.yaml); this default is for local development only.
+    secret: ${JWT_SECRET:local-dev-secret-not-for-production}
   vapid:
     public-key: ${VAPID_PUBLIC_KEY:}
     private-key: ${VAPID_PRIVATE_KEY:}
