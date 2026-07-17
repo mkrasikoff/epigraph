@@ -311,6 +311,8 @@ const TRANSLATIONS = {
         themeStyleCosmos:               'Космос',
         themeStyleOcean:                'Океан',
         themeStyleSunset:               'Закат',
+        themeStyleNoir:                 'Нуар',
+        themeStylePlusHint:             'Epigraph Plus',
 
         // ── Achievements (TASK-122) ──────────────────────────────────────────
         settingsAchievementsTitle:      'Достижения',
@@ -754,6 +756,8 @@ const TRANSLATIONS = {
         themeStyleCosmos:               'Cosmos',
         themeStyleOcean:                'Ocean',
         themeStyleSunset:               'Sunset',
+        themeStyleNoir:                 'Noir',
+        themeStylePlusHint:             'Epigraph Plus',
 
         // ── Achievements (TASK-122) ──────────────────────────────────────────
         settingsAchievementsTitle:      'Achievements',

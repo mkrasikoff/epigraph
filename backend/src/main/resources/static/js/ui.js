@@ -136,7 +136,9 @@ function updateThemeColorMeta(mode) {
 
     grid.innerHTML = THEME_STYLE_KEYS.map(key => {
         const preview = THEME_STYLE_PREVIEWS[key];
-        const hintKey = THEME_REWARD_ACHIEVEMENT[key] ? achievementTitleKey(THEME_REWARD_ACHIEVEMENT[key]) : '';
+        const hintKey = PLUS_THEME_KEYS.includes(key)
+            ? 'themeStylePlusHint'
+            : (THEME_REWARD_ACHIEVEMENT[key] ? achievementTitleKey(THEME_REWARD_ACHIEVEMENT[key]) : '');
         return `
             <button type="button" class="theme-style-card" data-theme-style-option="${key}">
                 <span class="theme-style-swatch">
