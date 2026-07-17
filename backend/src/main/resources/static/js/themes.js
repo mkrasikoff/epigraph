@@ -15,11 +15,17 @@
  *
  * Provides (globals):
  * - THEME_STYLE_KEYS      {string[]} — display order for the theme picker
+ * - PLUS_THEME_KEYS       {string[]} — themes gated behind Epigraph Plus (not achievements)
  * - THEME_STYLE_PREVIEWS  {Object}   — key -> { light: {bg,primary,accent}, dark: {...} }
  * - themeStyleLabelKey(key) {fn}     — returns the i18n key for a display label (see i18n.js)
  */
 
-const THEME_STYLE_KEYS = ['classic', 'forest', 'cosmos', 'ocean', 'sunset'];
+const THEME_STYLE_KEYS = ['classic', 'forest', 'cosmos', 'ocean', 'sunset', 'noir'];
+
+// Themes unlocked by an Epigraph Plus subscription (redeemed code) rather than by an
+// achievement. Keep in sync with the backend's Plus-theme gating. Used for the picker hint
+// and lock state — see isThemeStyleLocked()/updateThemeStyleGrid() in ui.js.
+const PLUS_THEME_KEYS = ['noir'];
 
 const THEME_STYLE_PREVIEWS = {
     classic: {
@@ -41,6 +47,10 @@ const THEME_STYLE_PREVIEWS = {
     sunset: {
         light: { bg: '#fce8e4', primary: '#d9634a', accent: '#e88a6a' },
         dark:  { bg: '#1a0f16', primary: '#ef7fa8', accent: '#d97fa3' }
+    },
+    noir: {
+        light: { bg: '#f4f3ef', primary: '#26262a', accent: '#55554f' },
+        dark:  { bg: '#0f0f10', primary: '#ebe8e1', accent: '#b4b0a7' }
     }
 };
 
