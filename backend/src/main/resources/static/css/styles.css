@@ -281,6 +281,49 @@
     --color-gold: #f0b860;
 }
 
+/* Noir — ink & paper monochrome (Epigraph Plus exclusive). */
+[data-theme-style="noir"][data-theme="light"] {
+    --color-bg: #f4f3ef;
+    --color-surface: #fbfaf6;
+    --color-surface-2: #ffffff;
+    --color-surface-offset: #eceae3;
+    --color-surface-dynamic: #e2e0d7;
+    --color-divider: #d9d7ce;
+    --color-border: #c4c2b8;
+    --color-text: #1a1a1c;
+    --color-text-muted: #6a6a66;
+    --color-text-faint: #9c9c96;
+    --color-text-inverse: #fbfaf6;
+    --color-primary: #26262a;
+    --color-primary-hover: #131315;
+    --color-primary-active: #000000;
+    --color-primary-highlight: #e6e5dd;
+    --color-banner-highlight: #e6e5dd;
+    --color-accent: #55554f;
+    --color-gold: #9a8a5e;
+}
+
+[data-theme-style="noir"][data-theme="dark"] {
+    --color-bg: #0f0f10;
+    --color-surface: #17171a;
+    --color-surface-2: #1d1d21;
+    --color-surface-offset: #131316;
+    --color-surface-dynamic: #232327;
+    --color-divider: #29292e;
+    --color-border: #3a3a40;
+    --color-text: #e4e2dd;
+    --color-text-muted: #93918b;
+    --color-text-faint: #57575c;
+    --color-text-inverse: #0f0f10;
+    --color-primary: #ebe8e1;
+    --color-primary-hover: #f6f3ec;
+    --color-primary-active: #ffffff;
+    --color-primary-highlight: #24242a;
+    --color-banner-highlight: #24242a;
+    --color-accent: #b4b0a7;
+    --color-gold: #c7bfa9;
+}
+
 /* =============================================================================
 // THEME DECOR
 // Fixed, full-viewport, non-interactive animated background per theme style.
@@ -308,7 +351,8 @@
 [data-theme-style="forest"] .decor-forest,
 [data-theme-style="cosmos"] .decor-cosmos,
 [data-theme-style="ocean"] .decor-ocean,
-[data-theme-style="sunset"] .decor-sunset {
+[data-theme-style="sunset"] .decor-sunset,
+[data-theme-style="noir"] .decor-noir {
     display: block;
 }
 
@@ -459,6 +503,26 @@
     0%   { transform: translate(0, 0) scale(1); }
     50%  { transform: translate(6%, -4%) scale(1.08); }
     100% { transform: translate(-4%, 5%) scale(0.96); }
+}
+
+/* -- noir: ink flecks drifting up like dust on paper -- */
+.decor-ink {
+    position: absolute;
+    bottom: -4%;
+    left: var(--x, 10%);
+    width: var(--size, 4px);
+    height: var(--size, 4px);
+    border-radius: 50%;
+    background: var(--color-primary);
+    opacity: 0;
+    animation: decorDrift var(--dur, 26s) linear var(--delay, 0s) infinite;
+}
+
+@keyframes decorDrift {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    12%  { opacity: 0.14; }
+    88%  { opacity: 0.14; }
+    100% { transform: translateY(-118vh) translateX(-28px); opacity: 0; }
 }
 
 /* =============================================================================
