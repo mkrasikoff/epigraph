@@ -6,9 +6,21 @@ favourites, search by author or keyword, earn achievements, and export your coll
 The interface is bilingual (Russian / English) and your quotes are stored server-side, so they
 follow you across devices.
 
+<p align="center">
+  <a href="https://epigraph.me">
+    <img src="showcase.png" alt="Epigraph — quote of the day in dark, light, and Russian views" width="100%">
+  </a>
+</p>
+
 ## Live app
 
 → **[epigraph.me](https://epigraph.me)**
+
+## Epigraph Plus
+
+Epigraph's core is free and ad-free. **Epigraph Plus** is an optional subscription that unlocks
+exclusive themes and avatars, a Plus badge, and a higher collection limit — while keeping the
+project independent. Available on **[Boosty](https://boosty.to/mkrasikoff)**.
 
 ---
 
@@ -105,3 +117,13 @@ hosting environment.
 ```bash
 cd backend && ./gradlew test
 ```
+
+---
+
+## License
+
+© 2026 Mikhail Krasikov. Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
+
+You're welcome to read, learn from, run, and modify Epigraph for any **noncommercial**
+purpose. **Commercial use** — including running it as a paid or ad-supported service — requires a
+separate license; reach out at **epigraph.support@icloud.com** if you're interested.
