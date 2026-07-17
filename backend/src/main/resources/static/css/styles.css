@@ -2191,7 +2191,8 @@ body.modal-lock-scroll {
     margin-top: var(--space-1);
 }
 
-.settings-github-link {
+.settings-github-link,
+.settings-support-link {
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -2206,7 +2207,8 @@ body.modal-lock-scroll {
     transition: border-color var(--transition), color var(--transition);
 }
 
-.settings-github-link:hover {
+.settings-github-link:hover,
+.settings-support-link:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
