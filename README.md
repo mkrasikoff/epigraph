@@ -6,9 +6,21 @@ favourites, search by author or keyword, earn achievements, and export your coll
 The interface is bilingual (Russian / English) and your quotes are stored server-side, so they
 follow you across devices.
 
+<p align="center">
+  <a href="https://epigraph.me">
+    <img src="showcase.png" alt="Epigraph — quote of the day in dark, light, and Russian views" width="100%">
+  </a>
+</p>
+
 ## Live app
 
 → **[epigraph.me](https://epigraph.me)**
+
+## Epigraph Plus
+
+Epigraph's core is free and ad-free. **Epigraph Plus** is an optional subscription that unlocks
+exclusive themes and avatars, a Plus badge, and a higher collection limit — while keeping the
+project independent. Available on **[Boosty](https://boosty.to/mkrasikoff)**.
 
 ---
 
@@ -87,9 +99,10 @@ Liquibase applies migrations on startup. Verify the API:
 curl http://localhost:8080/api/quotes   # → [] before you sign in
 ```
 
-Local config lives in `application-local.yaml` (git-ignored — never committed). External
-integrations (email delivery, Web Push, OAuth) need their own credentials to work locally; the
-core quote features run without them.
+Local config lives in `application-local.yaml`, committed as a template: every secret is an
+`${ENV_VAR}` placeholder, so no real credentials live in the repo. Supply them through environment
+variables (or your IDE run configuration) when you need the external integrations — email delivery,
+Web Push, and OAuth. The core quote features run without any of them.
 
 ### Production
 
@@ -104,3 +117,13 @@ hosting environment.
 ```bash
 cd backend && ./gradlew test
 ```
+
+---
+
+## License
+
+© 2026 Mikhail Krasikov. Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
+
+You're welcome to read, learn from, run, and modify Epigraph for any **noncommercial**
+purpose. **Commercial use** — including running it as a paid or ad-supported service — requires a
+separate license; reach out at **epigraph.support@icloud.com** if you're interested.
