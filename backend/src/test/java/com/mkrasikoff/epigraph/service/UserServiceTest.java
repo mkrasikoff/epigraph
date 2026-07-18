@@ -309,4 +309,32 @@ class UserServiceTest {
 
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("updateThemeStyle: allows a Plus theme when the account has Plus, without checking achievements")
+    void updateThemeStyle_allowsPlusTheme_whenUserHasPlus() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        user.setPlusSince(1_700_000_000_000L);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updateThemeStyle(USER_ID, "noir");
+
+        assertThat(user.getThemeStyle()).isEqualTo("noir");
+        verify(userRepository).save(user);
+        verify(achievementService, never()).isRewardUnlocked(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("updateThemeStyle: rejects a Plus theme when the account has no Plus")
+    void updateThemeStyle_throwsForPlusTheme_whenNoPlus() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(achievementService.isRewardUnlocked(USER_ID, "theme", "noir")).thenReturn(false);
+
+        assertThatThrownBy(() -> userService.updateThemeStyle(USER_ID, "noir"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("THEME_LOCKED");
+
+        verify(userRepository, never()).save(any());
+    }
 }

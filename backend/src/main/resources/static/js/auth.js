@@ -188,6 +188,7 @@ async function authSubmit() {
         await loadCurrentUser();
         await syncPreferredLanguage();
         await syncPreferredTheme();
+        await applyPendingRedeem();   // activate a /?redeem code stashed while signed out (TASK-131)
         renderQod();
 
     } catch (e) {
