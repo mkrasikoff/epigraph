@@ -210,6 +210,17 @@ function updateThemeColorMeta(mode) {
  */
 function isThemeStyleLocked(key) {
     if (key === 'classic') return false;
+    // Plus themes are gated by the Epigraph Plus entitlement, not by achievements
+    // (see PLUS_THEME_KEYS / TASK-131). Locked for guests and non-Plus accounts.
+    // currentUser (state.js) can still be in its temporal dead zone during the first
+    // load-time render of the picker, so read it defensively — unknown ⇒ locked.
+    if (PLUS_THEME_KEYS.includes(key)) {
+        try {
+            return !(currentUser && currentUser.plus);
+        } catch (e) {
+            return true;
+        }
+    }
     if (!achievementStatuses) return true;
 
     const match = achievementStatuses.find(a => a.rewardType === 'theme' && a.rewardKey === key);

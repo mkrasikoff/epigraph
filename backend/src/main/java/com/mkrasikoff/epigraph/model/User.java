@@ -89,4 +89,11 @@ public class User {
      */
     @Column(length = 30)
     private String equippedBadge;
+
+    /**
+     * Epoch millis of when the account was granted Epigraph Plus by redeeming a code
+     * (see RedeemCode / TASK-131). Null until redeemed; permanent once set. A non-null
+     * value is the single source of truth for "has Plus".
+     */
+    private Long plusSince;
 }

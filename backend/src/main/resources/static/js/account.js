@@ -581,3 +581,78 @@ async function loadAppVersion() {
         badge.textContent = 'v—';
     }
 }
+
+// =============================================================================
+// EPIGRAPH PLUS — redeem-code activation (TASK-131)
+// A supporter opens a /?redeem=CODE link: signed in, it activates immediately and
+// thanks them; signed out, the code is stashed and applied right after sign-in (never
+// consumed while guest). Grants Plus permanently and unlocks the Noir theme.
+// =============================================================================
+const PENDING_REDEEM_KEY = 'epigraph_pending_redeem';
+
+/**
+ * Activates a Plus redeem code for the signed-in user: on success refreshes the account
+ * (so currentUser.plus flips), drops the lock on the Plus theme card, and shows the
+ * thank-you modal. On failure shows a localized toast. No-op for guests.
+ * @param {string} code
+ */
+async function activateRedeemCode(code) {
+    if (!code || isGuest) return;
+
+    try {
+        const res = await Api.redeem(code.trim());
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            toast(apiErrorMessage(data, 'redeemErrorInvalid'), 'error');
+            return;
+        }
+
+        await loadCurrentUser();   // currentUser.plus is now true
+        updateThemeStyleGrid();     // unlock the Noir card in the picker
+        showRedeemSuccessModal();
+    } catch (e) {
+        toast(t('authErrorConnection'), 'error');
+    }
+}
+
+/**
+ * Thank-you modal after a successful activation, offering to apply the freshly-unlocked
+ * Noir theme right away.
+ */
+function showRedeemSuccessModal() {
+    showModal(
+        t('redeemThanksTitle'),
+        t('redeemThanksBody'),
+        [
+            {label: t('closeButton'), cls: 'btn-secondary', action: closeModal},
+            {label: t('redeemApplyNoir'), cls: 'btn-primary', action: () => applyAchievementTheme('noir')}
+        ]
+    );
+}
+
+/** Whether a redeem code is waiting to be applied after sign-in. */
+function hasPendingRedeem() {
+    try {
+        return !!localStorage.getItem(PENDING_REDEEM_KEY);
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Applies a redeem code stashed while signed out (the /?redeem code is captured in bootstrap.js),
+ * now that the user is signed in. Clears the stash first so it never fires twice.
+ */
+async function applyPendingRedeem() {
+    if (isGuest) return;
+
+    let code = null;
+    try {
+        code = localStorage.getItem(PENDING_REDEEM_KEY);
+        if (code) localStorage.removeItem(PENDING_REDEEM_KEY);
+    } catch (e) {
+        return;
+    }
+    if (code) await activateRedeemCode(code);
+}
