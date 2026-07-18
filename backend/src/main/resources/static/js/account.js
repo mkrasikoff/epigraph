@@ -247,7 +247,67 @@ function updateSettingsAccount() {
 
     renderBadgePill();
     refreshAchievementsUi();
+
+    // Plus accent strip on the account row (TASK-132, direction N7).
+    document.getElementById('settings-account-item')
+        ?.classList.toggle('is-plus', !!(currentUser && currentUser.plus));
+
+    // Keep the header avatar/logo in sync (e.g. after an avatar change here).
+    updateHeaderAccount();
 }
+
+/**
+ * Refreshes the header account controls (TASK-132): the signed-in avatar icon,
+ * the quiet "plus" wordmark suffix, and the Plus status line in the avatar menu.
+ * The last two show only for Plus accounts; guests never reach here because the
+ * whole account menu is hidden in showGuestMode().
+ */
+function updateHeaderAccount() {
+    const avatarBtn = document.getElementById('account-avatar-btn');
+    if (avatarBtn) avatarBtn.innerHTML = avatarIconMarkup(currentUser?.avatarIcon);
+
+    const isPlus = !!(currentUser && currentUser.plus);
+
+    const logoPlus = document.getElementById('logo-plus');
+    if (logoPlus) logoPlus.style.display = isPlus ? '' : 'none';
+
+    const menuPlus = document.getElementById('account-menu-plus');
+    if (menuPlus) menuPlus.style.display = isPlus ? '' : 'none';
+}
+
+/**
+ * Toggles the header avatar dropdown (TASK-132), mirroring the sort menu's
+ * open/close shape. Closed on outside click by the listener below.
+ */
+function toggleAccountMenu() {
+    const wrap = document.getElementById('account-menu');
+    if (!wrap) return;
+
+    if (wrap.classList.contains('open')) {
+        closeAccountMenu();
+    } else {
+        wrap.classList.add('open');
+        const btn = document.getElementById('account-avatar-btn');
+        btn?.classList.add('open');
+        btn?.setAttribute('aria-expanded', 'true');
+    }
+}
+
+/** Closes the header avatar dropdown. */
+function closeAccountMenu() {
+    const wrap = document.getElementById('account-menu');
+    const btn = document.getElementById('account-avatar-btn');
+    wrap?.classList.remove('open');
+    btn?.classList.remove('open');
+    btn?.setAttribute('aria-expanded', 'false');
+}
+
+// Close the account menu on outside click (same pattern as the sort menu).
+document.addEventListener('click', e => {
+    if (!document.getElementById('account-menu')?.contains(e.target)) {
+        closeAccountMenu();
+    }
+});
 
 /**
  * Opens the modal to pick one of the 12 preset avatar icons.

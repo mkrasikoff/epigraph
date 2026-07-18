@@ -50,7 +50,8 @@ function showGuestMode() {
     quotes = getGuestQuotes();
     qodAnchorId = quotes[0]?.id ?? null;
 
-    document.getElementById('logout-btn').style.display = 'none';
+    document.getElementById('account-menu').style.display = 'none';
+    closeAccountMenu();
     document.getElementById('login-btn').style.display = '';
     document.querySelector('[data-lang-toggle]')?.style.removeProperty('display');
 
@@ -70,9 +71,10 @@ function showGuestMode() {
 function hideGuestMode() {
     isGuest = false;
 
-    document.getElementById('logout-btn').style.display = '';
+    document.getElementById('account-menu').style.display = '';
     document.getElementById('login-btn').style.display = 'none';
     document.querySelector('[data-lang-toggle]')?.style.setProperty('display', 'none');
+    updateHeaderAccount();
 
     ['list', 'add', 'settings'].forEach(id => {
         document.getElementById('tab-' + id)?.classList.remove('guest-locked');

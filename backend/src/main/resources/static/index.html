@@ -335,7 +335,7 @@
                 <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                 <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
             </svg>
-            Epigraph
+            Epigraph<span class="logo-plus" id="logo-plus" style="display:none" aria-hidden="true">plus</span>
         </a>
 
         <nav class="nav-tabs" role="tablist">
@@ -364,13 +364,24 @@
             <button class="btn-secondary" id="login-btn" data-i18n="authSubmitLogin" onclick="showAuthModal()">
                 Войти
             </button>
-            <button class="btn-icon" id="logout-btn" onclick="logout()" style="display:none" aria-label="Выйти из аккаунта" data-i18n-aria="ariaLogout">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-            </button>
+            <div class="account-menu" id="account-menu" style="display:none">
+                <button class="account-avatar-btn" id="account-avatar-btn" onclick="toggleAccountMenu()" aria-haspopup="menu" aria-expanded="false" aria-label="Меню аккаунта" data-i18n-aria="ariaAccountMenu"></button>
+                <div class="account-menu-dropdown" id="account-menu-dropdown" role="menu">
+                    <div class="account-menu-plus" id="account-menu-plus" role="presentation" style="display:none">
+                        <span class="account-menu-plus-dot" aria-hidden="true"></span>
+                        <span class="account-menu-plus-label" data-i18n="accountMenuPlus">Epigraph Plus</span>
+                        <span class="account-menu-plus-state" data-i18n="accountMenuPlusActive">активен</span>
+                    </div>
+                    <button class="account-menu-item" role="menuitem" onclick="logout()">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span data-i18n="accountMenuLogout">Выход</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -744,7 +755,8 @@
                         Аккаунт
                     </div>
                     <div class="settings-card">
-                    <div class="settings-item">
+                    <div class="settings-item settings-account-item" id="settings-account-item">
+                        <span class="account-plus-strip" aria-hidden="true"><span class="account-plus-strip-label">plus</span></span>
                         <div class="settings-item-info settings-account-info">
                             <button type="button" id="settings-account-avatar" class="settings-account-avatar"
                                     onclick="showAvatarPickerModal()" aria-label="Изменить иконку" data-i18n-aria="settingsAccountAvatarAria">
