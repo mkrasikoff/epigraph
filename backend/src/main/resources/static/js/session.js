@@ -65,6 +65,9 @@ async function loadCurrentUser() {
     } catch (e) {
         currentUser = null;
     }
+    // Reflect avatar + Plus state in the header (TASK-132). Safe for the guest
+    // path too — the account menu itself stays hidden via showGuestMode().
+    if (typeof updateHeaderAccount === 'function') updateHeaderAccount();
 }
 
 // =============================================================================
