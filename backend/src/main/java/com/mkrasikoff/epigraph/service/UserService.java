@@ -9,9 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
+
+    /**
+     * Theme styles unlocked by an Epigraph Plus subscription rather than an achievement
+     * (see TASK-131). Keep in sync with PLUS_THEME_KEYS in themes.js on the frontend.
+     */
+    private static final Set<String> PLUS_THEMES = Set.of("noir");
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -139,7 +146,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
-        if (!themeStyle.equals("classic") && !achievementService.isRewardUnlocked(userId, "theme", themeStyle)) {
+        boolean unlocked = themeStyle.equals("classic")
+                || (PLUS_THEMES.contains(themeStyle) && user.getPlusSince() != null)
+                || achievementService.isRewardUnlocked(userId, "theme", themeStyle);
+        if (!unlocked) {
             throw new IllegalArgumentException(ApiCodes.THEME_LOCKED);
         }
 

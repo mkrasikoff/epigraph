@@ -313,6 +313,10 @@ const TRANSLATIONS = {
         themeStyleSunset:               'Закат',
         themeStyleNoir:                 'Нуар',
         themeStylePlusHint:             'Epigraph Plus',
+        redeemThanksTitle:              'Спасибо за поддержку!',
+        redeemThanksBody:               'Epigraph Plus активирован. Открыта эксклюзивная тема Noir и другие возможности Plus.',
+        redeemApplyNoir:                'Применить Noir',
+        redeemErrorInvalid:             'Код недействителен или уже использован',
 
         // ── Achievements (TASK-122) ──────────────────────────────────────────
         settingsAchievementsTitle:      'Достижения',
@@ -758,6 +762,10 @@ const TRANSLATIONS = {
         themeStyleSunset:               'Sunset',
         themeStyleNoir:                 'Noir',
         themeStylePlusHint:             'Epigraph Plus',
+        redeemThanksTitle:              'Thank you for your support!',
+        redeemThanksBody:               'Epigraph Plus is active. The exclusive Noir theme and other Plus features are now unlocked.',
+        redeemApplyNoir:                'Apply Noir',
+        redeemErrorInvalid:             'This code is invalid or has already been used',
 
         // ── Achievements (TASK-122) ──────────────────────────────────────────
         settingsAchievementsTitle:      'Achievements',
@@ -1018,6 +1026,7 @@ const ERROR_CODE_KEYS = {
     RESET_LINK_INVALID:       'resetLinkInvalid',
     BAD_REQUEST:              'errBadRequest',
     QUOTE_LIMIT_EXCEEDED:     'errQuoteLimit',
+    INVALID_OR_USED_CODE:     'redeemErrorInvalid',
     // Quote bean-validation codes surfaced per-item in the import-rejected report.
     QUOTE_TOO_LONG:           'importErrorQuoteTooLong',
     AUTHOR_TOO_LONG:          'importErrorAuthorTooLong',

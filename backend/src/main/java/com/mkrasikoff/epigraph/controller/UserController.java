@@ -9,6 +9,7 @@ import com.mkrasikoff.epigraph.dto.user.UpdateThemeStyleRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.service.JwtService;
+import com.mkrasikoff.epigraph.service.RedeemService;
 import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -33,10 +35,12 @@ public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final RedeemService redeemService;
 
-    public UserController(UserService userService, JwtService jwtService) {
+    public UserController(UserService userService, JwtService jwtService, RedeemService redeemService) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.redeemService = redeemService;
     }
 
     /**
@@ -126,6 +130,27 @@ public class UserController {
             log.info("Theme style updated — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse(ApiCodes.THEME_UPDATED));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Activates an Epigraph Plus redeem code for the authenticated user (TASK-131), granting Plus.
+     * Single-use — the service rejects an unknown or already-used code.
+     */
+    @PostMapping("/me/redeem")
+    public ResponseEntity<?> redeem(@AuthenticationPrincipal Long userId, @RequestBody Map<String, String> body) {
+        String code = body.get("code");
+        if (code == null || code.isBlank()) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(ApiCodes.INVALID_OR_USED_CODE));
+        }
+
+        try {
+            redeemService.redeem(userId, code.trim());
+            log.info("Plus code redeemed — userId = {}", userId);
+
+            return ResponseEntity.ok(new ErrorResponse(ApiCodes.PLUS_ACTIVATED));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }

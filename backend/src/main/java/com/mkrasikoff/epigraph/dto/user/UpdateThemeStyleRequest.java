@@ -9,7 +9,7 @@ public class UpdateThemeStyleRequest {
 
     @NotBlank(message = "THEME_REQUIRED")
     @Pattern(
-            regexp = "^(classic|forest|cosmos|ocean|sunset)$",
+            regexp = "^(classic|forest|cosmos|ocean|sunset|noir)$",
             message = "THEME_INVALID"
     )
     private String themeStyle;

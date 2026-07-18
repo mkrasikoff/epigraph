@@ -146,6 +146,18 @@ const Api = {
         }),
 
     /**
+     * Activates an Epigraph Plus redeem code for the authenticated user (TASK-131).
+     * @param {string} code
+     * @returns {Promise<Response>}
+     */
+    redeem: (code) =>
+        fetch('/api/user/me/redeem', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ code })
+        }),
+
+    /**
      * Fetches the authenticated user's achievement catalog with per-user
      * progress/unlock state. Called lazily — only when the Achievements
      * screen is opened, never at app bootstrap.

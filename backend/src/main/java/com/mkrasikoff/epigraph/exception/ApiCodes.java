@@ -25,6 +25,7 @@ public final class ApiCodes {
     public static final String RESET_LINK_INVALID = "RESET_LINK_INVALID";
     public static final String BAD_REQUEST = "BAD_REQUEST";
     public static final String QUOTE_LIMIT_EXCEEDED = "QUOTE_LIMIT_EXCEEDED";
+    public static final String INVALID_OR_USED_CODE = "INVALID_OR_USED_CODE";
 
     // Success confirmations (not displayed to the client — see class doc)
     public static final String PASSWORD_CHANGED = "PASSWORD_CHANGED";
@@ -32,6 +33,7 @@ public final class ApiCodes {
     public static final String AVATAR_UPDATED = "AVATAR_UPDATED";
     public static final String LANGUAGE_UPDATED = "LANGUAGE_UPDATED";
     public static final String THEME_UPDATED = "THEME_UPDATED";
+    public static final String PLUS_ACTIVATED = "PLUS_ACTIVATED";
 
     private ApiCodes() {
     }

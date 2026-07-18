@@ -6,6 +6,7 @@ import com.mkrasikoff.epigraph.dto.user.UpdatePreferredLanguageRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdateThemeStyleRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.service.JwtService;
+import com.mkrasikoff.epigraph.service.RedeemService;
 import com.mkrasikoff.epigraph.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,14 +19,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,12 +43,15 @@ class UserControllerTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private RedeemService redeemService;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        UserController controller = new UserController(userService, jwtService);
+        UserController controller = new UserController(userService, jwtService, redeemService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         objectMapper = new ObjectMapper();
     }
@@ -438,5 +445,43 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /api/user/me/redeem: returns 200 and activates Plus on a valid code")
+    void redeem_returnsOk() throws Exception {
+        mockMvc.perform(post("/api/user/me/redeem")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"PLUS-ABCDEFGHIJKLMNOPQRST\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("PLUS_ACTIVATED"));
+
+        verify(redeemService).redeem(isNull(), eq("PLUS-ABCDEFGHIJKLMNOPQRST"));
+    }
+
+    @Test
+    @DisplayName("POST /api/user/me/redeem: returns 400 and skips the service when code is blank")
+    void redeem_returnsBadRequest_whenBlank() throws Exception {
+        mockMvc.perform(post("/api/user/me/redeem")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("INVALID_OR_USED_CODE"));
+
+        verify(redeemService, never()).redeem(any(), any());
+    }
+
+    @Test
+    @DisplayName("POST /api/user/me/redeem: returns 400 when the code is invalid or already used")
+    void redeem_returnsBadRequest_whenInvalidOrUsed() throws Exception {
+        doThrow(new IllegalArgumentException("INVALID_OR_USED_CODE"))
+                .when(redeemService).redeem(isNull(), eq("PLUS-BADCODE"));
+
+        mockMvc.perform(post("/api/user/me/redeem")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"PLUS-BADCODE\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("INVALID_OR_USED_CODE"));
     }
 }

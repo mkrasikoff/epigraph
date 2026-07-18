@@ -52,6 +52,13 @@
 
     // If Google OAuth — token inside query-param
     const urlParams = new URLSearchParams(window.location.search);
+
+    // Stash a Plus redeem code (TASK-131) before any URL cleanup below wipes the query string.
+    const redeemCode = urlParams.get('redeem');
+    if (redeemCode) {
+        try { localStorage.setItem(PENDING_REDEEM_KEY, redeemCode); } catch (e) {}
+    }
+
     const urlToken = urlParams.get('token');
     if (urlToken) {
         setToken(urlToken);
@@ -101,6 +108,9 @@
         showGuestMode();
         // Guests can only see QoD — clear any hash that would open a locked section
         window.history.replaceState(null, '', '#today');
+        // A guest arriving via a /?redeem link is prompted to sign in; the stashed code
+        // activates automatically right after (see applyPendingRedeem in the login flow).
+        if (hasPendingRedeem()) showAuthModal();
         return;
     }
 
@@ -116,6 +126,7 @@
         hideGuestMode();
         await loadCurrentUser();
         await syncPreferredLanguage();
+        await applyPendingRedeem();   // activate a stashed /?redeem code, if any (TASK-131)
 
         // Navigate to the section matching the URL hash (or default to QoD)
         applyHashRoute();
