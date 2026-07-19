@@ -529,7 +529,11 @@
     100% { transform: translate(-4%, 5%) scale(0.96); }
 }
 
-/* -- noir: ink flecks drifting up like dust on paper -- */
+/* -- noir: ink dust drifting up like flecks on paper. Varied size/opacity with
+   a few soft-focus motes (.decor-ink--soft) for depth; each mote's peak opacity
+   is --o and its sideways drift is --dx. Base --o values are tuned for the dark
+   mode; in light mode --ink-boost scales them so dark-ink-on-paper reads a hair
+   softer than the dark set (but still more present than a plain 1:1 map). -- */
 .decor-ink {
     position: absolute;
     bottom: -4%;
@@ -542,11 +546,39 @@
     animation: decorDrift var(--dur, 26s) linear var(--delay, 0s) infinite;
 }
 
+.decor-ink--soft {
+    filter: blur(2.5px);
+}
+
+[data-theme-style="noir"][data-theme="light"] .decor-ink {
+    --ink-boost: 0.9;
+}
+
 @keyframes decorDrift {
     0%   { transform: translateY(0) translateX(0); opacity: 0; }
-    12%  { opacity: 0.14; }
-    88%  { opacity: 0.14; }
-    100% { transform: translateY(-118vh) translateX(-28px); opacity: 0; }
+    12%  { opacity: calc(var(--o, 0.14) * var(--ink-boost, 1)); }
+    88%  { opacity: calc(var(--o, 0.14) * var(--ink-boost, 1)); }
+    100% { transform: translateY(-118vh) translateX(var(--dx, -28px)); opacity: 0; }
+}
+
+/* -- noir: a faint monochrome glow that very slowly wanders across the page
+   behind the ink dust, so the background gradient shifts "under changing light".
+   Drawn from --color-primary, so it's a soft light in dark mode and a soft
+   ink-shadow on paper in light mode. Sits first in .decor-noir, behind the
+   motes. -- */
+.decor-noir-glow {
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle at 50% 50%,
+        color-mix(in srgb, var(--color-primary) 7%, transparent),
+        transparent 55%);
+    pointer-events: none;
+    animation: decorNoirGlow 34s ease-in-out infinite alternate;
+}
+
+@keyframes decorNoirGlow {
+    0%   { transform: translate(-12%, -8%); }
+    100% { transform: translate(14%, 10%); }
 }
 
 /* =============================================================================
