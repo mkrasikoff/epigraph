@@ -203,7 +203,7 @@ async function submitChangePassword() {
 // =============================================================================
 /**
  * Updates the account section in Settings with the current user's profile
- * (username, id, email) and quote stats. Shows the section for authenticated
+ * (username, email) and quote stats. Shows the section for authenticated
  * users, hides for guests.
  */
 function updateSettingsAccount() {
@@ -218,7 +218,6 @@ function updateSettingsAccount() {
     accountGroup.style.display = '';
 
     const usernameEl = document.getElementById('settings-account-username');
-    const idEl = document.getElementById('settings-account-id');
     const emailEl = document.getElementById('settings-account-email');
     const avatarEl = document.getElementById('settings-account-avatar');
 
@@ -226,11 +225,9 @@ function updateSettingsAccount() {
 
     if (currentUser) {
         usernameEl.textContent = '@' + (currentUser.username || ('user' + currentUser.id));
-        idEl.textContent = '#' + currentUser.id;
         emailEl.textContent = currentUser.email || '';
     } else {
         usernameEl.textContent = '—';
-        idEl.textContent = '';
         emailEl.textContent = '';
     }
 
