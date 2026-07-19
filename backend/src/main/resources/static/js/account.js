@@ -257,19 +257,16 @@ function updateSettingsAccount() {
 }
 
 /**
- * Refreshes the header account controls (TASK-132): the signed-in avatar icon,
- * the quiet "plus" wordmark suffix, and the Plus status line in the avatar menu.
- * The last two show only for Plus accounts; guests never reach here because the
- * whole account menu is hidden in showGuestMode().
+ * Refreshes the header account controls (TASK-132): the signed-in avatar icon
+ * and the Plus status line in the avatar menu (shown only for Plus accounts).
+ * Guests never reach here because the whole account menu is hidden in
+ * showGuestMode().
  */
 function updateHeaderAccount() {
     const avatarBtn = document.getElementById('account-avatar-btn');
     if (avatarBtn) avatarBtn.innerHTML = avatarIconMarkup(currentUser?.avatarIcon);
 
     const isPlus = !!(currentUser && currentUser.plus);
-
-    const logoPlus = document.getElementById('logo-plus');
-    if (logoPlus) logoPlus.style.display = isPlus ? '' : 'none';
 
     const menuPlus = document.getElementById('account-menu-plus');
     if (menuPlus) menuPlus.style.display = isPlus ? '' : 'none';

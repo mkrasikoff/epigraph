@@ -21,8 +21,8 @@
     --color-banner-highlight: #e2c9ac;
     --color-accent: #c8956c;
     --color-gold: #c9a227;
-    --color-plus: #a8842e;
-    --color-plus-ink: #2a2012;
+    --color-plus: #a4763a;
+    --color-plus-ink: #2e2413;
     --font-display: 'Cormorant Garamond', Georgia, serif;
     --font-body: 'Inter', system-ui, sans-serif;
     --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
@@ -136,6 +136,8 @@
     --color-banner-highlight: #cfe0ba;
     --color-accent: #7fa563;
     --color-gold: #a8b23a;
+    --color-plus: #7e8a34;
+    --color-plus-ink: #1f2e17;
 }
 
 [data-theme-style="forest"][data-theme="dark"] {
@@ -157,6 +159,8 @@
     --color-banner-highlight: #24361c;
     --color-accent: #8fc46f;
     --color-gold: #c3d24a;
+    --color-plus: #b8c877;
+    --color-plus-ink: #10160d;
 }
 
 [data-theme-style="cosmos"][data-theme="light"] {
@@ -178,6 +182,8 @@
     --color-banner-highlight: #d6d1f2;
     --color-accent: #8a7fd8;
     --color-gold: #c9a227;
+    --color-plus: #5f52b5;
+    --color-plus-ink: #f7f8fd;
 }
 
 [data-theme-style="cosmos"][data-theme="dark"] {
@@ -199,6 +205,8 @@
     --color-banner-highlight: #2a2158;
     --color-accent: #c084fc;
     --color-gold: #f0c94a;
+    --color-plus: #e2c56e;
+    --color-plus-ink: #0a0a1a;
 }
 
 [data-theme-style="ocean"][data-theme="light"] {
@@ -220,6 +228,8 @@
     --color-banner-highlight: #bfe4e6;
     --color-accent: #4fa6b5;
     --color-gold: #c9a227;
+    --color-plus: #5f7d6a;
+    --color-plus-ink: #0f2a2c;
 }
 
 [data-theme-style="ocean"][data-theme="dark"] {
@@ -241,6 +251,8 @@
     --color-banner-highlight: #123a41;
     --color-accent: #5fc6d8;
     --color-gold: #e0c860;
+    --color-plus: #cabf82;
+    --color-plus-ink: #071a1d;
 }
 
 [data-theme-style="sunset"][data-theme="light"] {
@@ -262,6 +274,8 @@
     --color-banner-highlight: #f4c3b0;
     --color-accent: #e88a6a;
     --color-gold: #e0a527;
+    --color-plus: #bd6c33;
+    --color-plus-ink: #3a1a14;
 }
 
 [data-theme-style="sunset"][data-theme="dark"] {
@@ -283,6 +297,8 @@
     --color-banner-highlight: #3d1f34;
     --color-accent: #d97fa3;
     --color-gold: #f0b860;
+    --color-plus: #b0748a;
+    --color-plus-ink: #1a0f16;
 }
 
 /* Noir — ink & paper monochrome (Epigraph Plus exclusive). */
@@ -305,6 +321,8 @@
     --color-banner-highlight: #e6e5dd;
     --color-accent: #55554f;
     --color-gold: #9a8a5e;
+    --color-plus: #3d3d39;
+    --color-plus-ink: #f4f3ef;
 }
 
 [data-theme-style="noir"][data-theme="dark"] {
@@ -326,6 +344,8 @@
     --color-banner-highlight: #24242a;
     --color-accent: #b4b0a7;
     --color-gold: #c7bfa9;
+    --color-plus: #a8a8a5;
+    --color-plus-ink: #0f0f10;
 }
 
 /* =============================================================================
@@ -648,21 +668,6 @@ header {
     color: var(--color-primary);
     flex-shrink: 0;
     transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Epigraph "plus" — quiet lowercase serif superscript shown only for Plus
-   accounts (toggled in updateHeaderAccount()). Sits high against the wordmark
-   like a small mark, in the warm Plus gold rather than the clay accent. */
-.logo-plus {
-    align-self: flex-start;
-    margin-left: -1px;
-    margin-top: 0.16em;
-    font-family: var(--font-display);
-    font-size: 0.6em;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    color: var(--color-plus);
 }
 
 .header-actions {
@@ -2527,6 +2532,15 @@ body.modal-lock-scroll {
    row's left padding (space-5), so the widened state never overlaps content. */
 .settings-account-item {
     position: relative;
+    transition: padding-left 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* On hover the strip widens, so nudge the row's content right by the same amount
+   — the widened strip then sits in the freed space instead of clipping the
+   avatar. At rest the row keeps the shared left padding, aligned with the rows
+   below it. */
+.settings-account-item.is-plus:hover {
+    padding-left: calc(var(--space-5) + 16px);
 }
 
 .account-plus-strip {
