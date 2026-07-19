@@ -22,6 +22,7 @@ public final class ApiCodes {
     public static final String EMAIL_ALREADY_REGISTERED = "EMAIL_ALREADY_REGISTERED";
     public static final String INVALID_OR_EXPIRED_CODE = "INVALID_OR_EXPIRED_CODE";
     public static final String THEME_LOCKED = "THEME_LOCKED";
+    public static final String AVATAR_LOCKED = "AVATAR_LOCKED";
     public static final String RESET_LINK_INVALID = "RESET_LINK_INVALID";
     public static final String BAD_REQUEST = "BAD_REQUEST";
     public static final String QUOTE_LIMIT_EXCEEDED = "QUOTE_LIMIT_EXCEEDED";

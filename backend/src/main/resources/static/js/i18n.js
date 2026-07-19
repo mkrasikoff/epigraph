@@ -118,6 +118,11 @@ const TRANSLATIONS = {
         avatarIconMouse:                  'Мышь',
         avatarIconDuck:                   'Утка',
         avatarIconSeal:                   'Тюлень',
+        avatarIconSnail:                  'Улитка',
+        avatarIconBee:                    'Пчела',
+        avatarIconFrog:                   'Лягушка',
+        avatarIconNightingale:            'Соловей',
+        avatarPlusLocked:                 'Доступно в Epigraph Plus',
 
         // ── Forgot password ──────────────────────────────────────────────────────
         forgotPasswordLink:               'Забыли пароль?',
@@ -144,6 +149,7 @@ const TRANSLATIONS = {
         accountMenuPlusBenefitsTitle:   'В подписке',
         accountMenuPlusBenefitLimit:    'До {limit} цитат',
         accountMenuPlusBenefitNoir:     'Эксклюзивная тема «Нуар»',
+        accountMenuPlusBenefitAvatars:  'Эксклюзивные аватары',
         accountMenuLogout:              'Выход',
         ariaScrollTop:                  'Наверх',
         ariaAchievementInfo:            'Подробнее',
@@ -574,6 +580,11 @@ const TRANSLATIONS = {
         avatarIconMouse:                  'Mouse',
         avatarIconDuck:                   'Duck',
         avatarIconSeal:                   'Seal',
+        avatarIconSnail:                  'Snail',
+        avatarIconBee:                    'Bee',
+        avatarIconFrog:                   'Frog',
+        avatarIconNightingale:            'Nightingale',
+        avatarPlusLocked:                 'Available in Epigraph Plus',
 
         // ── Forgot password ──────────────────────────────────────────────────────
         forgotPasswordLink:               'Forgot your password?',
@@ -600,6 +611,7 @@ const TRANSLATIONS = {
         accountMenuPlusBenefitsTitle:   'Included',
         accountMenuPlusBenefitLimit:    'Up to {limit} quotes',
         accountMenuPlusBenefitNoir:     'Exclusive Noir theme',
+        accountMenuPlusBenefitAvatars:  'Exclusive avatars',
         accountMenuLogout:              'Sign out',
         ariaScrollTop:                  'Scroll to top',
         ariaAchievementInfo:            'More info',
@@ -1041,6 +1053,7 @@ const ERROR_CODE_KEYS = {
     BAD_REQUEST:              'errBadRequest',
     QUOTE_LIMIT_EXCEEDED:     'errQuoteLimit',
     INVALID_OR_USED_CODE:     'redeemErrorInvalid',
+    AVATAR_LOCKED:            'avatarPlusLocked',
     // Quote bean-validation codes surfaced per-item in the import-rejected report.
     QUOTE_TOO_LONG:           'importErrorQuoteTooLong',
     AUTHOR_TOO_LONG:          'importErrorAuthorTooLong',

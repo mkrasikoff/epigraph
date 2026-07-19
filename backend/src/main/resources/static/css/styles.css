@@ -2581,6 +2581,95 @@ body.modal-lock-scroll {
     transform: scale(1);
 }
 
+/* Epigraph Plus avatars (TASK-132): a small "Plus" pill in the top-left corner,
+   and a dimmed locked state for non-Plus users (clicking shows the "available in
+   Plus" toast). The pill uses the same per-theme --color-plus / --color-plus-ink
+   tokens as the Settings account strip, so it re-tints with the active theme. */
+.avatar-picker-plus {
+    position: absolute;
+    left: -4px;
+    top: -3px;
+    padding: 1.5px 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-plus);
+    color: var(--color-plus-ink);
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+}
+
+.avatar-picker-option--locked {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.avatar-picker-option--locked:hover {
+    transform: none;
+}
+
+/* =============================================================================
+// ANIMATED AVATARS (TASK-132)
+// Looping micro-animations for the Plus avatar set (snail, bee, frog,
+// nightingale). Class names are namespaced av-* and live on sub-elements inside
+// the inline SVG markup in avatars.js, so the motion follows the avatar wherever
+// it renders (top bar, Settings, picker). All disabled under reduced-motion.
+// ============================================================================= */
+.av-stalk, .av-bob, .av-buzz-l, .av-buzz-r, .av-blink,
+.av-ripple, .av-leaf, .av-tilt, .av-tailbob, .av-note {
+    transform-box: fill-box;
+}
+
+.av-stalk { transform-origin: center bottom; animation: avWave 2.8s ease-in-out infinite; }
+.av-bob { transform-origin: center; animation: avBob 3.6s ease-in-out infinite; }
+.av-buzz-l { transform-origin: right center; animation: avBuzz 0.22s linear infinite; }
+.av-buzz-r { transform-origin: left center; animation: avBuzz 0.22s linear infinite; }
+.av-blink { transform-origin: center; animation: avBlink 4s ease-in-out infinite; }
+.av-ripple { transform-origin: center; animation: avRipple 3.4s ease-out infinite; }
+.av-ripple-2 { animation-delay: 1.7s; }
+.av-leaf {
+    transform-origin: center;
+    animation-name: avLeaf;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+.av-leaf-1 { --lx: 5px; animation-duration: 8.5s; animation-delay: 0s; }
+.av-leaf-2 { --lx: -4px; animation-duration: 10.5s; animation-delay: -3.5s; }
+.av-leaf-3 { --lx: 6px; animation-duration: 9.5s; animation-delay: -6.5s; }
+.av-leaf-4 { --lx: -6px; animation-duration: 12s; animation-delay: -9s; }
+.av-tilt { transform-origin: center bottom; animation: avTilt 3.8s ease-in-out infinite; }
+.av-tailbob { transform-origin: center top; animation: avTailbob 3.4s ease-in-out infinite; }
+.av-note { transform-origin: center; animation: avNote 3s ease-out infinite; }
+
+@keyframes avWave { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes avBob { 0%, 100% { transform: translateY(-0.84px); } 50% { transform: translateY(0.84px); } }
+@keyframes avBuzz { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.4); } }
+@keyframes avBlink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.12); } }
+@keyframes avRipple { 0% { transform: scale(0.4); opacity: 0.5; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes avLeaf {
+    0% { transform: translateY(-9px) rotate(0); opacity: 0; }
+    16% { opacity: 0.5; }
+    52% { opacity: 0.5; }
+    100% { transform: translateY(14px) translateX(var(--lx)) rotate(185deg); opacity: 0; }
+}
+@keyframes avTilt { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(5deg); } }
+@keyframes avTailbob { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+@keyframes avNote { 0% { opacity: 0; transform: translate(0, 0); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(3px, -9px); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .av-stalk, .av-bob, .av-buzz-l, .av-buzz-r, .av-blink,
+    .av-ripple, .av-leaf, .av-tilt, .av-tailbob, .av-note {
+        animation: none;
+    }
+    /* The falling leaves and water ripples are pure ambience — hide them fully
+       when motion is off rather than leaving frozen artifacts on the frog. */
+    .av-leaf, .av-ripple {
+        opacity: 0;
+    }
+}
+
 .settings-account-name {
     display: flex;
     align-items: center;

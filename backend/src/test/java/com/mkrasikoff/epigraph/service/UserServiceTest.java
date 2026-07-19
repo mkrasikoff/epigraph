@@ -235,6 +235,32 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("updateAvatarIcon: throws AVATAR_LOCKED when a non-Plus user picks a Plus icon")
+    void updateAvatarIcon_throws_whenPlusIconWithoutPlus() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> userService.updateAvatarIcon(USER_ID, "frog"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("AVATAR_LOCKED");
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateAvatarIcon: Plus user can set a Plus-exclusive icon")
+    void updateAvatarIcon_allowsPlusIcon_forPlusUser() {
+        User user = buildUser(USER_ID, "user@mail.com", true);
+        user.setPlusSince(1700000000000L);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        userService.updateAvatarIcon(USER_ID, "frog");
+
+        assertThat(user.getAvatarIcon()).isEqualTo("frog");
+        verify(userRepository).save(user);
+    }
+
+    @Test
     @DisplayName("updatePreferredLanguage: sets language and saves user")
     void updatePreferredLanguage_setsLanguageAndSaves() {
         User user = buildUser(USER_ID, "user@mail.com", true);
