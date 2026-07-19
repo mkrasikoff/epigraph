@@ -4,7 +4,9 @@ import com.mkrasikoff.epigraph.dto.quote.BatchImportResult;
 import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
+import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
+import com.mkrasikoff.epigraph.repository.UserRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +41,9 @@ class QuoteServiceTest {
     @Mock
     private Validator validator;
 
+    @Mock
+    private UserRepository userRepo;
+
     @InjectMocks
     private QuoteService quoteService;
 
@@ -51,6 +56,13 @@ class QuoteServiceTest {
         q.setAuthor("Author");
         q.setUserId(USER_ID);
         return q;
+    }
+
+    /** A user whose Epigraph Plus is active (raises the quote cap to 5000). */
+    private User plusUser() {
+        User u = new User();
+        u.setPlusSince(1700000000000L);
+        return u;
     }
 
     @Test
@@ -139,6 +151,33 @@ class QuoteServiceTest {
     void save_throwsWhenLimitReached() {
         Quote quote = buildQuote(null, "One quote too many");
         when(repo.countByUserId(USER_ID)).thenReturn(1000L);
+
+        assertThatThrownBy(() -> quoteService.save(quote, USER_ID))
+                .isInstanceOf(QuoteLimitExceededException.class);
+
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("save: Plus account can save past the 1000 free cap (up to 5000)")
+    void save_allowsBeyondFreeLimit_forPlusUser() {
+        Quote quote = buildQuote(null, "Quote #1001 for a Plus account");
+        when(userRepo.findById(USER_ID)).thenReturn(Optional.of(plusUser()));
+        when(repo.countByUserId(USER_ID)).thenReturn(1000L);
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Quote saved = quoteService.save(quote, USER_ID);
+
+        assertThat(saved.getUserId()).isEqualTo(USER_ID);
+        verify(repo).save(quote);
+    }
+
+    @Test
+    @DisplayName("save: throws for a Plus account already at the 5000 cap")
+    void save_throwsAtPlusLimit_forPlusUser() {
+        Quote quote = buildQuote(null, "One quote too many, even for Plus");
+        when(userRepo.findById(USER_ID)).thenReturn(Optional.of(plusUser()));
+        when(repo.countByUserId(USER_ID)).thenReturn(5000L);
 
         assertThatThrownBy(() -> quoteService.save(quote, USER_ID))
                 .isInstanceOf(QuoteLimitExceededException.class);

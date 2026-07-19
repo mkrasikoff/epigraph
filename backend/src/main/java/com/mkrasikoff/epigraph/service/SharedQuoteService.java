@@ -8,6 +8,7 @@ import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.SharedQuote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
 import com.mkrasikoff.epigraph.repository.SharedQuoteRepository;
+import com.mkrasikoff.epigraph.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,16 +20,29 @@ public class SharedQuoteService {
 
     /**
      * Same personal-app safety cap as QuoteService — importing a shared quote
-     * still counts against the importer's own quote limit.
+     * still counts against the importer's own quote limit, and Epigraph Plus
+     * raises it the same way (TASK-132); see {@link #maxQuotesFor(Long)}.
      */
-    private static final int MAX_QUOTES_PER_USER = 1000;
+    private static final int FREE_MAX_QUOTES_PER_USER = 1000;
+    private static final int PLUS_MAX_QUOTES_PER_USER = 5000;
 
     private final SharedQuoteRepository sharedQuoteRepo;
     private final QuoteRepository quoteRepo;
+    private final UserRepository userRepo;
 
-    public SharedQuoteService(SharedQuoteRepository sharedQuoteRepo, QuoteRepository quoteRepo) {
+    public SharedQuoteService(SharedQuoteRepository sharedQuoteRepo, QuoteRepository quoteRepo, UserRepository userRepo) {
         this.sharedQuoteRepo = sharedQuoteRepo;
         this.quoteRepo = quoteRepo;
+        this.userRepo = userRepo;
+    }
+
+    /**
+     * The per-account quote cap for the importer — 5000 for Epigraph Plus,
+     * 1000 otherwise. Mirrors QuoteService#maxQuotesFor.
+     */
+    private int maxQuotesFor(Long userId) {
+        boolean plus = userRepo.findById(userId).map(u -> u.getPlusSince() != null).orElse(false);
+        return plus ? PLUS_MAX_QUOTES_PER_USER : FREE_MAX_QUOTES_PER_USER;
     }
 
     /**
@@ -98,7 +112,7 @@ public class SharedQuoteService {
             return new ImportSharedQuoteResponse(existing, true);
         }
 
-        if (quoteRepo.countByUserId(importerUserId) >= MAX_QUOTES_PER_USER) {
+        if (quoteRepo.countByUserId(importerUserId) >= maxQuotesFor(importerUserId)) {
             throw new QuoteLimitExceededException();
         }
 
