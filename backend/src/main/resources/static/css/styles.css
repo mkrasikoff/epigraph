@@ -3044,6 +3044,23 @@ body.modal-lock-scroll {
 [data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r7, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r7 { background: var(--color-primary-hover); color: var(--color-text-inverse); border-color: var(--color-primary-hover); --achievement-icon-ring: var(--color-primary-hover); }
 [data-theme="light"]:not([data-theme-style="classic"]) .achievement-row-icon.achievement-icon-r8, [data-theme="light"]:not([data-theme-style="classic"]) .achievement-focus-icon.achievement-icon-r8 { background: var(--color-primary-active); color: var(--color-text-inverse); border-color: var(--color-primary-active); --achievement-icon-ring: var(--color-primary-active); }
 
+/* Noir light overrides r0-r5 of the generic ramp above. Noir's --color-primary
+   (#26262a) is near-black, unlike the medium-lightness primaries the generic
+   percentages were tuned for, so at 8-58% mix its background is already too
+   dark for the book SVGs' embedded stroke="#000" detail lines (see
+   ACHIEVEMENT_META icons in achievements.js) to read against a dark fill, yet
+   still too pale for a light fill to have real contrast. Darker mix stops
+   here keep every icon fill light (readable detail lines, and a consistent
+   ink-on-paper look across the whole rank ladder) with real contrast the
+   whole way up; r6-r8 already land on --color-primary/-hover/-active, which
+   are dark enough in Noir without an override.  */
+[data-theme="light"][data-theme-style="noir"] .achievement-row-icon.achievement-icon-r0, [data-theme="light"][data-theme-style="noir"] .achievement-focus-icon.achievement-icon-r0 { background: color-mix(in oklch, var(--color-primary) 20%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-divider); }
+[data-theme="light"][data-theme-style="noir"] .achievement-row-icon.achievement-icon-r1, [data-theme="light"][data-theme-style="noir"] .achievement-focus-icon.achievement-icon-r1 { background: color-mix(in oklch, var(--color-primary) 32%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-divider); }
+[data-theme="light"][data-theme-style="noir"] .achievement-row-icon.achievement-icon-r2, [data-theme="light"][data-theme-style="noir"] .achievement-focus-icon.achievement-icon-r2 { background: color-mix(in oklch, var(--color-primary) 45%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-border); }
+[data-theme="light"][data-theme-style="noir"] .achievement-row-icon.achievement-icon-r3, [data-theme="light"][data-theme-style="noir"] .achievement-focus-icon.achievement-icon-r3 { background: color-mix(in oklch, var(--color-primary) 60%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-border); }
+[data-theme="light"][data-theme-style="noir"] .achievement-row-icon.achievement-icon-r4, [data-theme="light"][data-theme-style="noir"] .achievement-focus-icon.achievement-icon-r4 { background: color-mix(in oklch, var(--color-primary) 72%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-primary); }
+[data-theme="light"][data-theme-style="noir"] .achievement-row-icon.achievement-icon-r5, [data-theme="light"][data-theme-style="noir"] .achievement-focus-icon.achievement-icon-r5 { background: color-mix(in oklch, var(--color-primary) 85%, var(--color-surface-2)); color: var(--color-text-inverse); border-color: var(--color-primary); }
+
 .achievement-row-body {
     flex: 1;
     min-width: 0;
@@ -3266,12 +3283,6 @@ body.modal-lock-scroll {
     color: var(--color-primary);
     font-size: var(--text-sm);
     font-weight: 500;
-}
-
-.settings-account-id {
-    font-size: var(--text-xs);
-    font-weight: 400;
-    color: var(--color-text-faint);
 }
 
 .settings-account-meta {
