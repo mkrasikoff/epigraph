@@ -318,14 +318,28 @@ document.addEventListener('click', e => {
 function showAvatarPickerModal() {
     const current = currentUser?.avatarIcon || 'neutral';
 
+    const isPlus = !!(currentUser && currentUser.plus);
+
     const optionsHtml = AVATAR_ICON_KEYS.map(key => {
         const selected = key === current ? ' avatar-picker-option--selected' : '';
+        const isPlusIcon = PLUS_AVATAR_ICON_KEYS.includes(key);
+        const locked = isPlusIcon && !isPlus;
         const label = t(avatarIconLabelKey(key));
+        const cls = `avatar-picker-option${selected}`
+            + (isPlusIcon ? ' avatar-picker-option--plus' : '')
+            + (locked ? ' avatar-picker-option--locked' : '');
+        const onclick = locked ? 'avatarPlusLocked()' : `submitAvatarIcon('${key}')`;
+        // "Plus" is the product wordmark — identical in every locale, so it's a
+        // literal here rather than an i18n string (like "Epigraph" itself).
+        const plusBadge = isPlusIcon
+            ? '<span class="avatar-picker-plus" aria-hidden="true">Plus</span>'
+            : '';
         return `<div class="avatar-picker-item">
-                    <button type="button" class="avatar-picker-option${selected}"
-                            aria-label="${label}" onclick="submitAvatarIcon('${key}')">
+                    <button type="button" class="${cls}"
+                            aria-label="${label}${isPlusIcon ? ' — Epigraph Plus' : ''}" onclick="${onclick}">
                         ${avatarIconMarkup(key, 1.8)}
                         <span class="avatar-picker-badge" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                        ${plusBadge}
                     </button>
                     <span class="avatar-picker-label">${label}</span>
                 </div>`;
@@ -356,7 +370,19 @@ function bounceAvatarOption(btn) {
  * Submits the chosen avatar icon to PATCH /api/user/me/avatar.
  * @param {string} key - One of AVATAR_ICON_KEYS.
  */
+/** Toast shown when a non-Plus user taps a Plus-exclusive avatar (TASK-132). */
+function avatarPlusLocked() {
+    toast(t('avatarPlusLocked'), 'error');
+}
+
 async function submitAvatarIcon(key) {
+    // Defense in depth — the picker already locks these, and the backend rejects
+    // them, but guard here too so a stray call can't fire a doomed request.
+    if (PLUS_AVATAR_ICON_KEYS.includes(key) && !(currentUser && currentUser.plus)) {
+        avatarPlusLocked();
+        return;
+    }
+
     if (currentUser?.avatarIcon === key) {
         closeModal();
         return;

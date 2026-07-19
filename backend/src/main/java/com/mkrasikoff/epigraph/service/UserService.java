@@ -20,6 +20,12 @@ public class UserService {
      */
     private static final Set<String> PLUS_THEMES = Set.of("noir");
 
+    /**
+     * Avatar icons unlocked only by an Epigraph Plus subscription (TASK-132).
+     * Keep in sync with PLUS_AVATAR_ICON_KEYS in avatars.js on the frontend.
+     */
+    private static final Set<String> PLUS_AVATARS = Set.of("snail", "bee", "frog", "nightingale");
+
     @Value("${app.base-url}")
     private String baseUrl;
 
@@ -115,6 +121,10 @@ public class UserService {
     public void updateAvatarIcon(Long userId, String avatarIcon) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
+
+        if (PLUS_AVATARS.contains(avatarIcon) && user.getPlusSince() == null) {
+            throw new IllegalArgumentException(ApiCodes.AVATAR_LOCKED);
+        }
 
         user.setAvatarIcon(avatarIcon);
         userRepository.save(user);

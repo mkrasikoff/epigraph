@@ -9,7 +9,7 @@ public class UpdateAvatarRequest {
 
     @NotBlank(message = "AVATAR_REQUIRED")
     @Pattern(
-            regexp = "^(neutral|bear|cat|dog|hamster|rabbit|fox|owl|elephant|mouse|duck|seal)$",
+            regexp = "^(neutral|bear|cat|dog|hamster|rabbit|fox|owl|elephant|mouse|duck|seal|snail|bee|frog|nightingale)$",
             message = "AVATAR_INVALID"
     )
     private String avatarIcon;
