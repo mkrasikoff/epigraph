@@ -375,9 +375,26 @@
                 <button class="account-avatar-btn" id="account-avatar-btn" onclick="toggleAccountMenu()" aria-haspopup="menu" aria-expanded="false" aria-label="Меню аккаунта" data-i18n-aria="ariaAccountMenu"></button>
                 <div class="account-menu-dropdown" id="account-menu-dropdown" role="menu">
                     <div class="account-menu-plus" id="account-menu-plus" role="presentation" style="display:none">
-                        <span class="account-menu-plus-dot" aria-hidden="true"></span>
-                        <span class="account-menu-plus-label" data-i18n="accountMenuPlus">Epigraph Plus</span>
-                        <span class="account-menu-plus-state" data-i18n="accountMenuPlusActive">активен</span>
+                        <div class="account-menu-plus-head">
+                            <span class="account-menu-plus-dot" aria-hidden="true"></span>
+                            <span class="account-menu-plus-label" data-i18n="accountMenuPlus">Epigraph Plus</span>
+                            <span class="account-menu-plus-state" data-i18n="accountMenuPlusActive">активен</span>
+                        </div>
+                        <div class="account-menu-plus-benefits">
+                            <div class="account-menu-plus-benefits-title" data-i18n="accountMenuPlusBenefitsTitle">В подписке</div>
+                            <div class="account-menu-plus-benefit">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                <span id="account-menu-plus-benefit-limit">До 5000 цитат</span>
+                            </div>
+                            <div class="account-menu-plus-benefit">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                <span data-i18n="accountMenuPlusBenefitNoir">Эксклюзивная тема «Нуар»</span>
+                            </div>
+                        </div>
                     </div>
                     <button class="account-menu-item" role="menuitem" onclick="logout()">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

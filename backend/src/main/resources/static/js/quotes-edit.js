@@ -17,7 +17,7 @@
  * - checkForNewAchievements() {fn} — defined in achievements.js
  *
  * Provides (globals): addQuote(), resetForm(), toggleFav(), copyQuote(), shareQuote(),
- *   editQuote(), saveEditQuote(), deleteQuote(), MAX_QUOTES_PER_USER.
+ *   editQuote(), saveEditQuote(), deleteQuote(), maxQuotesForCurrentUser().
  */
 
 // =============================================================================
@@ -31,8 +31,17 @@
  * @param {Event} e - The form submit event.
  * @returns {Promise<void>}
  */
-/** Mirrors the backend's MAX_QUOTES_PER_USER cap — checked client-side to skip a wasted request. */
-const MAX_QUOTES_PER_USER = 1000;
+/**
+ * Mirrors the backend's per-account quote cap — checked client-side to skip a
+ * wasted request. Epigraph Plus raises it from 1000 to 5000 (TASK-132), so the
+ * limit tracks currentUser.plus rather than being a fixed constant.
+ */
+const FREE_QUOTE_LIMIT = 1000;
+const PLUS_QUOTE_LIMIT = 5000;
+
+function maxQuotesForCurrentUser() {
+    return currentUser && currentUser.plus ? PLUS_QUOTE_LIMIT : FREE_QUOTE_LIMIT;
+}
 
 async function addQuote(e) {
     e.preventDefault();
@@ -44,8 +53,9 @@ async function addQuote(e) {
         return;
     }
 
-    if (quotes.length >= MAX_QUOTES_PER_USER) {
-        toast(t('toastQuoteLimitReached', {limit: MAX_QUOTES_PER_USER}), 'error');
+    const maxQuotes = maxQuotesForCurrentUser();
+    if (quotes.length >= maxQuotes) {
+        toast(t('toastQuoteLimitReached', {limit: maxQuotes}), 'error');
         return;
     }
 

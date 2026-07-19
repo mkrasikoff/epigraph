@@ -270,6 +270,11 @@ function updateHeaderAccount() {
 
     const menuPlus = document.getElementById('account-menu-plus');
     if (menuPlus) menuPlus.style.display = isPlus ? '' : 'none';
+
+    // Keep the quote-limit benefit line in sync with the actual Plus cap
+    // (PLUS_QUOTE_LIMIT in quotes-edit.js) rather than hardcoding the number.
+    const benefitLimit = document.getElementById('account-menu-plus-benefit-limit');
+    if (benefitLimit) benefitLimit.textContent = t('accountMenuPlusBenefitLimit', {limit: PLUS_QUOTE_LIMIT});
 }
 
 /**

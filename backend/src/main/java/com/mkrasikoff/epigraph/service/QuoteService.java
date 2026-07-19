@@ -7,6 +7,7 @@ import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
 import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
+import com.mkrasikoff.epigraph.repository.UserRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
@@ -23,15 +24,29 @@ public class QuoteService {
 
     /**
      * Personal-app safety cap — keeps a single account from growing unbounded.
+     * Epigraph Plus raises it (TASK-132); see {@link #maxQuotesFor(Long)}.
      */
-    private static final int MAX_QUOTES_PER_USER = 1000;
+    private static final int FREE_MAX_QUOTES_PER_USER = 1000;
+    private static final int PLUS_MAX_QUOTES_PER_USER = 5000;
 
     private final QuoteRepository repo;
+    private final UserRepository userRepo;
     private final Validator validator;
 
-    public QuoteService(QuoteRepository repo, Validator validator) {
+    public QuoteService(QuoteRepository repo, UserRepository userRepo, Validator validator) {
         this.repo = repo;
+        this.userRepo = userRepo;
         this.validator = validator;
+    }
+
+    /**
+     * The per-account quote cap for a user — 5000 for Epigraph Plus accounts,
+     * 1000 otherwise. A missing user (shouldn't happen for an authenticated
+     * request) falls back to the free cap.
+     */
+    private int maxQuotesFor(Long userId) {
+        boolean plus = userRepo.findById(userId).map(u -> u.getPlusSince() != null).orElse(false);
+        return plus ? PLUS_MAX_QUOTES_PER_USER : FREE_MAX_QUOTES_PER_USER;
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +77,7 @@ public class QuoteService {
 
     @Transactional
     public Quote save(Quote quote, Long userId) {
-        if (repo.countByUserId(userId) >= MAX_QUOTES_PER_USER) {
+        if (repo.countByUserId(userId) >= maxQuotesFor(userId)) {
             throw new QuoteLimitExceededException();
         }
 
@@ -88,7 +103,7 @@ public class QuoteService {
     @Transactional
     public BatchImportResult saveAll(List<Quote> quotes, Long userId) {
         long now = System.currentTimeMillis();
-        long remainingSlots = MAX_QUOTES_PER_USER - repo.countByUserId(userId);
+        long remainingSlots = maxQuotesFor(userId) - repo.countByUserId(userId);
         List<Quote> valid = new ArrayList<>();
         List<RejectedQuote> rejected = new ArrayList<>();
 

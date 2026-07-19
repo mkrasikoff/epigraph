@@ -6,8 +6,10 @@ import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.exception.SharedQuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.SharedQuote;
+import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
 import com.mkrasikoff.epigraph.repository.SharedQuoteRepository;
+import com.mkrasikoff.epigraph.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +34,9 @@ class SharedQuoteServiceTest {
 
     @Mock
     private QuoteRepository quoteRepo;
+
+    @Mock
+    private UserRepository userRepo;
 
     @InjectMocks
     private SharedQuoteService sharedQuoteService;
@@ -212,5 +217,24 @@ class SharedQuoteServiceTest {
                 .isInstanceOf(QuoteLimitExceededException.class);
 
         verify(quoteRepo, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("importToCollection: Plus importer can import past the 1000 free cap")
+    void importToCollection_allowsBeyondFreeLimit_forPlusImporter() {
+        SharedQuote shared = buildSharedQuote(5L);
+        User plus = new User();
+        plus.setPlusSince(1700000000000L);
+
+        when(sharedQuoteRepo.findByToken("tok123")).thenReturn(Optional.of(shared));
+        when(quoteRepo.findBySharedQuoteIdAndUserId(5L, IMPORTER_ID)).thenReturn(Optional.empty());
+        when(quoteRepo.countByUserId(IMPORTER_ID)).thenReturn(1000L);
+        when(userRepo.findById(IMPORTER_ID)).thenReturn(Optional.of(plus));
+        when(quoteRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ImportSharedQuoteResponse result = sharedQuoteService.importToCollection("tok123", IMPORTER_ID);
+
+        assertThat(result.isAlreadyImported()).isFalse();
+        verify(quoteRepo).save(any());
     }
 }
