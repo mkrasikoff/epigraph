@@ -9,16 +9,24 @@
  * - (none) — pure data module, load before auth.js.
  *
  * Provides (globals):
- * - AVATAR_ICON_KEYS   {string[]} — display order for the icon picker
- * - AVATAR_ICONS       {Object}   — key -> inline SVG markup string
+ * - AVATAR_ICON_KEYS        {string[]} — display order for the icon picker
+ * - PLUS_AVATAR_ICON_KEYS   {string[]} — subset unlocked only by Epigraph Plus (TASK-132)
+ * - AVATAR_ICONS            {Object}   — key -> inline SVG markup string
  * - avatarIconMarkup(key) {fn}    — returns markup for a key, falling back to 'neutral'
  * - avatarIconLabelKey(key) {fn}  — returns the i18n key for a display label (see i18n.js)
  */
 
 const AVATAR_ICON_KEYS = [
     'neutral', 'bear', 'cat', 'dog', 'hamster', 'rabbit',
-    'fox', 'owl', 'elephant', 'mouse', 'duck', 'seal'
+    'fox', 'owl', 'elephant', 'mouse', 'duck', 'seal',
+    'snail', 'bee', 'frog', 'nightingale'
 ];
+
+/**
+ * Epigraph Plus-exclusive avatars (TASK-132) — animated, gated in the picker and
+ * server-side. Keep in sync with PLUS_AVATARS in UserService.java on the backend.
+ */
+const PLUS_AVATAR_ICON_KEYS = ['snail', 'bee', 'frog', 'nightingale'];
 
 const AVATAR_ICONS = {
     neutral: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
@@ -43,7 +51,16 @@ const AVATAR_ICONS = {
 
     duck: '<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.4" fill="#c8956c"/><circle cx="9.3" cy="11.2" r="0.9" fill="#3a2d22"/><circle cx="14.7" cy="11.2" r="0.9" fill="#3a2d22"/><rect x="8" y="13.2" width="8" height="3.6" rx="1.8" fill="#f0b888" stroke="#3a2d22" stroke-width="0.3"/><line x1="8.3" y1="15" x2="15.7" y2="15" stroke="#3a2d22" stroke-width="0.35"/></svg>',
 
-    seal: '<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="13.6" r="7.8" fill="#d4956a"/><ellipse cx="12" cy="16.6" rx="3" ry="2.3" fill="#f0b888"/><circle cx="9.1" cy="12.6" r="1.15" fill="#3a2d22"/><circle cx="14.9" cy="12.6" r="1.15" fill="#3a2d22"/><ellipse cx="12" cy="15.8" rx="0.75" ry="0.55" fill="#3a2d22"/><circle cx="5.6" cy="15.5" r="0.35" fill="#3a2d22"/><circle cx="5.6" cy="17" r="0.35" fill="#3a2d22"/><circle cx="18.4" cy="15.5" r="0.35" fill="#3a2d22"/><circle cx="18.4" cy="17" r="0.35" fill="#3a2d22"/></svg>'
+    seal: '<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="13.6" r="7.8" fill="#d4956a"/><ellipse cx="12" cy="16.6" rx="3" ry="2.3" fill="#f0b888"/><circle cx="9.1" cy="12.6" r="1.15" fill="#3a2d22"/><circle cx="14.9" cy="12.6" r="1.15" fill="#3a2d22"/><ellipse cx="12" cy="15.8" rx="0.75" ry="0.55" fill="#3a2d22"/><circle cx="5.6" cy="15.5" r="0.35" fill="#3a2d22"/><circle cx="5.6" cy="17" r="0.35" fill="#3a2d22"/><circle cx="18.4" cy="15.5" r="0.35" fill="#3a2d22"/><circle cx="18.4" cy="17" r="0.35" fill="#3a2d22"/></svg>',
+
+    // ── Epigraph Plus avatars (TASK-132) — subtle looping animation via the av-* classes in styles.css ──
+    snail: '<svg width="24" height="24" viewBox="0 0 24 24"><path d="M3.5 18.5 Q3.5 15.5 8 15.5 H15 Q17.5 15.5 17.5 17.5 Q17.5 19 15 19 H4.5 Z" fill="#e8c9a0"/><circle cx="10" cy="12.5" r="5.2" fill="#c8956c"/><path d="M10 12.5 Q10 9.4 12.8 10 Q13.6 12.6 11.4 14 Q9.4 14.6 10 12.5 Z" fill="none" stroke="#8a5a30" stroke-width="0.7"/><g class="av-stalk"><line x1="16" y1="15.6" x2="17.4" y2="10" stroke="#e8c9a0" stroke-width="1.2" stroke-linecap="round"/><circle cx="17.4" cy="9.6" r="0.9" fill="#e8c9a0"/><circle cx="17.4" cy="9.6" r="0.4" fill="#3a2d22"/><line x1="14" y1="15.6" x2="14.8" y2="10.4" stroke="#e8c9a0" stroke-width="1.2" stroke-linecap="round"/><circle cx="14.8" cy="10" r="0.9" fill="#e8c9a0"/><circle cx="14.8" cy="10" r="0.4" fill="#3a2d22"/></g></svg>',
+
+    bee: '<svg width="24" height="24" viewBox="0 0 24 24"><g class="av-bob"><ellipse cx="12" cy="14" rx="4.2" ry="5" fill="#e0a94a"/><path d="M8 12 H16 M7.8 15 H16.2" stroke="#3a2d22" stroke-width="1.4"/><circle cx="10.6" cy="10" r="0.7" fill="#3a2d22"/><circle cx="13.4" cy="10" r="0.7" fill="#3a2d22"/><path d="M10.6 8.4 Q10 6.5 8.6 6 M13.4 8.4 Q14 6.5 15.4 6" stroke="#3a2d22" stroke-width="0.5" fill="none" stroke-linecap="round"/><g class="av-buzz-l"><ellipse cx="8" cy="9.6" rx="3.2" ry="1.9" fill="#f6efe0" fill-opacity="0.62" stroke="#a8863c" stroke-width="0.5"/></g><g class="av-buzz-r"><ellipse cx="16" cy="9.6" rx="3.2" ry="1.9" fill="#f6efe0" fill-opacity="0.62" stroke="#a8863c" stroke-width="0.5"/></g></g></svg>',
+
+    frog: '<svg width="24" height="24" viewBox="0 0 24 24"><path class="av-leaf av-leaf-1" d="M4.6 2.2 Q6.4 4 4.6 5.8 Q2.8 4 4.6 2.2 Z" fill="#c88a4a" opacity="0"/><path class="av-leaf av-leaf-2" d="M11 2 Q13 4 11 6 Q9 4 11 2 Z" fill="#b0693a" opacity="0"/><path class="av-leaf av-leaf-3" d="M18 2.4 Q19.7 4.1 18 5.8 Q16.3 4.1 18 2.4 Z" fill="#d2a85e" opacity="0"/><path class="av-leaf av-leaf-4" d="M8.6 2.6 Q10.1 4 8.6 5.4 Q7.1 4 8.6 2.6 Z" fill="#a8803c" opacity="0"/><ellipse class="av-ripple" cx="12" cy="20" rx="6.6" ry="1.9" fill="none" stroke="#8fb055" stroke-width="0.6"/><ellipse class="av-ripple av-ripple-2" cx="12" cy="20" rx="6.6" ry="1.9" fill="none" stroke="#8fb055" stroke-width="0.6"/><ellipse cx="12" cy="20" rx="8" ry="2.4" fill="#6f8f3a"/><path d="M10.7 21.7 L11.05 20.3" stroke="#4f6a26" stroke-width="0.55" stroke-linecap="round"/><ellipse cx="12" cy="14.6" rx="6.4" ry="4.6" fill="#a8a45c"/><circle cx="8.6" cy="9" r="2.3" fill="#a8a45c"/><circle cx="15.4" cy="9" r="2.3" fill="#a8a45c"/><g class="av-blink"><circle cx="8.6" cy="9" r="1" fill="#3a2d22"/><circle cx="15.4" cy="9" r="1" fill="#3a2d22"/></g><path d="M8.4 15.2 Q12 17.6 15.6 15.2" stroke="#3a2d22" stroke-width="0.7" fill="none" stroke-linecap="round"/></svg>',
+
+    nightingale: '<svg width="24" height="24" viewBox="0 0 24 24"><path d="M2 19 Q12 17.4 22 19" stroke="#7a5636" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="5" cy="18" r="1.2" fill="#b0553a"/><path d="M5 16.8 V16" stroke="#6f8f3a" stroke-width="0.5"/><path d="M10.6 16.8 V18.6 M13.4 16.8 V18.6" stroke="#8a6a42" stroke-width="0.8"/><g class="av-tailbob"><path d="M12 15 L11.6 20 L14 18.4 Z" fill="#b8865c"/></g><ellipse cx="12" cy="13" rx="5.2" ry="4.8" fill="#c8956c"/><ellipse cx="12" cy="14" rx="3" ry="3.2" fill="#f0b888"/><g class="av-tilt"><circle cx="12" cy="7.8" r="3.4" fill="#d4956a"/><circle cx="10.8" cy="7.4" r="0.7" fill="#3a2d22"/><circle cx="13.2" cy="7.4" r="0.7" fill="#3a2d22"/><path d="M12 8.4 L14.6 9.2 L12 9.8 Z" fill="#e0a527"/></g><g class="av-note"><circle cx="18" cy="8" r="0.9" fill="#c2a878"/><rect x="18.55" y="5.4" width="0.55" height="2.8" fill="#c2a878"/></g></svg>'
 };
 
 /**
