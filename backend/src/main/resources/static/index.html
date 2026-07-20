@@ -373,6 +373,9 @@
             </button>
             <div class="account-menu" id="account-menu" style="display:none">
                 <button class="account-avatar-btn" id="account-avatar-btn" onclick="toggleAccountMenu()" aria-haspopup="menu" aria-expanded="false" aria-label="Меню аккаунта" data-i18n-aria="ariaAccountMenu"></button>
+                <!-- Sibling of the avatar button, not a child: updateHeaderAccount()
+                     replaces that button's innerHTML on every render. -->
+                <span class="account-badge-dot" id="account-badge-dot" style="display:none" aria-hidden="true"></span>
                 <div class="account-menu-dropdown" id="account-menu-dropdown" role="menu">
                     <div class="account-menu-plus" id="account-menu-plus" role="presentation" style="display:none">
                         <div class="account-menu-plus-head">
@@ -410,6 +413,7 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                         </svg>
                         <span data-i18n="accountMenuFriends">Друзья</span>
+                        <span class="account-menu-count" id="account-menu-friends-count" style="display:none"></span>
                     </button>
                     <button class="account-menu-item" role="menuitem" onclick="logout()">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

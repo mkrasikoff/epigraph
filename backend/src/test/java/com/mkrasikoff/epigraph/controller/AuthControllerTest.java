@@ -6,6 +6,7 @@ import com.mkrasikoff.epigraph.dto.auth.VerifyRequest;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;
+import com.mkrasikoff.epigraph.service.FriendshipService;
 import com.mkrasikoff.epigraph.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,12 +45,15 @@ class AuthControllerTest {
     @Mock
     private AchievementService achievementService;
 
+    @Mock
+    private FriendshipService friendshipService;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        AuthController controller = new AuthController(authService, userService, achievementService);
+        AuthController controller = new AuthController(authService, userService, achievementService, friendshipService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         objectMapper = new ObjectMapper();
     }
@@ -270,10 +274,12 @@ class AuthControllerTest {
         user.setEquippedBadge("chronicler");
         user.setPlusSince(1_700_000_000_000L);
         when(userService.findById(null)).thenReturn(Optional.of(user));
+        when(friendshipService.countIncomingRequests(null)).thenReturn(2);
 
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.pendingFriendRequests").value(2))
                 .andExpect(jsonPath("$.id").value(42))
                 .andExpect(jsonPath("$.email").value("user@example.com"))
                 .andExpect(jsonPath("$.username").value("testuser"))

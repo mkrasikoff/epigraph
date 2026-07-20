@@ -8,7 +8,7 @@ follow you across devices.
 
 <p align="center">
   <a href="https://epigraph.me">
-    <img src="showcase.png" alt="Epigraph — quote of the day in dark, light, and Russian views" width="100%">
+    <img src="showcase.png" alt="Epigraph — quote of the day on a dark screen, with feature highlights" width="100%">
   </a>
 </p>
 

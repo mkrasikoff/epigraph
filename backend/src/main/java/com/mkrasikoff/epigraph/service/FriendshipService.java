@@ -145,6 +145,16 @@ public class FriendshipService {
     }
 
     /**
+     * How many friend requests await the user's answer. Drives the header badge
+     * (TASK-129) — a count of live state, not a notification feed: answering a
+     * request lowers it on its own, so there is no read/unread flag to store.
+     */
+    @Transactional(readOnly = true)
+    public int countIncomingRequests(Long userId) {
+        return (int) friendshipRepository.countByAddresseeIdAndStatus(userId, Friendship.STATUS_PENDING);
+    }
+
+    /**
      * Every user the given user has an outstanding request out to — so they can
      * see and cancel what they've already sent instead of re-sending blindly.
      */

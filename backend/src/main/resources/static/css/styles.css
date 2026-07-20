@@ -205,7 +205,11 @@
     --color-banner-highlight: #2a2158;
     --color-accent: #c084fc;
     --color-gold: #f0c94a;
-    --color-plus: #e2c56e;
+    /* Silver rather than the warm gold the other themes use: Cosmos' Plus
+       accent should read like its own falling stars, which are drawn in
+       --color-text (#e4e2f7). Deliberately a touch dimmer and cooler than that,
+       so the pill stays an accent instead of looking like plain white text. */
+    --color-plus: #c9c6de;
     --color-plus-ink: #0a0a1a;
 }
 
@@ -3283,6 +3287,40 @@ body.modal-lock-scroll {
     color: var(--color-primary);
     font-size: var(--text-sm);
     font-weight: 500;
+}
+
+/* -- pending friend requests: header dot + menu count (TASK-129) --
+   The avatar only says "something is waiting"; the number lives on the Friends
+   row of the menu the dot leads to. Anchored on .account-menu (already
+   position:relative) rather than inside the avatar button, whose innerHTML
+   updateHeaderAccount() rewrites on every render. */
+.account-badge-dot {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    /* Ring in the page colour, not a border — without it the dot merges into
+       the avatar's edge, badly in light themes. */
+    box-shadow: 0 0 0 2px var(--color-bg);
+    pointer-events: none;
+}
+
+.account-menu-count {
+    margin-left: auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* =============================================================================
