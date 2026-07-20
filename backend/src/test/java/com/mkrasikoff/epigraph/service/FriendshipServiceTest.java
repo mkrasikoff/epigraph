@@ -312,6 +312,14 @@ class FriendshipServiceTest {
     }
 
     @Test
+    @DisplayName("countIncomingRequests: counts only pending requests addressed to the user")
+    void countIncomingRequests_countsPendingIncoming() {
+        when(friendshipRepository.countByAddresseeIdAndStatus(ME, Friendship.STATUS_PENDING)).thenReturn(3L);
+
+        assertThat(friendshipService.countIncomingRequests(ME)).isEqualTo(3);
+    }
+
+    @Test
     @DisplayName("listOutgoingRequests: resolves each addressee of a pending sent request, marked OUTGOING")
     void listOutgoingRequests_mapsAddresseeToSummaries() {
         when(friendshipRepository.findByRequesterIdAndStatus(ME, Friendship.STATUS_PENDING))

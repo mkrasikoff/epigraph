@@ -273,6 +273,10 @@ function updateHeaderAccount() {
     // (PLUS_QUOTE_LIMIT in quotes-edit.js) rather than hardcoding the number.
     const benefitLimit = document.getElementById('account-menu-plus-benefit-limit');
     if (benefitLimit) benefitLimit.textContent = t('accountMenuPlusBenefitLimit', {limit: PLUS_QUOTE_LIMIT});
+
+    // Pending friend requests come with /api/auth/me, so the badge is correct
+    // from the first render without its own request (TASK-129).
+    renderFriendRequestsBadge(currentUser?.pendingFriendRequests || 0);
 }
 
 /**
@@ -290,6 +294,10 @@ function toggleAccountMenu() {
         const btn = document.getElementById('account-avatar-btn');
         btn?.classList.add('open');
         btn?.setAttribute('aria-expanded', 'true');
+
+        // Catches a request that arrived while the tab sat open — one call, on
+        // an actual gesture, instead of polling in the background.
+        refreshFriendRequestsBadge();
     }
 }
 

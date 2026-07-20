@@ -10,6 +10,7 @@ import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;
+import com.mkrasikoff.epigraph.service.FriendshipService;
 import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -36,11 +37,14 @@ public class AuthController {
     private final AuthService authService;
     private final UserService userService;
     private final AchievementService achievementService;
+    private final FriendshipService friendshipService;
 
-    public AuthController(AuthService authService, UserService userService, AchievementService achievementService) {
+    public AuthController(AuthService authService, UserService userService, AchievementService achievementService,
+                          FriendshipService friendshipService) {
         this.authService = authService;
         this.userService = userService;
         this.achievementService = achievementService;
+        this.friendshipService = friendshipService;
     }
 
     @PostMapping("/register")
@@ -76,7 +80,7 @@ public class AuthController {
                 .<ResponseEntity<?>>map(user -> {
                     boolean isNewActivityDay = achievementService.markActiveToday(userId);
                     if (!isNewActivityDay) {
-                        return ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon(), user.getPreferredLanguage(), user.getThemeStyle(), user.getEquippedBadge(), user.getPlusSince() != null));
+                        return ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon(), user.getPreferredLanguage(), user.getThemeStyle(), user.getEquippedBadge(), user.getPlusSince() != null, friendshipService.countIncomingRequests(userId)));
                     }
 
                     achievementService.evaluate(userId);
@@ -85,7 +89,7 @@ public class AuthController {
                     // detached snapshot from before that ran, so it would still
                     // report the old badge.
                     User refreshed = userService.findById(userId).orElse(user);
-                    return ResponseEntity.ok(new MeResponse(refreshed.getId(), refreshed.getEmail(), refreshed.getUsername(), refreshed.getAvatarIcon(), refreshed.getPreferredLanguage(), refreshed.getThemeStyle(), refreshed.getEquippedBadge(), refreshed.getPlusSince() != null));
+                    return ResponseEntity.ok(new MeResponse(refreshed.getId(), refreshed.getEmail(), refreshed.getUsername(), refreshed.getAvatarIcon(), refreshed.getPreferredLanguage(), refreshed.getThemeStyle(), refreshed.getEquippedBadge(), refreshed.getPlusSince() != null, friendshipService.countIncomingRequests(userId)));
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ErrorResponse(ApiCodes.USER_NOT_FOUND)));
