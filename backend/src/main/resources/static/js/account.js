@@ -237,6 +237,7 @@ function updateSettingsAccount() {
     document.getElementById('settings-account-stats').textContent =
         t('statsSummary', {total, word: quoteCountWord(total), favorites: favCount});
 
+
     // Update change-password item — same wording for all users
     document.getElementById('settings-change-password-title').textContent = t('changePasswordTitle');
     document.getElementById('settings-change-password-desc').textContent = t('changePasswordSettingsDesc');

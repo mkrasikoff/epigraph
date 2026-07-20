@@ -70,6 +70,18 @@ class FriendControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/friends/requests/outgoing: returns requests the caller sent")
+    void listOutgoingRequests_returnsRequests() throws Exception {
+        when(friendshipService.listOutgoingRequests(null))
+                .thenReturn(List.of(new UserSummaryResponse(OTHER, "anna", "cat", null, "OUTGOING")));
+
+        mockMvc.perform(get("/api/friends/requests/outgoing"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(2))
+                .andExpect(jsonPath("$[0].relation").value("OUTGOING"));
+    }
+
+    @Test
     @DisplayName("GET /api/friends/search: returns matches with the viewer's relation")
     void search_returnsMatches() throws Exception {
         when(friendshipService.searchUsers(null, "an"))

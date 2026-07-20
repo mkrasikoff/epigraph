@@ -312,6 +312,20 @@ class FriendshipServiceTest {
     }
 
     @Test
+    @DisplayName("listOutgoingRequests: resolves each addressee of a pending sent request, marked OUTGOING")
+    void listOutgoingRequests_mapsAddresseeToSummaries() {
+        when(friendshipRepository.findByRequesterIdAndStatus(ME, Friendship.STATUS_PENDING))
+                .thenReturn(List.of(pending(ME, OTHER)));
+        when(userRepository.findAllById(List.of(OTHER))).thenReturn(List.of(user(OTHER, "anna")));
+
+        List<UserSummaryResponse> result = friendshipService.listOutgoingRequests(ME);
+
+        assertThat(result).extracting(UserSummaryResponse::getId).containsExactly(OTHER);
+        assertThat(result).extracting(UserSummaryResponse::getRelation)
+                .containsOnly(FriendshipService.RelationStatus.OUTGOING.name());
+    }
+
+    @Test
     @DisplayName("listFriends: returns empty without hitting the user repository")
     void listFriends_returnsEmptyWhenNoFriends() {
         when(friendshipRepository.findAcceptedForUser(ME)).thenReturn(List.of());

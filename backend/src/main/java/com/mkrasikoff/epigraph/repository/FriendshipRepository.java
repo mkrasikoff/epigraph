@@ -26,6 +26,12 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     List<Friendship> findByAddresseeIdAndStatus(Long addresseeId, String status);
 
     /**
+     * Rows the user sent, in a given status — used with PENDING to list their own
+     * outstanding requests.
+     */
+    List<Friendship> findByRequesterIdAndStatus(Long requesterId, String status);
+
+    /**
      * Every accepted friendship the user is part of, on either side. The caller
      * maps each row to "the other user".
      */

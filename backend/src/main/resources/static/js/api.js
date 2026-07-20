@@ -192,6 +192,13 @@ const Api = {
         fetch(`${FRIENDS_API}/requests`, { headers: authHeaders() }).then(r => r.json()),
 
     /**
+     * Friend requests the authenticated user has sent and that are unanswered.
+     * @returns {Promise<Object[]>} User summaries of the addressees.
+     */
+    getOutgoingFriendRequests: () =>
+        fetch(`${FRIENDS_API}/requests/outgoing`, { headers: authHeaders() }).then(r => r.json()),
+
+    /**
      * Searches users by display name. The backend returns nothing for queries
      * shorter than 2 characters, so callers don't need to pre-filter.
      * @param {string} query
