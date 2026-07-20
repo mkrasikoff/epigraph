@@ -429,6 +429,12 @@ const TRANSLATIONS = {
         pluralQuote1:                   'цитата',
         pluralQuote2:                   'цитаты',
         pluralQuote5:                   'цитат',
+        pluralDay1:                     'день',
+        pluralDay2:                     'дня',
+        pluralDay5:                     'дней',
+        // Genitive month names, for "с мая 2026" — toLocaleDateString's long
+        // month is nominative ("май"), which reads wrong after the preposition.
+        monthsGenitive:                 'января,февраля,марта,апреля,мая,июня,июля,августа,сентября,октября,ноября,декабря',
         statsSummary:                   '{total} {word} · {favorites} в избранном',
 
         // ── Favorite button tooltip ───────────────────────────────────────────────
@@ -474,6 +480,7 @@ const TRANSLATIONS = {
         friendsSearchHint:              'Введите минимум 2 символа',
         friendsSearchEmpty:             'Никого не нашлось',
         friendsRequestsTitle:           'Заявки',
+        friendsOutgoingTitle:           'Отправленные заявки',
         friendsListTitle:               'Мои друзья',
         friendsListEmpty:               'Пока никого. Найдите друзей по имени выше.',
         friendsAddBtn:                  'Добавить',
@@ -486,8 +493,8 @@ const TRANSLATIONS = {
         friendsToastDeclined:           'Заявка отклонена',
         friendsToastRemoved:            'Удалено из друзей',
         friendProfileSincePrefix:       'с',
-        friendProfileStreak:            '{count} дней подряд',
-        friendProfileQuotes:            '{count} цитат',
+        friendProfileStreak:            '{count} {word} подряд',
+        friendProfileQuotes:            '{count} {word}',
         friendProfileAchievements:      'Достижения',
         friendProfileLocked:            'Цитаты и активность — станут доступны позже',
         friendsErrorSelf:               'Нельзя добавить себя в друзья',
@@ -920,6 +927,10 @@ const TRANSLATIONS = {
         pluralQuote1:                   'quote',
         pluralQuote2:                   'quotes',
         pluralQuote5:                   'quotes',
+        pluralDay1:                     'day',
+        pluralDay2:                     'days',
+        pluralDay5:                     'days',
+        monthsGenitive:                 'January,February,March,April,May,June,July,August,September,October,November,December',
         statsSummary:                   '{total} {word} · {favorites} favorited',
 
         // ── Favorite button tooltip ───────────────────────────────────────────────
@@ -965,6 +976,7 @@ const TRANSLATIONS = {
         friendsSearchHint:              'Enter at least 2 characters',
         friendsSearchEmpty:             'No one found',
         friendsRequestsTitle:           'Requests',
+        friendsOutgoingTitle:           'Sent requests',
         friendsListTitle:               'Your friends',
         friendsListEmpty:               'No one yet. Find friends by name above.',
         friendsAddBtn:                  'Add',
@@ -977,8 +989,8 @@ const TRANSLATIONS = {
         friendsToastDeclined:           'Request declined',
         friendsToastRemoved:            'Friend removed',
         friendProfileSincePrefix:       'since',
-        friendProfileStreak:            '{count} days in a row',
-        friendProfileQuotes:            '{count} quotes',
+        friendProfileStreak:            '{count} {word} in a row',
+        friendProfileQuotes:            '{count} {word}',
         friendProfileAchievements:      'Achievements',
         friendProfileLocked:            'Quotes and activity — coming later',
         friendsErrorSelf:               'You can\'t add yourself',
@@ -1042,6 +1054,33 @@ function quoteCountWord(n) {
         return n === 1 ? t('pluralQuote1') : t('pluralQuote2');
     }
     return pluralRu(n, t('pluralQuote1'), t('pluralQuote2'), t('pluralQuote5'));
+}
+
+/**
+ * Same as quoteCountWord() but for "day(s)" — used by the activity streak
+ * ("18 дней подряд"), which otherwise renders "1 дней" (TASK-129).
+ * @param {number} n
+ * @returns {string}
+ */
+function dayCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralDay1') : t('pluralDay2');
+    }
+    return pluralRu(n, t('pluralDay1'), t('pluralDay2'), t('pluralDay5'));
+}
+
+/**
+ * Formats a timestamp as a "month year" label for the genitive case that
+ * follows a preposition — "мая 2026", not toLocaleDateString's nominative
+ * "май 2026 г.". English has no cases, so its list is just the plain names.
+ * @param {number} timestamp - Unix millis.
+ * @returns {string}
+ */
+function monthYearGenitive(timestamp) {
+    const date = new Date(timestamp);
+    const month = t('monthsGenitive').split(',')[date.getMonth()];
+
+    return `${month} ${date.getFullYear()}`;
 }
 
 /**

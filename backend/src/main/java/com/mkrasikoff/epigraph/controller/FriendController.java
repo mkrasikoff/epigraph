@@ -53,6 +53,14 @@ public class FriendController {
     }
 
     /**
+     * Requests the caller has sent and that are still unanswered.
+     */
+    @GetMapping("/requests/outgoing")
+    public List<UserSummaryResponse> listOutgoingRequests(@AuthenticationPrincipal Long userId) {
+        return friendshipService.listOutgoingRequests(userId);
+    }
+
+    /**
      * Finds users to befriend by display name. Returns nothing for a query
      * shorter than the service's minimum rather than most of the user base.
      */

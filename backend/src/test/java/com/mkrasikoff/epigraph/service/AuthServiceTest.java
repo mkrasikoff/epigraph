@@ -231,6 +231,39 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("provisionOAuthUser: falls back to the email-derived username for a Cyrillic display name")
+    void provisionOAuthUser_fallsBackToEmailUsername_whenProviderNameUnusable() {
+        when(userRepository.findByEmail("mkrasikoff@gmail.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            u.setId(8L);
+            return u;
+        });
+
+        // A fully Cyrillic Google display name sanitizes to nothing. Leaving the
+        // username null would make the account permanently unfindable in friend
+        // search, since SQL LIKE never matches NULL (TASK-129).
+        authService.provisionOAuthUser("mkrasikoff@gmail.com", "google", "sub-1", "Михаил Красиков", null);
+
+        verify(userRepository).save(argThat(u -> "mkrasikoff".equals(u.getUsername())));
+    }
+
+    @Test
+    @DisplayName("provisionOAuthUser: falls back to the email-derived username when the provider sends no name")
+    void provisionOAuthUser_fallsBackToEmailUsername_whenProviderNameMissing() {
+        when(userRepository.findByEmail("someone@gmail.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            u.setId(9L);
+            return u;
+        });
+
+        authService.provisionOAuthUser("someone@gmail.com", "google", "sub-2", null, null);
+
+        verify(userRepository).save(argThat(u -> "someone".equals(u.getUsername())));
+    }
+
+    @Test
     @DisplayName("provisionOAuthUser: returns existing user without re-saving or seeding quotes")
     void provisionOAuthUser_returnsExistingUser() {
         User existing = buildUser(5L, "user@gmail.com", true);
@@ -244,8 +277,8 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("provisionOAuthUser: username too short after sanitizing becomes null")
-    void provisionOAuthUser_shortUsernameBecomesNull() {
+    @DisplayName("provisionOAuthUser: username too short after sanitizing falls back to the email-derived one")
+    void provisionOAuthUser_shortUsernameFallsBackToEmail() {
         when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> {
             User u = inv.getArgument(0);
@@ -255,7 +288,9 @@ class AuthServiceTest {
 
         authService.provisionOAuthUser("x@gmail.com", "google", "sub", "A!", null);
 
-        verify(userRepository).save(argThat(u -> u.getUsername() == null));
+        // Was null before TASK-129. deriveUsername() pads a 1-char local part to
+        // the 3-char minimum, so this lands on "x__" rather than nothing.
+        verify(userRepository).save(argThat(u -> "x__".equals(u.getUsername())));
     }
 
     @Test

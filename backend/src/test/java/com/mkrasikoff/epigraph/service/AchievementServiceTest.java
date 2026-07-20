@@ -17,11 +17,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -39,6 +41,9 @@ class AchievementServiceTest {
     private AchievementService achievementService;
 
     private static final Long USER_ID = 1L;
+
+    /** Mirrors AchievementService.ACTIVITY_ZONE — streaks are counted in Moscow days. */
+    private static final ZoneId ACTIVITY_ZONE = ZoneId.of("Europe/Moscow");
 
     private AchievementProgress buildProgress(String key, int progress, Long unlockedAt) {
         AchievementProgress p = new AchievementProgress();
@@ -148,12 +153,16 @@ class AchievementServiceTest {
         when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
         when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
         when(activityDayRepo.countByUserId(USER_ID)).thenReturn(5L);
+        // Dates are relative to today on purpose: currentStreak() only counts a
+        // run that reaches today or yesterday, so fixed calendar dates would
+        // silently start returning 0 as they age past that window.
+        LocalDate today = LocalDate.now(ACTIVITY_ZONE);
         when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(
-                LocalDate.of(2024, 1, 10),
-                LocalDate.of(2024, 1, 9),
-                LocalDate.of(2024, 1, 8),
-                LocalDate.of(2023, 12, 20),
-                LocalDate.of(2023, 12, 19)
+                today,
+                today.minusDays(1),
+                today.minusDays(2),
+                today.minusDays(30),
+                today.minusDays(31)
         ));
         when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
         when(progressRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -167,6 +176,72 @@ class AchievementServiceTest {
                 .findFirst().orElseThrow();
         assertThat(weekStreak.getProgress()).isEqualTo(3);
         assertThat(weekStreak.getUnlockedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("currentStreak: counts the run when it reaches today")
+    void currentStreak_countsRunEndingToday() {
+        LocalDate today = LocalDate.now(ACTIVITY_ZONE);
+        when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(
+                today, today.minusDays(1), today.minusDays(2)
+        ));
+
+        assertThat(achievementService.currentStreak(USER_ID)).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("currentStreak: a run ending yesterday is still alive — today just isn't recorded yet")
+    void currentStreak_countsRunEndingYesterday() {
+        LocalDate yesterday = LocalDate.now(ACTIVITY_ZONE).minusDays(1);
+        when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(
+                yesterday, yesterday.minusDays(1)
+        ));
+
+        assertThat(achievementService.currentStreak(USER_ID)).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("currentStreak: resets to 0 once the run ended before yesterday")
+    void currentStreak_resetsWhenRunIsBroken() {
+        LocalDate lastActive = LocalDate.now(ACTIVITY_ZONE).minusDays(2);
+        when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(
+                lastActive, lastActive.minusDays(1), lastActive.minusDays(2)
+        ));
+
+        assertThat(achievementService.currentStreak(USER_ID)).isZero();
+    }
+
+    @Test
+    @DisplayName("currentStreak: returns 0 for a user with no activity at all")
+    void currentStreak_returnsZeroWithoutActivity() {
+        when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of());
+
+        assertThat(achievementService.currentStreak(USER_ID)).isZero();
+    }
+
+    @Test
+    @DisplayName("currentStreak: a lapsed streak drops to 0 but never revokes the reward it earned")
+    void currentStreak_lapsedRunKeepsExistingUnlock() {
+        LocalDate lastActive = LocalDate.now(ACTIVITY_ZONE).minusDays(10);
+        AchievementProgress alreadyUnlocked = new AchievementProgress();
+        alreadyUnlocked.setUserId(USER_ID);
+        alreadyUnlocked.setAchievementKey("week_streak");
+        alreadyUnlocked.setProgress(7);
+        alreadyUnlocked.setUnlockedAt(1_700_000_000_000L);
+
+        when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
+        when(quoteRepo.countDistinctManuallyAddedAuthors(USER_ID)).thenReturn(0L);
+        when(activityDayRepo.countByUserId(USER_ID)).thenReturn(20L);
+        when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(lastActive, lastActive.minusDays(1)));
+        when(progressRepo.findByUserIdAndAchievementKey(USER_ID, "week_streak")).thenReturn(Optional.of(alreadyUnlocked));
+        when(progressRepo.findByUserIdAndAchievementKey(eq(USER_ID), argThat(k -> !"week_streak".equals(k))))
+                .thenReturn(Optional.empty());
+        when(progressRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        achievementService.evaluate(USER_ID);
+
+        assertThat(alreadyUnlocked.getProgress()).isZero();
+        assertThat(alreadyUnlocked.getUnlockedAt()).isEqualTo(1_700_000_000_000L);
     }
 
     @Test

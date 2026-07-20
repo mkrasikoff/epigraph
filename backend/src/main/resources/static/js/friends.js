@@ -59,12 +59,14 @@ async function renderFriendsView() {
  */
 async function refreshFriendsLists() {
     try {
-        const [requests, friends] = await Promise.all([
+        const [requests, outgoing, friends] = await Promise.all([
             Api.getFriendRequests(),
+            Api.getOutgoingFriendRequests(),
             Api.getFriends()
         ]);
 
         renderFriendRequests(requests);
+        renderOutgoingRequests(outgoing);
         renderFriendsList(friends);
     } catch (e) {
         console.error('Friends load error:', e);
@@ -81,6 +83,20 @@ function renderFriendRequests(requests) {
     // "Requests" heading reads as a bug rather than as a calm zero state.
     section.style.display = requests.length ? '' : 'none';
     list.innerHTML = requests.map(friendRowMarkup).join('');
+}
+
+/**
+ * Requests the user has sent and that are still unanswered. Without this the
+ * only trace of a sent request was the button state on the searched-for user,
+ * which you had to find again to see or cancel it.
+ */
+function renderOutgoingRequests(outgoing) {
+    const section = document.getElementById('friends-outgoing-section');
+    const list = document.getElementById('friends-outgoing-list');
+    if (!section || !list) return;
+
+    section.style.display = outgoing.length ? '' : 'none';
+    list.innerHTML = outgoing.map(friendRowMarkup).join('');
 }
 
 function renderFriendsList(friends) {
@@ -348,27 +364,27 @@ function friendProfileMetaMarkup(profile) {
     const items = [];
 
     if (profile.memberSince) {
-        // Same locale convention as the Quote-of-the-day date (qod.js) — never a
-        // hardcoded 'ru-RU', the app is bilingual.
-        const locale = currentLanguage === 'ru' ? 'ru-RU' : 'en-US';
-        const since = new Date(profile.memberSince).toLocaleDateString(locale, { month: 'long', year: 'numeric' });
         items.push([
             '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-            `${t('friendProfileSincePrefix')} ${since}`
+            `${t('friendProfileSincePrefix')} ${monthYearGenitive(profile.memberSince)}`
         ]);
     }
 
     // Flame and quote-mark are the app's own glyphs — the flame is the
     // "week_streak" achievement icon, the quote mark is the header logo's.
     // Hand-drawing lookalikes here is how the quote icon ended up broken once.
-    items.push([
-        '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-        t('friendProfileStreak', { count: profile.currentStreak })
-    ]);
+    // A broken streak reads 0 (see AchievementService.currentStreak) and is
+    // dropped rather than shown, same as on your own account card.
+    if (profile.currentStreak > 0) {
+        items.push([
+            '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+            t('friendProfileStreak', { count: profile.currentStreak, word: dayCountWord(profile.currentStreak) })
+        ]);
+    }
 
     items.push([
         '<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>',
-        t('friendProfileQuotes', { count: profile.quoteCount })
+        t('friendProfileQuotes', { count: profile.quoteCount, word: quoteCountWord(profile.quoteCount) })
     ]);
 
     return items.map(([path, label]) => `
