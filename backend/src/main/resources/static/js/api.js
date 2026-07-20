@@ -175,7 +175,73 @@ const Api = {
         fetch('/api/achievements/appearance-toggle', {
             method: 'POST',
             headers: authHeaders()
-        })
+        }),
+
+    /**
+     * The authenticated user's accepted friends (TASK-129).
+     * @returns {Promise<Object[]>} User summaries, each with a `relation` field.
+     */
+    getFriends: () =>
+        fetch(FRIENDS_API, { headers: authHeaders() }).then(r => r.json()),
+
+    /**
+     * Friend requests awaiting the authenticated user's answer.
+     * @returns {Promise<Object[]>} User summaries of the requesters.
+     */
+    getFriendRequests: () =>
+        fetch(`${FRIENDS_API}/requests`, { headers: authHeaders() }).then(r => r.json()),
+
+    /**
+     * Searches users by display name. The backend returns nothing for queries
+     * shorter than 2 characters, so callers don't need to pre-filter.
+     * @param {string} query
+     * @returns {Promise<Object[]>} User summaries, each with a `relation` field.
+     */
+    searchUsers: (query) =>
+        fetch(`${FRIENDS_API}/search?q=${encodeURIComponent(query)}`, { headers: authHeaders() })
+            .then(r => r.json()),
+
+    /**
+     * Another user's public profile — no email, no quotes. Readable for any
+     * signed-in user, since it's how you decide whether to send a request.
+     * @param {number|string} id
+     * @returns {Promise<Response>}
+     */
+    getFriendProfile: (id) =>
+        fetch(`${FRIENDS_API}/${id}/profile`, { headers: authHeaders() }),
+
+    /**
+     * Sends a friend request. If that user had already requested the caller,
+     * the backend collapses the two into an accepted friendship.
+     * @param {number|string} id
+     * @returns {Promise<Response>}
+     */
+    sendFriendRequest: (id) =>
+        fetch(`${FRIENDS_API}/requests/${id}`, { method: 'POST', headers: authHeaders() }),
+
+    /**
+     * Accepts a pending request received from the given user.
+     * @param {number|string} id
+     * @returns {Promise<Response>}
+     */
+    acceptFriendRequest: (id) =>
+        fetch(`${FRIENDS_API}/requests/${id}/accept`, { method: 'POST', headers: authHeaders() }),
+
+    /**
+     * Declines a pending request received from the given user.
+     * @param {number|string} id
+     * @returns {Promise<Response>}
+     */
+    declineFriendRequest: (id) =>
+        fetch(`${FRIENDS_API}/requests/${id}`, { method: 'DELETE', headers: authHeaders() }),
+
+    /**
+     * Removes a friend, or cancels the caller's own still-pending request.
+     * @param {number|string} id
+     * @returns {Promise<Response>}
+     */
+    removeFriend: (id) =>
+        fetch(`${FRIENDS_API}/${id}`, { method: 'DELETE', headers: authHeaders() })
 
 };
 

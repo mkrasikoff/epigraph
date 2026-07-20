@@ -214,6 +214,21 @@ function applyAchievementStatusesToUi() {
 }
 
 /**
+ * Returns equipped-badge pill markup for *any* user, not just the signed-in
+ * one — the friends screen and a friend's profile (TASK-129) render someone
+ * else's badge, so they can't use renderBadgePill()'s single fixed element.
+ * Returns '' for a user who hasn't unlocked a badge yet.
+ * @param {string} [badgeKey]
+ * @returns {string}
+ */
+function badgePillMarkup(badgeKey) {
+    const rank = badgeKey ? BADGE_REWARD_ORDER.indexOf(badgeKey) : -1;
+    if (rank === -1) return '';
+
+    return `<span class="badge-pill badge-pill--r${rank}">${escHtml(t(badgeLabelKey(badgeKey)))}</span>`;
+}
+
+/**
  * Renders the equipped-badge pill next to the username using the rank
  * (index into BADGE_REWARD_ORDER) to pick one of 9 saturation levels
  * (.badge-pill--r0 .. --r8, see styles.css). Hidden entirely until the

@@ -153,12 +153,14 @@ public class AchievementService {
 
     /**
      * Length of the current run of consecutive calendar days with activity,
-     * counted backward from the most recently recorded day. Only feeds
-     * "week_streak"/Закат — the day-count badge ladder deliberately stays a
-     * total, gap-tolerant count (see AchievementCatalog), so it must not use
-     * this. Returns 0 for a user with no activity rows.
+     * counted backward from the most recently recorded day. Feeds
+     * "week_streak"/Закат and the "дней подряд" line on a friend's profile
+     * (TASK-129) — the day-count badge ladder deliberately stays a total,
+     * gap-tolerant count (see AchievementCatalog), so it must not use this.
+     * Returns 0 for a user with no activity rows.
      */
-    private int currentStreak(Long userId) {
+    @Transactional(readOnly = true)
+    public int currentStreak(Long userId) {
         List<LocalDate> dates = activityDayRepo.findActivityDatesDesc(userId);
         if (dates.isEmpty()) return 0;
 

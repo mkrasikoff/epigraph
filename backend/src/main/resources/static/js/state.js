@@ -34,6 +34,7 @@
 
 const API = '/api/quotes';
 const AUTH_API = '/api/auth';
+const FRIENDS_API = '/api/friends';
 
 const TOAST_DISPLAY_DURATION_MS = 2500;
 const TOAST_FADE_DURATION_MS = 300;
