@@ -27,6 +27,11 @@ public final class ApiCodes {
     public static final String BAD_REQUEST = "BAD_REQUEST";
     public static final String QUOTE_LIMIT_EXCEEDED = "QUOTE_LIMIT_EXCEEDED";
     public static final String INVALID_OR_USED_CODE = "INVALID_OR_USED_CODE";
+    public static final String CANNOT_FRIEND_SELF = "CANNOT_FRIEND_SELF";
+    public static final String ALREADY_FRIENDS = "ALREADY_FRIENDS";
+    public static final String REQUEST_ALREADY_SENT = "REQUEST_ALREADY_SENT";
+    public static final String FRIEND_REQUEST_NOT_FOUND = "FRIEND_REQUEST_NOT_FOUND";
+    public static final String FRIENDSHIP_NOT_FOUND = "FRIENDSHIP_NOT_FOUND";
 
     // Success confirmations (not displayed to the client — see class doc)
     public static final String PASSWORD_CHANGED = "PASSWORD_CHANGED";
@@ -35,6 +40,10 @@ public final class ApiCodes {
     public static final String LANGUAGE_UPDATED = "LANGUAGE_UPDATED";
     public static final String THEME_UPDATED = "THEME_UPDATED";
     public static final String PLUS_ACTIVATED = "PLUS_ACTIVATED";
+    public static final String FRIEND_REQUEST_SENT = "FRIEND_REQUEST_SENT";
+    public static final String FRIEND_REQUEST_ACCEPTED = "FRIEND_REQUEST_ACCEPTED";
+    public static final String FRIEND_REQUEST_DECLINED = "FRIEND_REQUEST_DECLINED";
+    public static final String FRIEND_REMOVED = "FRIEND_REMOVED";
 
     private ApiCodes() {
     }

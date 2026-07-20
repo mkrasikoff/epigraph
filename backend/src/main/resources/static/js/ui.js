@@ -475,10 +475,18 @@ function switchView(id) {
         return;
     }
 
+    // Leaving a friend's profile by any route (back button, nav tab, account
+    // menu) has to give the viewer their own theme and chrome back. Idempotent
+    // when no friend page is open.
+    exitFriendProfileMode();
+
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('view-' + id).classList.add('active');
-    document.getElementById('tab-' + id).classList.add('active');
+    // Views reached from the account menu rather than the nav bar (Friends —
+    // TASK-129) deliberately have no tab; moveNavIndicator() already handles
+    // "no active tab" by hiding the indicator.
+    document.getElementById('tab-' + id)?.classList.add('active');
     moveNavIndicator();
 
     if (id !== 'qod') document.body.classList.remove('no-scroll');
@@ -524,9 +532,10 @@ function switchView(id) {
         loadAppVersion();
         moveAllToggleIndicators();
     }
+    if (id === 'friends') renderFriendsView();
 
     // Update URL hash to reflect the current section (enables back button and bookmarking)
-    const hashMap = { qod: '#today', list: '#all', add: '#add', settings: '#settings' };
+    const hashMap = { qod: '#today', list: '#all', add: '#add', settings: '#settings', friends: '#friends' };
     const newHash = hashMap[id] || '#today';
     if (window.location.hash !== newHash) {
         window.history.pushState(null, '', newHash);

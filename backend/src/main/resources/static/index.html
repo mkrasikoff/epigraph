@@ -402,6 +402,15 @@
                             </div>
                         </div>
                     </div>
+                    <button class="account-menu-item" role="menuitem" onclick="closeAccountMenu(); switchView('friends');">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        <span data-i18n="accountMenuFriends">Друзья</span>
+                    </button>
                     <button class="account-menu-item" role="menuitem" onclick="logout()">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -1157,6 +1166,52 @@
                 </div>
             </section>
         </div>
+
+        <!-- FRIENDS (TASK-129) — reached from the account menu, not the nav tabs -->
+        <div class="view" id="view-friends">
+            <section class="friends-section">
+                <h2 data-i18n="friendsTitle">Друзья</h2>
+
+                <div class="friends-search">
+                    <svg class="friends-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" id="friends-search-input" autocomplete="off"
+                           placeholder="Поиск по имени" data-i18n-placeholder="friendsSearchPlaceholder"
+                           oninput="onFriendsSearchInput(this.value)">
+                </div>
+                <div id="friends-search-results" class="friends-block"></div>
+
+                <div class="friends-block" id="friends-requests-section" style="display:none">
+                    <div class="friends-block-title" data-i18n="friendsRequestsTitle">Заявки</div>
+                    <div id="friends-requests-list"></div>
+                </div>
+
+                <div class="friends-block">
+                    <div class="friends-block-title" data-i18n="friendsListTitle">Мои друзья</div>
+                    <div id="friends-list"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- FRIEND PROFILE (TASK-129) — immersive: global header/nav are hidden and the
+             page is painted in the friend's theme style, in the viewer's own light/dark
+             mode. Body is rendered by renderFriendProfile() in friends.js. -->
+        <div class="view" id="view-friend-profile">
+            <section class="friend-profile-section">
+                <div class="friend-profile-topbar">
+                    <button class="friend-profile-back" onclick="closeFriendProfile()"
+                            aria-label="Назад" data-i18n-aria="friendsBackAria">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="19" y1="12" x2="5" y2="12"/>
+                            <polyline points="12 19 5 12 12 5"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="friend-profile-body"></div>
+            </section>
+        </div>
     </main>
 
 </div>
@@ -1191,6 +1246,7 @@
 <script src="/js/session.js"></script>
 <script src="/js/auth.js"></script>
 <script src="/js/account.js"></script>
+<script src="/js/friends.js"></script>
 <script src="/js/tags.js"></script>
 <script src="/js/notifications.js"></script>
 <script src="/js/quotes-edit.js"></script>
