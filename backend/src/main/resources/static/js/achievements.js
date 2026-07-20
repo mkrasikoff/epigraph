@@ -209,8 +209,35 @@ function applyAchievementStatusesToUi() {
         summaryEl.textContent = t('achievementsSummary', {unlocked, total: achievementStatuses.length});
     }
 
+    renderOwnStreak();
     renderBadgePill();
     updateThemeStyleGrid();
+}
+
+/**
+ * Shows the user's own activity streak on the settings account card (TASK-129) —
+ * previously it was visible only to a friend looking at your profile, never to
+ * you.
+ *
+ * The number is read straight off the "week_streak" achievement's progress,
+ * which upsertProgress() stores *uncapped* (it is not clamped to the 7-day
+ * threshold), so it is the real streak. That keeps this free: the value is
+ * already recomputed at most once a day inside AchievementService.evaluate(),
+ * and this payload is already fetched when Settings opens — no extra request,
+ * and nothing walks the user's whole activity history on a hot path.
+ *
+ * Hidden at zero rather than shown as "0 дней подряд", which reads as a
+ * reproach on a fresh account.
+ */
+function renderOwnStreak() {
+    const item = document.getElementById('settings-account-streak-item');
+    if (!item) return;
+
+    const streak = achievementStatuses?.find(a => a.key === 'week_streak')?.progress || 0;
+
+    item.style.display = streak > 0 ? '' : 'none';
+    document.getElementById('settings-account-streak').textContent =
+        t('friendProfileStreak', { count: streak, word: dayCountWord(streak) });
 }
 
 /**

@@ -3328,7 +3328,10 @@ body.modal-lock-scroll {
     border-radius: var(--radius-lg);
     color: var(--color-text);
     font-family: var(--font-body);
-    font-size: var(--text-sm);
+    /* Never below 1rem: iOS Safari zooms the page in when a focused input's
+       font-size is under 16px. Same max() guard as .search-input on the quotes
+       list — var(--text-sm) alone clamps down to 0.875rem on narrow screens. */
+    font-size: max(var(--text-sm), 1rem);
     transition: border-color var(--transition);
 }
 

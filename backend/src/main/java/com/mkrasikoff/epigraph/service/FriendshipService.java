@@ -145,6 +145,19 @@ public class FriendshipService {
     }
 
     /**
+     * Every user the given user has an outstanding request out to — so they can
+     * see and cancel what they've already sent instead of re-sending blindly.
+     */
+    @Transactional(readOnly = true)
+    public List<UserSummaryResponse> listOutgoingRequests(Long userId) {
+        List<Long> addresseeIds = friendshipRepository.findByRequesterIdAndStatus(userId, Friendship.STATUS_PENDING).stream()
+                .map(Friendship::getAddresseeId)
+                .toList();
+
+        return toSummaries(addresseeIds, RelationStatus.OUTGOING);
+    }
+
+    /**
      * Finds users to befriend by display name. Usernames are not unique and are
      * not identifiers, so this is a plain case-insensitive substring match,
      * capped by the repository; the caller disambiguates same-named people by

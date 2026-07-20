@@ -150,8 +150,8 @@ public class AuthService {
      * the address.
      *
      * @param suggestedUsername raw display name pulled from the provider; sanitized here to the
-     *                          username policy (may resolve to null when nothing usable remains,
-     *                          in which case the client shows a fallback).
+     *                          username policy, falling back to the email-derived name when
+     *                          nothing usable remains (e.g. a fully Cyrillic display name).
      * @param language          the guest-selected UI language carried over from the client (the
      *                          {@code epigraph_lang} cookie, present on the OAuth callback). "en"
      *                          seeds an English account + English onboarding quotes; anything else
@@ -168,7 +168,13 @@ public class AuthService {
         user.setEmail(email);
         user.setProvider(provider);
         user.setProviderId(providerId);
-        user.setUsername(sanitizeUsername(suggestedUsername));
+        // Falling back to the email-derived name matters more than it looks: every
+        // user must end up findable in friend search (TASK-129), and SQL LIKE never
+        // matches NULL, so a null username makes an account permanently unsearchable.
+        // A provider display name in Cyrillic sanitizes down to nothing, which makes
+        // this the common path for Google sign-ins here, not an edge case.
+        String username = sanitizeUsername(suggestedUsername);
+        user.setUsername(username != null ? username : deriveUsername(email));
         user.setCreatedAt(System.currentTimeMillis());
         if ("en".equals(language)) {
             user.setPreferredLanguage("en");
@@ -182,8 +188,8 @@ public class AuthService {
 
     /**
      * Cleans up a name pulled from an OAuth provider so it fits the username constraints
-     * (3–20 chars, letters/digits/underscore only). Returns null when nothing usable is left —
-     * the client will then show a fallback.
+     * (3–20 chars, letters/digits/underscore only). Returns null when nothing usable is left;
+     * the caller substitutes the email-derived name so the account is never left nameless.
      */
     private String sanitizeUsername(String raw) {
         if (raw == null || raw.isBlank()) return null;

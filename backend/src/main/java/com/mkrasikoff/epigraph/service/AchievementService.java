@@ -152,17 +152,29 @@ public class AchievementService {
     }
 
     /**
-     * Length of the current run of consecutive calendar days with activity,
-     * counted backward from the most recently recorded day. Feeds
-     * "week_streak"/Закат and the "дней подряд" line on a friend's profile
-     * (TASK-129) — the day-count badge ladder deliberately stays a total,
-     * gap-tolerant count (see AchievementCatalog), so it must not use this.
-     * Returns 0 for a user with no activity rows.
+     * Length of the run of consecutive calendar days with activity ending
+     * today or yesterday. Returns 0 for a user with no activity rows, and also
+     * for one whose last active day is older than that — the run is finished,
+     * not "current". Feeds "week_streak"/Закат and the "дней подряд" line on a
+     * friend's profile (TASK-129); the day-count badge ladder deliberately
+     * stays a total, gap-tolerant count (see AchievementCatalog), so it must
+     * not use this.
+     *
+     * Dropping back to 0 never revokes a reward: upsertProgress() stamps
+     * unlockedAt once and never clears it, so "Закат" stays unlocked even if
+     * the streak that earned it lapses.
      */
     @Transactional(readOnly = true)
     public int currentStreak(Long userId) {
         List<LocalDate> dates = activityDayRepo.findActivityDatesDesc(userId);
         if (dates.isEmpty()) return 0;
+
+        // A run that ended before yesterday is over, not current — without this
+        // check, someone who stopped months ago keeps reporting the streak they
+        // had back then. Yesterday still counts: today simply hasn't been
+        // recorded yet, and the run can still be continued before the day ends.
+        LocalDate today = LocalDate.now(ACTIVITY_ZONE);
+        if (dates.get(0).isBefore(today.minusDays(1))) return 0;
 
         int streak = 1;
         for (int i = 1; i < dates.size(); i++) {
