@@ -32,6 +32,13 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     List<Friendship> findByRequesterIdAndStatus(Long requesterId, String status);
 
     /**
+     * How many requests await the user's answer, for the header badge. Served by
+     * idx_friendships_addressee, so this stays a cheap counted index scan even
+     * though it runs on every /api/auth/me.
+     */
+    long countByAddresseeIdAndStatus(Long addresseeId, String status);
+
+    /**
      * Every accepted friendship the user is part of, on either side. The caller
      * maps each row to "the other user".
      */

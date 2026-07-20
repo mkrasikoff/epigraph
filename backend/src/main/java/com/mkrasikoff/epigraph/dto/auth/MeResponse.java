@@ -18,4 +18,11 @@ public class MeResponse {
     private String themeStyle;
     private String equippedBadge;
     private boolean plus;
+
+    /**
+     * Неотвеченных входящих заявок в друзья — для значка в шапке (TASK-129).
+     * Это индексированный count по (addressee_id, status), а не обход истории,
+     * поэтому его не жалко считать на каждый вызов /me.
+     */
+    private int pendingFriendRequests;
 }

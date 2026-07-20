@@ -41,6 +41,47 @@ let friendsSearchTimer = null;
 const FRIEND_ICON_USER_PLUS = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>';
 const FRIEND_ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
 
+// =============================================================================
+// PENDING-REQUEST BADGE (TASK-129)
+// A count of live state, not a notification feed: the number *is* how many
+// requests are unanswered, so answering one lowers it on its own and there is
+// no read/unread flag to store anywhere. The header avatar only carries a dot
+// ("something is waiting"); the number itself lives on the Friends row of the
+// account menu, which is where the dot leads.
+// =============================================================================
+/**
+ * Paints the badge from a known count.
+ * @param {number} count
+ */
+function renderFriendRequestsBadge(count) {
+    const dot = document.getElementById('account-badge-dot');
+    if (dot) dot.style.display = count > 0 ? '' : 'none';
+
+    const menuCount = document.getElementById('account-menu-friends-count');
+    if (menuCount) {
+        menuCount.style.display = count > 0 ? '' : 'none';
+        menuCount.textContent = count;
+    }
+}
+
+/**
+ * Re-reads the count from the server. Called when the account menu opens, so
+ * a request that arrived while the tab sat open still shows up without a
+ * reload — and cheaply, since it only runs on an actual user gesture.
+ */
+async function refreshFriendRequestsBadge() {
+    if (isGuest || !currentUser) return;
+
+    try {
+        const requests = await Api.getFriendRequests();
+        renderFriendRequestsBadge(requests.length);
+    } catch (e) {
+        // A failed refresh leaves the last known count on screen — a badge is
+        // not worth a visible error.
+        console.error('Friend request badge refresh error:', e);
+    }
+}
+
 /**
  * Entry point when the Friends view opens (see switchView). The search box is
  * deliberately *not* cleared: the common path here is search → open someone's
@@ -68,6 +109,9 @@ async function refreshFriendsLists() {
         renderFriendRequests(requests);
         renderOutgoingRequests(outgoing);
         renderFriendsList(friends);
+        // Accepting or declining here changes the count, so keep the header in
+        // sync without a second round-trip — we already have the list.
+        renderFriendRequestsBadge(requests.length);
     } catch (e) {
         console.error('Friends load error:', e);
         toast(t('toastError'), 'error');
