@@ -76,4 +76,12 @@ public class Quote {
 
     @Column(name = "imported_at", updatable = false)
     private Long importedAt;
+
+    /**
+     * For a quote saved from a friend's collection (TASK-129): the id of that
+     * friend's source quote. Null for quotes not saved this way. Distinct from
+     * {@link #sharedQuoteId} (a share-link import); see the 021 migration.
+     */
+    @Column(name = "imported_from_quote_id", updatable = false)
+    private Long importedFromQuoteId;
 }

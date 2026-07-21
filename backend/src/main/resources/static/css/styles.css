@@ -1558,6 +1558,19 @@ body.modal-lock-scroll {
     color: var(--color-gold);
 }
 
+/* Saved state of the friend-quote "+" (TASK-129): a settled accent check, no
+   hover/press affordance since saving is idempotent and there's nothing left to
+   do. Kept as a .card-btn so it lines up with the copy button beside it. */
+.card-btn.friend-save-btn--saved {
+    color: var(--color-primary);
+    cursor: default;
+}
+
+.card-btn.friend-save-btn--saved:hover {
+    background: transparent;
+    color: var(--color-primary);
+}
+
 .card-btn.edit:hover {
     background: var(--color-surface-offset);
     color: var(--color-primary);
@@ -3313,6 +3326,19 @@ body.modal-lock-scroll {
    Each option states its consequence, not just its name: the setting ships
    switched on for every account, so the first encounter has to explain what it
    already does rather than leave "favourites only" to interpretation. */
+/* Settings-row icon mirrors the chosen visibility (set in renderQuotesVisibilityRow).
+   Constrained to 15px so it matches the other export-btn icons, since the shared
+   VISIBILITY_ICONS are authored at 17px for the modal. */
+.settings-visibility-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.settings-visibility-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
 .visibility-options {
     display: flex;
     flex-direction: column;

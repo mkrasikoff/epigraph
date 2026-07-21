@@ -5,6 +5,8 @@ import com.mkrasikoff.epigraph.dto.friend.FriendProfileResponse;
 import com.mkrasikoff.epigraph.dto.friend.FriendQuoteResponse;
 import com.mkrasikoff.epigraph.dto.friend.UserSummaryResponse;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
+import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
+import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.exception.QuotesNotVisibleException;
 import com.mkrasikoff.epigraph.model.Friendship;
 import com.mkrasikoff.epigraph.model.Quote;
@@ -15,8 +17,10 @@ import com.mkrasikoff.epigraph.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Two-sided friendships with mutual confirmation (TASK-129). A request is one
@@ -41,6 +45,13 @@ public class FriendshipService {
      * large slice of the user base for no useful signal.
      */
     private static final int MIN_SEARCH_LENGTH = 2;
+
+    /**
+     * Same personal-app quote caps as SharedQuoteService/QuoteService — a saved
+     * friend quote counts against the importer's own limit, Plus raises it.
+     */
+    private static final int FREE_MAX_QUOTES_PER_USER = 1000;
+    private static final int PLUS_MAX_QUOTES_PER_USER = 5000;
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
@@ -258,10 +269,86 @@ public class FriendshipService {
             default -> List.<Quote>of();
         };
 
+        // Which of these the viewer has already saved, in one query, so the "+"
+        // button can render as "saved" without a call per card.
+        Set<Long> savedSourceIds = quotes.isEmpty()
+                ? Set.of()
+                : new HashSet<>(quoteRepository.findSavedSourceIds(userId, quotes.stream().map(Quote::getId).toList()));
+
         return quotes.stream()
                 .map(q -> new FriendQuoteResponse(q.getId(), q.getText(), q.getAuthor(),
-                        q.getSource(), q.getTags(), q.getAdded()))
+                        q.getSource(), q.getTags(), q.getAdded(), savedSourceIds.contains(q.getId())))
                 .toList();
+    }
+
+    /**
+     * Saves a friend's quote into the viewer's own collection (TASK-129).
+     * Reuses the same provenance/limit shape as a share-link import
+     * (SharedQuoteService.importToCollection), but gated by friendship: you must
+     * be accepted friends, and the quote must actually be one the owner shares
+     * with you (so a non-favourite can't be pulled when they share only
+     * favourites). Idempotent — saving the same quote twice is a no-op.
+     */
+    @Transactional
+    public void importFriendQuote(Long importerId, Long quoteId) {
+        Quote source = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new QuoteNotFoundException(quoteId));
+
+        Long ownerId = source.getUserId();
+        if (relationStatus(importerId, ownerId) != RelationStatus.FRIENDS) {
+            throw new QuotesNotVisibleException(ApiCodes.NOT_FRIENDS);
+        }
+
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
+        if (!isSharedWithFriends(owner, source)) {
+            throw new QuotesNotVisibleException(ApiCodes.NOT_FRIENDS);
+        }
+
+        // Idempotent — a second tap (or a stale card) doesn't duplicate.
+        if (quoteRepository.findByImportedFromQuoteIdAndUserId(quoteId, importerId).isPresent()) {
+            return;
+        }
+
+        if (quoteRepository.countByUserId(importerId) >= maxQuotesFor(importerId)) {
+            throw new QuoteLimitExceededException();
+        }
+
+        long now = System.currentTimeMillis();
+        Quote copy = new Quote();
+        copy.setText(source.getText());
+        copy.setAuthor(source.getAuthor());
+        copy.setSource(source.getSource());
+        copy.setTags(source.getTags());
+        copy.setUserId(importerId);
+        copy.setManuallyAdded(false);
+        copy.setAdded(now);
+        copy.setSharedFromUserId(ownerId);
+        copy.setImportedAt(now);
+        copy.setImportedFromQuoteId(quoteId);
+
+        quoteRepository.save(copy);
+    }
+
+    /**
+     * Whether {@code quote} falls within what {@code owner} shares with friends —
+     * everything when 'all', only favourites when 'favorites', nothing otherwise.
+     */
+    private boolean isSharedWithFriends(User owner, Quote quote) {
+        return switch (owner.getQuotesVisibility()) {
+            case User.QUOTES_VISIBLE_ALL -> true;
+            case User.QUOTES_VISIBLE_FAVORITES -> quote.isFav();
+            default -> false;
+        };
+    }
+
+    /**
+     * The importer's per-account quote cap — 5000 for Epigraph Plus, 1000
+     * otherwise. Mirrors SharedQuoteService/QuoteService.
+     */
+    private int maxQuotesFor(Long userId) {
+        boolean plus = userRepository.findById(userId).map(u -> u.getPlusSince() != null).orElse(false);
+        return plus ? PLUS_MAX_QUOTES_PER_USER : FREE_MAX_QUOTES_PER_USER;
     }
 
     /**

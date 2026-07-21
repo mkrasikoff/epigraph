@@ -19,7 +19,8 @@
  *
  * Provides (globals): renderFriendsView(), onFriendsSearchInput(),
  * friendAction(), openFriendProfile(), closeFriendProfile(),
- * exitFriendProfileMode(), showMoreFriendQuotes(), copyFriendQuote().
+ * exitFriendProfileMode(), showMoreFriendQuotes(), copyFriendQuote(),
+ * saveFriendQuote().
  */
 
 const FRIENDS_SEARCH_DEBOUNCE_MS = 300;
@@ -118,10 +119,32 @@ async function refreshFriendsLists() {
     }
 }
 
+/**
+ * Last rendered signature per section. Entering #friends (including coming back
+ * from a friend's profile) refetches all three lists for freshness, but the
+ * common case is that nothing changed — re-writing identical innerHTML would
+ * replay every row's entrance animation, the "flicker" that shows on every
+ * visit. So a section is only re-rendered when its data actually differs.
+ */
+const friendsSectionSignatures = { requests: null, outgoing: null, friends: null };
+
+/**
+ * A stable key for a list's rendered output. Language is part of it because the
+ * row markup contains translated button labels — a language switch must
+ * invalidate the cache even though the raw data is unchanged.
+ */
+function friendsSectionSignature(data) {
+    return currentLanguage + '|' + JSON.stringify(data);
+}
+
 function renderFriendRequests(requests) {
     const section = document.getElementById('friends-requests-section');
     const list = document.getElementById('friends-requests-list');
     if (!section || !list) return;
+
+    const signature = friendsSectionSignature(requests);
+    if (signature === friendsSectionSignatures.requests) return;
+    friendsSectionSignatures.requests = signature;
 
     // The whole section disappears when there's nothing to answer — an empty
     // "Requests" heading reads as a bug rather than as a calm zero state.
@@ -139,6 +162,10 @@ function renderOutgoingRequests(outgoing) {
     const list = document.getElementById('friends-outgoing-list');
     if (!section || !list) return;
 
+    const signature = friendsSectionSignature(outgoing);
+    if (signature === friendsSectionSignatures.outgoing) return;
+    friendsSectionSignatures.outgoing = signature;
+
     section.style.display = outgoing.length ? '' : 'none';
     list.innerHTML = outgoing.map(friendRowMarkup).join('');
 }
@@ -146,6 +173,10 @@ function renderOutgoingRequests(outgoing) {
 function renderFriendsList(friends) {
     const list = document.getElementById('friends-list');
     if (!list) return;
+
+    const signature = friendsSectionSignature(friends);
+    if (signature === friendsSectionSignatures.friends) return;
+    friendsSectionSignatures.friends = signature;
 
     list.innerHTML = friends.length
         ? friends.map(friendRowMarkup).join('')
@@ -488,12 +519,58 @@ function renderFriendQuoteCard(quote, index) {
               ${quote.source ? `<div class="quote-card-source">${escHtml(quote.source)}</div>` : ''}
             </div>
             <div class="quote-card-actions">
+              ${friendSaveButtonMarkup(quote)}
               <button class="card-btn" onclick="copyFriendQuote(${quote.id})" aria-label="${t('ariaCopy')}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               </button>
             </div>
           </div>
         </article>`;
+}
+
+const FRIEND_SAVE_ICON_PLUS = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+const FRIEND_SAVE_ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+
+/**
+ * Save-to-my-collection control for a friend's quote. A clickable "+" when not
+ * yet saved; once saved (from the payload's alreadySaved, or after a save) it
+ * becomes a non-interactive check — saving is idempotent, so there's nothing to
+ * do on a second press, and a live control would just invite a no-op.
+ * @param {Object} quote
+ */
+function friendSaveButtonMarkup(quote) {
+    if (quote.alreadySaved) {
+        return `<span class="card-btn friend-save-btn friend-save-btn--saved" title="${t('friendQuoteSavedLabel')}" aria-label="${t('friendQuoteSavedLabel')}">${FRIEND_SAVE_ICON_CHECK}</span>`;
+    }
+    return `<button class="card-btn friend-save-btn" onclick="saveFriendQuote(${quote.id})" aria-label="${t('friendQuoteSaveAria')}">${FRIEND_SAVE_ICON_PLUS}</button>`;
+}
+
+/**
+ * Saves a friend's quote into the viewer's collection, then flips just that
+ * card's button to the saved state. The local copy is marked too, so paging in
+ * more quotes (or any re-render) keeps it saved without a refetch.
+ * @param {number} id
+ */
+async function saveFriendQuote(id) {
+    try {
+        const res = await Api.saveFriendQuote(id);
+        if (!res.ok) {
+            const data = await res.json().catch(() => null);
+            toast(apiErrorMessage(data, 'friendsErrorNotVisible'), 'error');
+            return;
+        }
+
+        const quote = friendQuotes.find(q => q.id === id);
+        if (quote) quote.alreadySaved = true;
+
+        const btn = document.querySelector(`#friend-quotes-grid .quote-card[data-id="${id}"] .friend-save-btn`);
+        if (btn) btn.outerHTML = friendSaveButtonMarkup({ alreadySaved: true });
+
+        toast(t('friendQuoteSavedToast'));
+    } catch (e) {
+        console.error('Save friend quote error:', e);
+        toast(t('toastError'), 'error');
+    }
 }
 
 /** Copies a friend's quote. A separate handler from copyQuote() because that

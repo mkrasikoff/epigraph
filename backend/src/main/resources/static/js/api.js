@@ -239,6 +239,14 @@ const Api = {
         fetch(`${FRIENDS_API}/${id}/quotes`, { headers: authHeaders() }),
 
     /**
+     * Saves a friend's quote into the caller's own collection. Idempotent.
+     * @param {number|string} quoteId - The friend's source quote id.
+     * @returns {Promise<Response>}
+     */
+    saveFriendQuote: (quoteId) =>
+        fetch(`${FRIENDS_API}/quotes/${quoteId}/save`, { method: 'POST', headers: authHeaders() }),
+
+    /**
      * Sends a friend request. If that user had already requested the caller,
      * the backend collapses the two into an accepted friendship.
      * @param {number|string} id

@@ -767,13 +767,17 @@ function quotesVisibilityLabelKey(value) {
     return 'quotesVisibility' + value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-/** Paints the current choice onto the settings row. */
+/** Paints the current choice onto the settings row — label and its icon, so the
+ *  row mirrors the modal instead of always showing a fixed eye. */
 function renderQuotesVisibilityRow() {
     const valueEl = document.getElementById('settings-quotes-visibility-value');
     if (!valueEl) return;
 
     const current = currentUser?.quotesVisibility || 'favorites';
     valueEl.textContent = t(quotesVisibilityLabelKey(current));
+
+    const iconEl = document.getElementById('settings-quotes-visibility-icon');
+    if (iconEl) iconEl.innerHTML = VISIBILITY_ICONS[current];
 }
 
 /** Opens the picker. Each option carries its consequence, not just its name. */
