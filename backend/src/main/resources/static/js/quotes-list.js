@@ -265,22 +265,78 @@ function initExpandableCards(grid = document.getElementById('quotes-grid')) {
         if (!isClipped && !isExpanded) return;
 
         if (isExpanded) {
-            card.classList.remove('is-expanded');
+            setCardExpanded(card, false);
             if (hint) hint.textContent = t('expandHintOpen');
         } else {
             document.querySelectorAll('.quote-card.is-expanded').forEach(c => {
-                c.classList.remove('is-expanded');
+                setCardExpanded(c, false);
                 const h = c.querySelector('.quote-card-expand-hint');
                 if (h) h.textContent = t('expandHintOpen');
             });
 
-            card.classList.add('is-expanded');
+            setCardExpanded(card, true);
 
             if (hint) hint.textContent = t('expandHintClose');
 
             card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
         }
     });
+}
+
+/**
+ * Toggles a card's expanded state, animating the height between the clamped and
+ * full text instead of snapping (TASK-129). Line-clamp can't be transitioned,
+ * so this is a FLIP: measure the wrap before and after the class flip, then
+ * transition max-height from one to the other. Measuring the real end height
+ * (rather than transitioning to a fixed large max-height) is what keeps a short
+ * quote from finishing in a blink while a long one crawls.
+ *
+ * Honours prefers-reduced-motion by skipping straight to the final state.
+ * @param {HTMLElement} card
+ * @param {boolean} expand
+ */
+function setCardExpanded(card, expand) {
+    const wrap = card.querySelector('.quote-card-text-wrap');
+
+    if (!wrap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        card.classList.toggle('is-expanded', expand);
+        card.classList.toggle('is-raised', expand);
+        return;
+    }
+
+    const startHeight = wrap.offsetHeight;
+    let endHeight;
+
+    if (expand) {
+        // Unclamp now so the text is at full height, then grow max-height up to
+        // it. The raised background/shadow fades in over the same beat.
+        card.classList.add('is-expanded', 'is-raised');
+        endHeight = wrap.offsetHeight;
+    } else {
+        // Drop the raise immediately so the background fades out together with
+        // the shrinking height. Measure the clamped target, but keep the text
+        // unclamped during the shrink — reapplying the clamp now would collapse
+        // the content instantly and leave max-height nothing to animate. The
+        // clamp is restored at transitionend instead.
+        card.classList.remove('is-raised');
+        card.classList.remove('is-expanded');
+        endHeight = wrap.offsetHeight;
+        card.classList.add('is-expanded');
+    }
+
+    wrap.style.overflow = 'hidden';
+    wrap.style.maxHeight = startHeight + 'px';
+    void wrap.offsetHeight; // force the start height to paint before transitioning
+    wrap.style.transition = 'max-height 460ms cubic-bezier(0.22, 1, 0.36, 1)';
+    wrap.style.maxHeight = endHeight + 'px';
+
+    wrap.addEventListener('transitionend', function cleanup() {
+        if (!expand) card.classList.remove('is-expanded');
+        wrap.style.transition = '';
+        wrap.style.maxHeight = '';
+        wrap.style.overflow = '';
+        wrap.removeEventListener('transitionend', cleanup);
+    }, { once: true });
 }
 
 /**
