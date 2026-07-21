@@ -25,4 +25,10 @@ public class MeResponse {
      * поэтому его не жалко считать на каждый вызов /me.
      */
     private int pendingFriendRequests;
+
+    /**
+     * Кому видны цитаты пользователя: none / favorites / all (TASK-129).
+     * Нужен настройкам, чтобы отрисовать текущий выбор.
+     */
+    private String quotesVisibility;
 }

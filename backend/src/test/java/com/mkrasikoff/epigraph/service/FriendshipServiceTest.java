@@ -2,9 +2,12 @@ package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.dto.achievement.AchievementStatusResponse;
 import com.mkrasikoff.epigraph.dto.friend.FriendProfileResponse;
+import com.mkrasikoff.epigraph.dto.friend.FriendQuoteResponse;
 import com.mkrasikoff.epigraph.dto.friend.UserSummaryResponse;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
+import com.mkrasikoff.epigraph.exception.QuotesNotVisibleException;
 import com.mkrasikoff.epigraph.model.Friendship;
+import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.FriendshipRepository;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
@@ -444,5 +447,121 @@ class FriendshipServiceTest {
         assertThat(FriendProfileResponse.class.getDeclaredFields())
                 .extracting(java.lang.reflect.Field::getName)
                 .doesNotContain("email", "quotes");
+    }
+
+    private Quote quote(Long id, String text) {
+        Quote q = new Quote();
+        q.setId(id);
+        q.setText(text);
+        q.setAuthor("Author");
+        q.setUserId(OTHER);
+        q.setAdded(1000L);
+        return q;
+    }
+
+    private User sharingUser(String visibility) {
+        User u = user(OTHER, "anna");
+        u.setQuotesVisibility(visibility);
+        return u;
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: refuses a stranger even when the owner shares everything")
+    void listFriendQuotes_refusesNonFriend() {
+        assertThatThrownBy(() -> friendshipService.listFriendQuotes(ME, OTHER))
+                .isInstanceOf(QuotesNotVisibleException.class)
+                .hasMessage(ApiCodes.NOT_FRIENDS);
+
+        verify(quoteRepository, never()).findByUserId(any());
+        verify(quoteRepository, never()).findByUserIdAndFavTrue(any());
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: refuses someone with only a pending request")
+    void listFriendQuotes_refusesPendingRequester() {
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(pending(ME, OTHER)));
+
+        assertThatThrownBy(() -> friendshipService.listFriendQuotes(ME, OTHER))
+                .isInstanceOf(QuotesNotVisibleException.class)
+                .hasMessage(ApiCodes.NOT_FRIENDS);
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: a friend who shares nothing gets an empty list, not a refusal")
+    void listFriendQuotes_returnsEmptyWhenVisibilityNone() {
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_NONE)));
+
+        assertThat(friendshipService.listFriendQuotes(ME, OTHER)).isEmpty();
+
+        // Refusing access and having nothing to show are different answers; only
+        // the first one throws.
+        verify(quoteRepository, never()).findByUserId(any());
+        verify(quoteRepository, never()).findByUserIdAndFavTrue(any());
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: a friend gets only favourites when that is the setting")
+    void listFriendQuotes_returnsFavoritesOnly() {
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_FAVORITES)));
+        when(quoteRepository.findByUserIdAndFavTrue(OTHER)).thenReturn(List.of(quote(1L, "Favourited")));
+
+        List<FriendQuoteResponse> result = friendshipService.listFriendQuotes(ME, OTHER);
+
+        assertThat(result).extracting(FriendQuoteResponse::getText).containsExactly("Favourited");
+        verify(quoteRepository, never()).findByUserId(any());
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: a friend gets the whole collection when sharing is open")
+    void listFriendQuotes_returnsAllQuotes() {
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_ALL)));
+        when(quoteRepository.findByUserId(OTHER)).thenReturn(List.of(quote(1L, "One"), quote(2L, "Two")));
+
+        assertThat(friendshipService.listFriendQuotes(ME, OTHER)).hasSize(2);
+        verify(quoteRepository, never()).findByUserIdAndFavTrue(any());
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: works when the friendship was recorded in the other direction")
+    void listFriendQuotes_worksWhenFriendshipIsReversed() {
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.empty());
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(OTHER, ME)).thenReturn(Optional.of(accepted(OTHER, ME)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_ALL)));
+        when(quoteRepository.findByUserId(OTHER)).thenReturn(List.of(quote(1L, "One")));
+
+        assertThat(friendshipService.listFriendQuotes(ME, OTHER)).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: the quote payload carries no owner id or fav flag")
+    void listFriendQuotes_payloadHasNoOwnerFields() {
+        assertThat(FriendQuoteResponse.class.getDeclaredFields())
+                .extracting(java.lang.reflect.Field::getName)
+                .doesNotContain("userId", "fav");
+    }
+
+    @Test
+    @DisplayName("getProfile: a stranger is not told how much the user shares")
+    void getProfile_hidesVisibilityFromNonFriend() {
+        User target = sharingUser(User.QUOTES_VISIBLE_NONE);
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(target));
+        when(achievementService.getStatusForUser(OTHER)).thenReturn(List.of());
+
+        assertThat(friendshipService.getProfile(ME, OTHER).getQuotesVisibility()).isNull();
+    }
+
+    @Test
+    @DisplayName("getProfile: a friend is told how much is shared, so the page can pick its state")
+    void getProfile_exposesVisibilityToFriend() {
+        User target = sharingUser(User.QUOTES_VISIBLE_FAVORITES);
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(target));
+        when(achievementService.getStatusForUser(OTHER)).thenReturn(List.of());
+
+        assertThat(friendshipService.getProfile(ME, OTHER).getQuotesVisibility())
+                .isEqualTo(User.QUOTES_VISIBLE_FAVORITES);
     }
 }

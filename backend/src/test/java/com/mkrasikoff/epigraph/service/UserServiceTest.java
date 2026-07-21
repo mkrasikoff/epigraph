@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -282,6 +283,35 @@ class UserServiceTest {
                 .hasMessageContaining("USER_NOT_FOUND");
 
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateQuotesVisibility: saves the chosen visibility")
+    void updateQuotesVisibility_savesValue() {
+        User user = new User();
+        user.setId(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        userService.updateQuotesVisibility(1L, User.QUOTES_VISIBLE_ALL);
+
+        assertThat(user.getQuotesVisibility()).isEqualTo(User.QUOTES_VISIBLE_ALL);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("updateQuotesVisibility: throws when the user is missing")
+    void updateQuotesVisibility_throwsWhenUserMissing() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.updateQuotesVisibility(1L, User.QUOTES_VISIBLE_NONE))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(ApiCodes.USER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("new User: defaults to sharing only favourites with friends")
+    void newUser_defaultsToFavoritesVisibility() {
+        assertThat(new User().getQuotesVisibility()).isEqualTo(User.QUOTES_VISIBLE_FAVORITES);
     }
 
     @Test

@@ -146,6 +146,18 @@ const Api = {
         }),
 
     /**
+     * Updates how much of the user's collection an accepted friend may see.
+     * @param {'none'|'favorites'|'all'} quotesVisibility
+     * @returns {Promise<Response>}
+     */
+    updateQuotesVisibility: (quotesVisibility) =>
+        fetch('/api/user/me/quotes-visibility', {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ quotesVisibility })
+        }),
+
+    /**
      * Activates an Epigraph Plus redeem code for the authenticated user (TASK-131).
      * @param {string} code
      * @returns {Promise<Response>}
@@ -216,6 +228,15 @@ const Api = {
      */
     getFriendProfile: (id) =>
         fetch(`${FRIENDS_API}/${id}/profile`, { headers: authHeaders() }),
+
+    /**
+     * A friend's quotes — how many come back depends on their own visibility
+     * setting. 403 when the caller is not an accepted friend.
+     * @param {number|string} id
+     * @returns {Promise<Response>}
+     */
+    getFriendQuotes: (id) =>
+        fetch(`${FRIENDS_API}/${id}/quotes`, { headers: authHeaders() }),
 
     /**
      * Sends a friend request. If that user had already requested the caller,

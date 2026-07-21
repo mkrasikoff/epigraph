@@ -108,7 +108,7 @@ class FriendControllerTest {
     void profile_returnsProfile() throws Exception {
         when(friendshipService.getProfile(null, OTHER)).thenReturn(new FriendProfileResponse(
                 OTHER, "anna", "cat", "collector", "cosmos", true,
-                1600000000000L, 18, 63L, List.of("explorer"), "FRIENDS"));
+                1600000000000L, 18, 63L, List.of("explorer"), "FRIENDS", "favorites"));
 
         mockMvc.perform(get("/api/friends/2/profile"))
                 .andExpect(status().isOk())
