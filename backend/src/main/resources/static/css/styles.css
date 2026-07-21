@@ -1345,7 +1345,7 @@ body.modal-lock-scroll {
     position: relative;
     overflow: hidden;
     cursor: default;
-    transition: box-shadow var(--transition), transform var(--transition);
+    transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
     animation: cardAppear 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -1438,10 +1438,18 @@ body.modal-lock-scroll {
 
 /* Expanded card — full width in grid, full text visible */
 .quote-card.is-expanded {
-    background: var(--color-surface-2);
-    box-shadow: var(--shadow-lg);
     cursor: default;
     /* No grid-column: 1/-1 — stays in place, just grows down */
+}
+
+/* The raised look is a separate class from is-expanded (which unclamps the
+   text) so the two can be timed independently: on collapse the raise is dropped
+   at the start, fading the background out *with* the height rather than
+   snapping back once the height animation has already finished. Background is
+   in .quote-card's transition list for exactly this. */
+.quote-card.is-raised {
+    background: var(--color-surface-2);
+    box-shadow: var(--shadow-lg);
 }
 
 .quote-card.is-expanded .quote-card-text {
@@ -3313,7 +3321,7 @@ body.modal-lock-scroll {
 
 .visibility-option {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--space-3);
     width: 100%;
     padding: var(--space-3);
@@ -3327,29 +3335,32 @@ body.modal-lock-scroll {
 }
 
 .visibility-option:hover {
-    background: var(--color-surface-2);
+    background: var(--color-surface-offset);
 }
 
+/* A neutral step lighter than the modal (which is itself surface-2), matching
+   the mockup — a warm accent tint here read as too heavy. The accent stays on
+   the icon, which is enough to mark the choice. */
 .visibility-option--selected {
-    background: var(--color-surface-2);
+    background: var(--color-surface-dynamic);
 }
 
-.visibility-option-radio {
+.visibility-option-icon {
     flex-shrink: 0;
-    width: 18px;
-    height: 18px;
-    margin-top: 1px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 1.5px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-text-inverse);
+    transition: background var(--transition), color var(--transition);
 }
 
-.visibility-option--selected .visibility-option-radio {
+.visibility-option--selected .visibility-option-icon {
     background: var(--color-primary);
-    border-color: var(--color-primary);
+    color: var(--color-text-inverse);
 }
 
 .visibility-option-text {
@@ -3802,12 +3813,17 @@ body.friend-immersive header {
     font-size: var(--text-sm);
 }
 
+/* Quotes / notice sit below the profile card; the card owns no bottom margin,
+   so the breathing room lives here (TASK-129). */
+#friend-profile-quotes {
+    margin-top: var(--space-6);
+}
+
 .friend-profile-locked {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--space-2);
-    margin-top: var(--space-4);
     padding: var(--space-6) var(--space-4);
     border: 1px dashed var(--color-border);
     border-radius: var(--radius-xl);

@@ -780,29 +780,45 @@ function renderQuotesVisibilityRow() {
 function showQuotesVisibilityModal() {
     const current = currentUser?.quotesVisibility || 'favorites';
 
-    const options = QUOTES_VISIBILITY_KEYS.map(key => {
+    showModal(t('settingsQuotesVisibilityTitle'),
+        `<div class="visibility-options">${visibilityOptionsMarkup(current)}</div>`, [
+        { label: t('closeButton'), cls: 'btn-secondary', action: closeModal }
+    ], true);
+}
+
+/** The three option rows, with `current` marked selected. */
+function visibilityOptionsMarkup(current) {
+    return QUOTES_VISIBILITY_KEYS.map(key => {
         const selected = key === current;
         return `
             <button type="button" class="visibility-option${selected ? ' visibility-option--selected' : ''}"
-                    onclick="selectQuotesVisibility('${key}')" ${selected ? 'aria-current="true"' : ''}>
-                <span class="visibility-option-radio">${selected ? VISIBILITY_CHECK_ICON : ''}</span>
+                    data-visibility="${key}" onclick="selectQuotesVisibility('${key}')" ${selected ? 'aria-current="true"' : ''}>
+                <span class="visibility-option-icon">${VISIBILITY_ICONS[key]}</span>
                 <span class="visibility-option-text">
                     <span class="visibility-option-name">${t(quotesVisibilityLabelKey(key))}</span>
                     <span class="visibility-option-desc">${t(quotesVisibilityLabelKey(key) + 'Desc')}</span>
                 </span>
             </button>`;
     }).join('');
-
-    showModal(t('settingsQuotesVisibilityTitle'), `<div class="visibility-options">${options}</div>`, [
-        { label: t('closeButton'), cls: 'btn-secondary', action: closeModal }
-    ]);
 }
 
-const VISIBILITY_CHECK_ICON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+/**
+ * One icon per visibility value — the picture carries the meaning faster than
+ * the label: eye crossed out (nobody), star (favourites), open eye (everyone).
+ * The selected option's icon fills with the accent, so the choice is legible
+ * at a glance rather than by reading three lines.
+ */
+const VISIBILITY_ICONS = {
+    none: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19M6.61 6.61A18.5 18.5 0 0 0 2 12s3 8 10 8a9.12 9.12 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>',
+    favorites: '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    all: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+};
 
 /**
- * Saves the chosen visibility. Updates currentUser locally so the settings row
- * is right immediately, without refetching /me.
+ * Saves the chosen visibility. The modal stays open — moving the selection
+ * (icon + row highlight) in place is the confirmation, and closing on every tap
+ * would make comparing the three options a chore. Updates currentUser locally
+ * so the settings row is right immediately, without refetching /me.
  */
 async function selectQuotesVisibility(value) {
     try {
@@ -815,7 +831,20 @@ async function selectQuotesVisibility(value) {
 
         if (currentUser) currentUser.quotesVisibility = value;
         renderQuotesVisibilityRow();
-        closeModal();
+
+        // Move the selected state by toggling classes rather than re-rendering,
+        // so the highlight and icon fade across on .visibility-option's own
+        // background/colour transitions instead of snapping to new DOM.
+        document.querySelectorAll('.visibility-option').forEach(btn => {
+            const isChosen = btn.dataset.visibility === value;
+            btn.classList.toggle('visibility-option--selected', isChosen);
+            if (isChosen) {
+                btn.setAttribute('aria-current', 'true');
+            } else {
+                btn.removeAttribute('aria-current');
+            }
+        });
+
         toast(t('quotesVisibilitySaved'));
     } catch (e) {
         console.error('Quotes visibility error:', e);
