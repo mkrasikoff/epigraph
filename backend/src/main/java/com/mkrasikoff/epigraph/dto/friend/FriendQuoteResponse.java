@@ -23,4 +23,10 @@ public class FriendQuoteResponse {
      * Unix timestamp в миллисекундах — когда цитата добавлена.
      */
     private Long added;
+
+    /**
+     * Уже ли эта цитата сохранена смотрящим в свою коллекцию (TASK-129) —
+     * чтобы кнопка «+» сразу показывала состояние «сохранено».
+     */
+    private boolean alreadySaved;
 }

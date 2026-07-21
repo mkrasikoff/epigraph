@@ -46,6 +46,7 @@ public final class ApiCodes {
     public static final String FRIEND_REQUEST_ACCEPTED = "FRIEND_REQUEST_ACCEPTED";
     public static final String FRIEND_REQUEST_DECLINED = "FRIEND_REQUEST_DECLINED";
     public static final String FRIEND_REMOVED = "FRIEND_REMOVED";
+    public static final String FRIEND_QUOTE_SAVED = "FRIEND_QUOTE_SAVED";
 
     private ApiCodes() {
     }

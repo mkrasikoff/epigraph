@@ -6,6 +6,8 @@ import com.mkrasikoff.epigraph.dto.friend.FriendQuoteResponse;
 import com.mkrasikoff.epigraph.dto.friend.UserSummaryResponse;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.exception.QuotesNotVisibleException;
+import com.mkrasikoff.epigraph.exception.QuoteLimitExceededException;
+import com.mkrasikoff.epigraph.exception.QuoteNotFoundException;
 import com.mkrasikoff.epigraph.model.Friendship;
 import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.User;
@@ -563,5 +565,118 @@ class FriendshipServiceTest {
 
         assertThat(friendshipService.getProfile(ME, OTHER).getQuotesVisibility())
                 .isEqualTo(User.QUOTES_VISIBLE_FAVORITES);
+    }
+
+    private Quote favQuote(Long id) {
+        Quote q = quote(id, "Saveable");
+        q.setFav(true);
+        return q;
+    }
+
+    @Test
+    @DisplayName("importFriendQuote: refuses a non-friend even for an existing quote")
+    void importFriendQuote_refusesNonFriend() {
+        Quote source = favQuote(10L);
+        when(quoteRepository.findById(10L)).thenReturn(Optional.of(source));
+
+        assertThatThrownBy(() -> friendshipService.importFriendQuote(ME, 10L))
+                .isInstanceOf(QuotesNotVisibleException.class)
+                .hasMessage(ApiCodes.NOT_FRIENDS);
+
+        verify(quoteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("importFriendQuote: refuses a non-favourite when the owner shares only favourites")
+    void importFriendQuote_refusesQuoteOutsideVisibility() {
+        Quote source = quote(10L, "Not favourited"); // fav = false
+        when(quoteRepository.findById(10L)).thenReturn(Optional.of(source));
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_FAVORITES)));
+
+        assertThatThrownBy(() -> friendshipService.importFriendQuote(ME, 10L))
+                .isInstanceOf(QuotesNotVisibleException.class)
+                .hasMessage(ApiCodes.NOT_FRIENDS);
+
+        verify(quoteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("importFriendQuote: 404 when the source quote is gone")
+    void importFriendQuote_throwsWhenQuoteMissing() {
+        when(quoteRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> friendshipService.importFriendQuote(ME, 10L))
+                .isInstanceOf(QuoteNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("importFriendQuote: copies the quote with friend provenance")
+    void importFriendQuote_copiesWithProvenance() {
+        Quote source = favQuote(10L);
+        when(quoteRepository.findById(10L)).thenReturn(Optional.of(source));
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_ALL)));
+        when(quoteRepository.findByImportedFromQuoteIdAndUserId(10L, ME)).thenReturn(Optional.empty());
+        when(quoteRepository.countByUserId(ME)).thenReturn(0L);
+        when(userRepository.findById(ME)).thenReturn(Optional.of(user(ME, "me")));
+        when(quoteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        friendshipService.importFriendQuote(ME, 10L);
+
+        ArgumentCaptor<Quote> captor = ArgumentCaptor.forClass(Quote.class);
+        verify(quoteRepository).save(captor.capture());
+        Quote saved = captor.getValue();
+        assertThat(saved.getUserId()).isEqualTo(ME);
+        assertThat(saved.getText()).isEqualTo("Saveable");
+        assertThat(saved.getImportedFromQuoteId()).isEqualTo(10L);
+        assertThat(saved.getSharedFromUserId()).isEqualTo(OTHER);
+        assertThat(saved.isManuallyAdded()).isFalse();
+        assertThat(saved.getImportedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("importFriendQuote: saving the same quote twice is a no-op")
+    void importFriendQuote_idempotent() {
+        Quote source = favQuote(10L);
+        when(quoteRepository.findById(10L)).thenReturn(Optional.of(source));
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_ALL)));
+        when(quoteRepository.findByImportedFromQuoteIdAndUserId(10L, ME)).thenReturn(Optional.of(new Quote()));
+
+        friendshipService.importFriendQuote(ME, 10L);
+
+        verify(quoteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("importFriendQuote: refuses when the importer is at the quote cap")
+    void importFriendQuote_throwsWhenLimitReached() {
+        Quote source = favQuote(10L);
+        when(quoteRepository.findById(10L)).thenReturn(Optional.of(source));
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_ALL)));
+        when(quoteRepository.findByImportedFromQuoteIdAndUserId(10L, ME)).thenReturn(Optional.empty());
+        when(quoteRepository.countByUserId(ME)).thenReturn(1000L);
+        when(userRepository.findById(ME)).thenReturn(Optional.of(user(ME, "me")));
+
+        assertThatThrownBy(() -> friendshipService.importFriendQuote(ME, 10L))
+                .isInstanceOf(QuoteLimitExceededException.class);
+
+        verify(quoteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("listFriendQuotes: marks quotes the viewer has already saved")
+    void listFriendQuotes_marksAlreadySaved() {
+        when(friendshipRepository.findByRequesterIdAndAddresseeId(ME, OTHER)).thenReturn(Optional.of(accepted(ME, OTHER)));
+        when(userRepository.findById(OTHER)).thenReturn(Optional.of(sharingUser(User.QUOTES_VISIBLE_ALL)));
+        when(quoteRepository.findByUserId(OTHER)).thenReturn(List.of(quote(1L, "One"), quote(2L, "Two")));
+        when(quoteRepository.findSavedSourceIds(ME, List.of(1L, 2L))).thenReturn(List.of(2L));
+
+        List<FriendQuoteResponse> result = friendshipService.listFriendQuotes(ME, OTHER);
+
+        assertThat(result).filteredOn(FriendQuoteResponse::isAlreadySaved)
+                .extracting(FriendQuoteResponse::getId).containsExactly(2L);
     }
 }

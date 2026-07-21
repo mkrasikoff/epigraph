@@ -96,6 +96,19 @@ public class FriendController {
     }
 
     /**
+     * Saves a friend's quote into the caller's own collection. Idempotent.
+     * 403 if not friends or the quote isn't shared with the caller, 404 if the
+     * quote is gone, 400 at the quote cap — all via the global handler.
+     */
+    @PostMapping("/quotes/{quoteId}/save")
+    public ResponseEntity<?> saveQuote(@AuthenticationPrincipal Long userId, @PathVariable Long quoteId) {
+        friendshipService.importFriendQuote(userId, quoteId);
+        log.info("Friend quote saved — userId = {} saved quoteId = {}", userId, quoteId);
+
+        return ResponseEntity.ok(new ErrorResponse(ApiCodes.FRIEND_QUOTE_SAVED));
+    }
+
+    /**
      * Sends a friend request to the given user. If that user had already sent
      * the caller a request, the two collapse into an accepted friendship.
      */
