@@ -38,6 +38,14 @@ public class User {
     @Column(length = 255)
     private String providerId;
 
+    /**
+     * Values for {@link #quotesVisibility}. Not a Java enum — this codebase
+     * keeps closed sets as validated strings (see provider, themeStyle).
+     */
+    public static final String QUOTES_VISIBLE_NONE = "none";
+    public static final String QUOTES_VISIBLE_FAVORITES = "favorites";
+    public static final String QUOTES_VISIBLE_ALL = "all";
+
     @Column(updatable = false)
     private Long createdAt;
 
@@ -96,4 +104,12 @@ public class User {
      * value is the single source of truth for "has Plus".
      */
     private Long plusSince;
+
+    /**
+     * How much of this user's collection an ACCEPTED friend may see (TASK-129) —
+     * one of QUOTES_VISIBLE_*. Never grants access to a non-friend: the
+     * friendship check comes first, this only narrows what a friend gets.
+     */
+    @Column(name = "quotes_visibility", nullable = false, length = 20)
+    private String quotesVisibility = QUOTES_VISIBLE_FAVORITES;
 }

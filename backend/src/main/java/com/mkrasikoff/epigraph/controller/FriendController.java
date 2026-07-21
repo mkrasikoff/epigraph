@@ -1,6 +1,7 @@
 package com.mkrasikoff.epigraph.controller;
 
 import com.mkrasikoff.epigraph.dto.common.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.friend.FriendQuoteResponse;
 import com.mkrasikoff.epigraph.dto.friend.UserSummaryResponse;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
 import com.mkrasikoff.epigraph.service.FriendshipService;
@@ -81,6 +82,17 @@ public class FriendController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
+    }
+
+    /**
+     * A friend's quotes. 403 only when the caller is not an accepted friend —
+     * defence in depth, since the client learns the relation from the profile
+     * and normally doesn't ask. A friend whose owner shares nothing, or who has
+     * nothing matching the setting, gets an empty list.
+     */
+    @GetMapping("/{targetId}/quotes")
+    public List<FriendQuoteResponse> quotes(@AuthenticationPrincipal Long userId, @PathVariable Long targetId) {
+        return friendshipService.listFriendQuotes(userId, targetId);
     }
 
     /**
