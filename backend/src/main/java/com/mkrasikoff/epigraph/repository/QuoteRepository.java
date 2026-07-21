@@ -49,4 +49,18 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
     boolean existsBySharedQuoteIdAndUserId(Long sharedQuoteId, Long userId);
 
     Optional<Quote> findBySharedQuoteIdAndUserId(Long sharedQuoteId, Long userId);
+
+    /**
+     * The user's own copy of a friend's quote, if they've already saved it —
+     * used to keep saving idempotent (TASK-129).
+     */
+    Optional<Quote> findByImportedFromQuoteIdAndUserId(Long importedFromQuoteId, Long userId);
+
+    /**
+     * Of the given source-quote ids, which the user has already saved — one
+     * query to mark "saved" across a friend's whole quote list.
+     */
+    @Query("SELECT q.importedFromQuoteId FROM Quote q " +
+            "WHERE q.userId = :userId AND q.importedFromQuoteId IN :sourceIds")
+    List<Long> findSavedSourceIds(@Param("userId") Long userId, @Param("sourceIds") List<Long> sourceIds);
 }
