@@ -81,7 +81,7 @@ const TRANSLATIONS = {
 
         // ── Change password ───────────────────────────────────────────────────
         changePasswordTitle:              'Сменить пароль',
-        changePasswordSettingsDesc:       'Установить или изменить пароль для входа по email.',
+        changePasswordSettingsDesc:       'Пароль для входа по email.',
         changePasswordButton:             'Сменить пароль',
         changePasswordNew:                'Новый пароль',
         changePasswordConfirm:            'Подтвердите новый пароль',
@@ -314,9 +314,9 @@ const TRANSLATIONS = {
         settingsAccountEditAria:        'Изменить имя пользователя',
         settingsAccountAvatarAria:      'Изменить иконку',
         settingsLanguageTitle:          'Язык интерфейса',
-        settingsLanguageDesc:           'Переключить язык интерфейса приложения.',
+        settingsLanguageDesc:           'Язык интерфейса.',
         settingsThemeTitle:             'Тема оформления',
-        settingsThemeDesc:              'Выберите оформление приложения. Светлый и тёмный режим переключаются отдельно.',
+        settingsThemeDesc:              'Светлый и тёмный режим — отдельно.',
         ariaChooseThemeStyle:           'Выбрать тему оформления',
         themeStyleClassic:              'Классика',
         themeStyleForest:               'Лес',
@@ -332,7 +332,7 @@ const TRANSLATIONS = {
 
         // ── Achievements (TASK-122) ──────────────────────────────────────────
         settingsAchievementsTitle:      'Достижения',
-        settingsAchievementsDesc:       'Прогресс и награды за использование приложения.',
+        settingsAchievementsDesc:       'Прогресс и награды.',
         ariaOpenAchievements:           'Открыть достижения',
         achievementsOpenBtn:            'Открыть',
         achievementsSummary:            '{unlocked} из {total} получено',
@@ -472,6 +472,16 @@ const TRANSLATIONS = {
         shareLinkCopied:                'Ссылка скопирована',
         shareLinkError:                 'Не удалось создать ссылку',
 
+        settingsQuotesVisibilityTitle:  'Кто видит мои цитаты',
+        settingsQuotesVisibilityDesc:   'Действует только на друзей.',
+        quotesVisibilityNone:           'Никто',
+        quotesVisibilityNoneDesc:       'Цитаты не видит никто, даже друзья',
+        quotesVisibilityFavorites:      'Только избранное',
+        quotesVisibilityFavoritesDesc:  'Друзья видят цитаты, отмеченные звёздочкой',
+        quotesVisibilityAll:            'Все цитаты',
+        quotesVisibilityAllDesc:        'Друзья видят всю коллекцию целиком',
+        quotesVisibilitySaved:          'Настройка сохранена',
+
         // ── Friends (TASK-129) ────────────────────────────────────────────────
         accountMenuFriends:             'Друзья',
         friendsTitle:                   'Друзья',
@@ -496,7 +506,11 @@ const TRANSLATIONS = {
         friendProfileStreak:            '{count} {word} подряд',
         friendProfileQuotes:            '{count} {word}',
         friendProfileAchievements:      'Достижения',
-        friendProfileLocked:            'Цитаты и активность — станут доступны позже',
+        friendProfileQuotesTitle:       'Цитаты',
+        friendProfileQuotesNotFriends:  'Цитаты видны только друзьям',
+        friendProfileQuotesHidden:      '@{name} не показывает свои цитаты',
+        friendProfileQuotesEmpty:       'Пока нет цитат',
+        friendProfileQuotesMore:        'Показать ещё',
         friendsErrorSelf:               'Нельзя добавить себя в друзья',
         friendsErrorAlreadyFriends:     'Вы уже друзья',
         friendsErrorRequestSent:        'Заявка уже отправлена',
@@ -579,7 +593,7 @@ const TRANSLATIONS = {
 
         // ── Change password ───────────────────────────────────────────────────
         changePasswordTitle:              'Change password',
-        changePasswordSettingsDesc:       'Set or change your password for email sign-in.',
+        changePasswordSettingsDesc:       'Password for email sign-in.',
         changePasswordButton:             'Change password',
         changePasswordNew:                'New password',
         changePasswordConfirm:            'Confirm new password',
@@ -812,9 +826,9 @@ const TRANSLATIONS = {
         settingsAccountEditAria:        'Change username',
         settingsAccountAvatarAria:      'Change icon',
         settingsLanguageTitle:          'Interface language',
-        settingsLanguageDesc:           'Switch the app interface language.',
+        settingsLanguageDesc:           'Interface language.',
         settingsThemeTitle:             'Theme',
-        settingsThemeDesc:              'Choose the app\'s look. Light and dark mode switch separately.',
+        settingsThemeDesc:              'Light and dark mode switch separately.',
         ariaChooseThemeStyle:           'Choose theme',
         themeStyleClassic:              'Classic',
         themeStyleForest:               'Forest',
@@ -830,7 +844,7 @@ const TRANSLATIONS = {
 
         // ── Achievements (TASK-122) ──────────────────────────────────────────
         settingsAchievementsTitle:      'Achievements',
-        settingsAchievementsDesc:       'Progress and rewards for using the app.',
+        settingsAchievementsDesc:       'Progress and rewards.',
         ariaOpenAchievements:           'Open achievements',
         achievementsOpenBtn:            'Open',
         achievementsSummary:            '{unlocked} of {total} unlocked',
@@ -968,6 +982,16 @@ const TRANSLATIONS = {
         shareLinkCopied:                'Link copied',
         shareLinkError:                 'Couldn\'t create the link',
 
+        settingsQuotesVisibilityTitle:  'Who can see my quotes',
+        settingsQuotesVisibilityDesc:   'Applies to friends only.',
+        quotesVisibilityNone:           'No one',
+        quotesVisibilityNoneDesc:       'Nobody sees your quotes, not even friends',
+        quotesVisibilityFavorites:      'Favourites only',
+        quotesVisibilityFavoritesDesc:  'Friends see the quotes you starred',
+        quotesVisibilityAll:            'All quotes',
+        quotesVisibilityAllDesc:        'Friends see your whole collection',
+        quotesVisibilitySaved:          'Setting saved',
+
         // ── Friends (TASK-129) ────────────────────────────────────────────────
         accountMenuFriends:             'Friends',
         friendsTitle:                   'Friends',
@@ -992,7 +1016,11 @@ const TRANSLATIONS = {
         friendProfileStreak:            '{count} {word} in a row',
         friendProfileQuotes:            '{count} {word}',
         friendProfileAchievements:      'Achievements',
-        friendProfileLocked:            'Quotes and activity — coming later',
+        friendProfileQuotesTitle:       'Quotes',
+        friendProfileQuotesNotFriends:  'Quotes are visible to friends only',
+        friendProfileQuotesHidden:      '@{name} doesn\'t share their quotes',
+        friendProfileQuotesEmpty:       'No quotes yet',
+        friendProfileQuotesMore:        'Show more',
         friendsErrorSelf:               'You can\'t add yourself',
         friendsErrorAlreadyFriends:     'You are already friends',
         friendsErrorRequestSent:        'A request has already been sent',

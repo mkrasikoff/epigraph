@@ -241,11 +241,13 @@ function markClippedCards() {
 }
 
 /**
- * Attaches a single delegated click listener on the quotes grid for expand/collapse.
- * Runs only once per grid mount.
+ * Attaches a single delegated click listener on a quotes grid for expand/collapse.
+ * Runs only once per grid mount. Defaults to the "Мои цитаты" grid, but the
+ * friend-profile grid (TASK-129) reuses the exact same behaviour by passing its
+ * own element in.
+ * @param {HTMLElement} [grid]
  */
-function initExpandableCards() {
-    const grid = document.getElementById('quotes-grid');
+function initExpandableCards(grid = document.getElementById('quotes-grid')) {
     if (!grid || grid._expandListenerAttached) return;
     grid._expandListenerAttached = true;
 

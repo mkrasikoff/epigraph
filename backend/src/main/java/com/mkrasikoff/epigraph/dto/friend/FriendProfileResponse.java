@@ -47,4 +47,10 @@ public class FriendProfileResponse {
      * The viewer's relationship to this user (see FriendshipService.RelationStatus).
      */
     private String relation;
+
+    /**
+     * Сколько своей коллекции показывает этот пользователь: none / favorites /
+     * all. Null для не-друзей — им незачем знать чужую настройку.
+     */
+    private String quotesVisibility;
 }

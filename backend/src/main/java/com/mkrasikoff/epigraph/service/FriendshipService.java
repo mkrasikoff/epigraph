@@ -2,9 +2,12 @@ package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.dto.achievement.AchievementStatusResponse;
 import com.mkrasikoff.epigraph.dto.friend.FriendProfileResponse;
+import com.mkrasikoff.epigraph.dto.friend.FriendQuoteResponse;
 import com.mkrasikoff.epigraph.dto.friend.UserSummaryResponse;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
+import com.mkrasikoff.epigraph.exception.QuotesNotVisibleException;
 import com.mkrasikoff.epigraph.model.Friendship;
+import com.mkrasikoff.epigraph.model.Quote;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.FriendshipRepository;
 import com.mkrasikoff.epigraph.repository.QuoteRepository;
@@ -207,6 +210,8 @@ public class FriendshipService {
                 .map(AchievementStatusResponse::getKey)
                 .toList();
 
+        RelationStatus relation = relationStatus(userId, targetId);
+
         return new FriendProfileResponse(
                 target.getId(),
                 target.getUsername(),
@@ -218,7 +223,45 @@ public class FriendshipService {
                 achievementService.currentStreak(targetId),
                 quoteRepository.countByUserId(targetId),
                 unlockedAchievements,
-                relationStatus(userId, targetId).name());
+                relation.name(),
+                // Only friends learn how much is shared. Telling a stranger
+                // "this user shares nothing" would leak a setting they have no
+                // standing to see.
+                relation == RelationStatus.FRIENDS ? target.getQuotesVisibility() : null);
+    }
+
+    /**
+     * Another user's quotes — the one place friendship actually gates content.
+     *
+     * Two independent checks, in this order: you must be accepted friends at
+     * all, and only then does the owner's quotes_visibility decide how much you
+     * get. A non-friend is refused no matter how open the owner's setting is,
+     * which is the rule the whole feature rests on — and that refusal is the
+     * only thing here that throws. Sharing nothing returns an empty list.
+     */
+    @Transactional(readOnly = true)
+    public List<FriendQuoteResponse> listFriendQuotes(Long userId, Long targetId) {
+        if (relationStatus(userId, targetId) != RelationStatus.FRIENDS) {
+            throw new QuotesNotVisibleException(ApiCodes.NOT_FRIENDS);
+        }
+
+        User target = userRepository.findById(targetId)
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
+
+        List<Quote> quotes = switch (target.getQuotesVisibility()) {
+            case User.QUOTES_VISIBLE_ALL -> quoteRepository.findByUserId(targetId);
+            case User.QUOTES_VISIBLE_FAVORITES -> quoteRepository.findByUserIdAndFavTrue(targetId);
+            // 'none': a friend who shares nothing is a normal state, not a
+            // refusal. The profile already told the client which message to
+            // show, and the client must handle an empty list anyway — someone
+            // can share "favourites" while having favourited nothing.
+            default -> List.<Quote>of();
+        };
+
+        return quotes.stream()
+                .map(q -> new FriendQuoteResponse(q.getId(), q.getText(), q.getAuthor(),
+                        q.getSource(), q.getTags(), q.getAdded()))
+                .toList();
     }
 
     /**

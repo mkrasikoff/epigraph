@@ -145,6 +145,21 @@ public class UserService {
     }
 
     /**
+     * Sets how much of the user's collection an accepted friend may see
+     * (TASK-129). Value restricted to a fixed set, validated at the
+     * controller-level DTO. Never affects non-friends, who see nothing either
+     * way — see FriendshipService.listFriendQuotes().
+     */
+    @Transactional
+    public void updateQuotesVisibility(Long userId, String quotesVisibility) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
+
+        user.setQuotesVisibility(quotesVisibility);
+        userRepository.save(user);
+    }
+
+    /**
      * Sets the user's visual theme style. Value is restricted to a fixed set
      * of presets, validated at the controller-level DTO. "classic" is always
      * allowed; every other style must be unlocked via an achievement first

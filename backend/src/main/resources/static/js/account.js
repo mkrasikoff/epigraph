@@ -243,6 +243,7 @@ function updateSettingsAccount() {
     document.getElementById('settings-change-password-desc').textContent = t('changePasswordSettingsDesc');
     document.getElementById('settings-change-password-btn-label').textContent = t('changePasswordButton');
 
+    renderQuotesVisibilityRow();
     renderBadgePill();
     refreshAchievementsUi();
 
@@ -749,4 +750,75 @@ async function applyPendingRedeem() {
         return;
     }
     if (code) await activateRedeemCode(code);
+}
+
+// =============================================================================
+// QUOTES VISIBILITY (TASK-129)
+// Who among the user's friends may read their collection. A settings row that
+// shows the current choice and opens a modal for the explanations — the same
+// shape as the avatar and theme pickers, and the explanations matter here
+// because the setting ships switched on for everybody.
+// =============================================================================
+/** The three values, in the order they're offered. Mirrors User.QUOTES_VISIBLE_*. */
+const QUOTES_VISIBILITY_KEYS = ['none', 'favorites', 'all'];
+
+/** i18n key for a visibility value's short label. */
+function quotesVisibilityLabelKey(value) {
+    return 'quotesVisibility' + value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/** Paints the current choice onto the settings row. */
+function renderQuotesVisibilityRow() {
+    const valueEl = document.getElementById('settings-quotes-visibility-value');
+    if (!valueEl) return;
+
+    const current = currentUser?.quotesVisibility || 'favorites';
+    valueEl.textContent = t(quotesVisibilityLabelKey(current));
+}
+
+/** Opens the picker. Each option carries its consequence, not just its name. */
+function showQuotesVisibilityModal() {
+    const current = currentUser?.quotesVisibility || 'favorites';
+
+    const options = QUOTES_VISIBILITY_KEYS.map(key => {
+        const selected = key === current;
+        return `
+            <button type="button" class="visibility-option${selected ? ' visibility-option--selected' : ''}"
+                    onclick="selectQuotesVisibility('${key}')" ${selected ? 'aria-current="true"' : ''}>
+                <span class="visibility-option-radio">${selected ? VISIBILITY_CHECK_ICON : ''}</span>
+                <span class="visibility-option-text">
+                    <span class="visibility-option-name">${t(quotesVisibilityLabelKey(key))}</span>
+                    <span class="visibility-option-desc">${t(quotesVisibilityLabelKey(key) + 'Desc')}</span>
+                </span>
+            </button>`;
+    }).join('');
+
+    showModal(t('settingsQuotesVisibilityTitle'), `<div class="visibility-options">${options}</div>`, [
+        { label: t('closeButton'), cls: 'btn-secondary', action: closeModal }
+    ]);
+}
+
+const VISIBILITY_CHECK_ICON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+
+/**
+ * Saves the chosen visibility. Updates currentUser locally so the settings row
+ * is right immediately, without refetching /me.
+ */
+async function selectQuotesVisibility(value) {
+    try {
+        const res = await Api.updateQuotesVisibility(value);
+        if (!res.ok) {
+            const data = await res.json().catch(() => null);
+            toast(apiErrorMessage(data, 'toastError'), 'error');
+            return;
+        }
+
+        if (currentUser) currentUser.quotesVisibility = value;
+        renderQuotesVisibilityRow();
+        closeModal();
+        toast(t('quotesVisibilitySaved'));
+    } catch (e) {
+        console.error('Quotes visibility error:', e);
+        toast(t('toastError'), 'error');
+    }
 }

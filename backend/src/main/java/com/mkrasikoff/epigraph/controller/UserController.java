@@ -5,6 +5,7 @@ import com.mkrasikoff.epigraph.dto.auth.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.common.ErrorResponse;
 import com.mkrasikoff.epigraph.dto.user.UpdateAvatarRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdatePreferredLanguageRequest;
+import com.mkrasikoff.epigraph.dto.user.UpdateQuotesVisibilityRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdateThemeStyleRequest;
 import com.mkrasikoff.epigraph.dto.user.UpdateUsernameRequest;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
@@ -130,6 +131,22 @@ public class UserController {
             log.info("Theme style updated — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse(ApiCodes.THEME_UPDATED));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Updates how much of the user's collection an accepted friend may see.
+     */
+    @PatchMapping("/me/quotes-visibility")
+    public ResponseEntity<?> updateQuotesVisibility(@AuthenticationPrincipal Long userId,
+                                                    @Valid @RequestBody UpdateQuotesVisibilityRequest request) {
+        try {
+            userService.updateQuotesVisibility(userId, request.getQuotesVisibility());
+            log.info("Quotes visibility updated — userId = {}", userId);
+
+            return ResponseEntity.ok(new ErrorResponse(ApiCodes.QUOTES_VISIBILITY_UPDATED));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }

@@ -19,7 +19,7 @@
  *
  * Provides (globals): renderFriendsView(), onFriendsSearchInput(),
  * friendAction(), openFriendProfile(), closeFriendProfile(),
- * exitFriendProfileMode().
+ * exitFriendProfileMode(), showMoreFriendQuotes(), copyFriendQuote().
  */
 
 const FRIENDS_SEARCH_DEBOUNCE_MS = 300;
@@ -367,8 +367,144 @@ function showFriendProfileView() {
 }
 
 function renderFriendProfile(profile) {
+    const name = profile.username || ('user' + profile.id);
+
     const body = document.getElementById('friend-profile-body');
-    if (body) body.innerHTML = friendProfileMarkup(profile, profile.username || ('user' + profile.id));
+    if (body) body.innerHTML = friendProfileMarkup(profile, name);
+
+    renderFriendQuotesSection(profile, name);
+}
+
+// =============================================================================
+// FRIEND QUOTES (TASK-129)
+// Three states, chosen from the profile payload without an extra request: not
+// friends at all, friends but sharing nothing, or friends with something to
+// show. The dashed block stays in the first two — an empty page would read as
+// broken, and this way the block explains the rule instead.
+// =============================================================================
+const FRIEND_QUOTES_PAGE_SIZE = 20;
+
+/** The friend's quotes currently loaded, and how many of them are on screen. */
+let friendQuotes = [];
+let friendQuotesVisibleCount = 0;
+
+function friendQuotesNoticeMarkup(text) {
+    return `
+        <div class="friend-profile-locked">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span>${text}</span>
+        </div>`;
+}
+
+async function renderFriendQuotesSection(profile, name) {
+    const box = document.getElementById('friend-profile-quotes');
+    if (!box) return;
+
+    friendQuotes = [];
+    friendQuotesVisibleCount = 0;
+
+    if (profile.relation !== 'FRIENDS') {
+        box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesNotFriends'));
+        return;
+    }
+    if (profile.quotesVisibility === 'none') {
+        box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesHidden', { name: escHtml(name) }));
+        return;
+    }
+
+    try {
+        const res = await Api.getFriendQuotes(profile.id);
+        if (!res.ok) {
+            // Only reachable if the friendship changed under us mid-view.
+            box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesNotFriends'));
+            return;
+        }
+
+        friendQuotes = await res.json();
+        friendQuotesVisibleCount = Math.min(FRIEND_QUOTES_PAGE_SIZE, friendQuotes.length);
+        renderFriendQuotesList();
+    } catch (e) {
+        console.error('Friend quotes error:', e);
+        box.innerHTML = friendQuotesNoticeMarkup(t('toastError'));
+    }
+}
+
+function renderFriendQuotesList() {
+    const box = document.getElementById('friend-profile-quotes');
+    if (!box) return;
+
+    if (!friendQuotes.length) {
+        box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesEmpty'));
+        return;
+    }
+
+    const cards = friendQuotes.slice(0, friendQuotesVisibleCount).map(renderFriendQuoteCard).join('');
+    const hasMore = friendQuotesVisibleCount < friendQuotes.length;
+
+    box.innerHTML = `
+        <div class="friend-profile-block-title">${t('friendProfileQuotesTitle')}</div>
+        <div class="quotes-grid" id="friend-quotes-grid">${cards}</div>
+        ${hasMore ? `<div class="list-load-more"><button type="button" class="btn-secondary" onclick="showMoreFriendQuotes()">${t('friendProfileQuotesMore')}</button></div>` : ''}`;
+
+    // Reuse the collection's own two-up grid, clipping and expand-to-read
+    // behaviour instead of a second implementation — markClippedCards() works
+    // by class across the document, and initExpandableCards() now takes the
+    // grid to bind (both live in quotes-list.js).
+    markClippedCards();
+    initExpandableCards(document.getElementById('friend-quotes-grid'));
+}
+
+/** Reveals the next page. A friend can have thousands of quotes — rendering
+ *  them all at once would stall the page for no benefit. */
+function showMoreFriendQuotes() {
+    friendQuotesVisibleCount = Math.min(friendQuotesVisibleCount + FRIEND_QUOTES_PAGE_SIZE, friendQuotes.length);
+    renderFriendQuotesList();
+}
+
+/**
+ * Same card as "Мои цитаты" (renderQuoteCard in quotes-list.js) so the two read
+ * identically — two-up grid, click-to-expand, tag chips. Read-only, though: the
+ * owner's fav/edit/delete/share aren't the reader's to use, so the only action
+ * is Copy. A "save to my collection" (+) button is planned for this same slot.
+ * Tags are static here — tapping one can't search a collection that isn't yours.
+ * @param {Object} quote - A FriendQuoteResponse (no owner id or fav flag).
+ * @param {number} index
+ */
+function renderFriendQuoteCard(quote, index) {
+    const tags = (quote.tags || '').split(',').map(tag => tag.trim()).filter(Boolean);
+
+    return `
+        <article class="quote-card" data-id="${quote.id}" style="animation-delay: ${Math.min(index * 40, 300)}ms">
+          <div class="quote-card-text-wrap">
+            <p class="quote-card-text">${escHtml(quote.text)}</p>
+          </div>
+          <span class="quote-card-expand-hint">${t('expandHintOpen')}</span>
+          ${tags.length ? `<div class="quote-card-tags">${tags.map(tag => `<span class="quote-tag-chip quote-tag-chip--static">${escHtml(tag)}</span>`).join('')}</div>` : ''}
+          <div class="quote-card-meta">
+            <div>
+              ${quote.author ? `<div class="quote-card-author">${escHtml(quote.author)}</div>` : ''}
+              ${quote.source ? `<div class="quote-card-source">${escHtml(quote.source)}</div>` : ''}
+            </div>
+            <div class="quote-card-actions">
+              <button class="card-btn" onclick="copyFriendQuote(${quote.id})" aria-label="${t('ariaCopy')}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>`;
+}
+
+/** Copies a friend's quote. A separate handler from copyQuote() because that
+ *  one looks the quote up in your own collection, which this one isn't in. */
+function copyFriendQuote(id) {
+    const quote = friendQuotes.find(q => q.id === id);
+    if (!quote) return;
+
+    navigator.clipboard.writeText(formatQuoteAsText(quote))
+        .then(() => toast(t('toastCopied')))
+        .catch(() => toast(t('toastError')));
 }
 
 function friendProfileMarkup(profile, name) {
@@ -396,12 +532,7 @@ function friendProfileMarkup(profile, name) {
             </div>
         </div>
 
-        <div class="friend-profile-locked">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            <span>${t('friendProfileLocked')}</span>
-        </div>`;
+        <div id="friend-profile-quotes"></div>`;
 }
 
 function friendProfileMetaMarkup(profile) {

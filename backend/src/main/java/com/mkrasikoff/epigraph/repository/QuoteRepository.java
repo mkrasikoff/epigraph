@@ -36,6 +36,12 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
      */
     long countByUserIdAndFavTrue(Long userId);
 
+    /**
+     * A user's favourited quotes — what a friend sees when that user's
+     * quotes_visibility is 'favorites' (TASK-129).
+     */
+    List<Quote> findByUserIdAndFavTrue(Long userId);
+
     @Query("SELECT COUNT(DISTINCT q.author) FROM Quote q " +
             "WHERE q.userId = :userId AND q.manuallyAdded = true AND q.author IS NOT NULL AND q.author <> ''")
     long countDistinctManuallyAddedAuthors(@Param("userId") Long userId);

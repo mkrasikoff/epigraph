@@ -42,6 +42,13 @@ public class GlobalExceptionHandler {
         return Map.of("error", ex.getMessage());
     }
 
+    @ExceptionHandler(QuotesNotVisibleException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleQuotesNotVisible(QuotesNotVisibleException ex) {
+
+        return new ErrorResponse(ex.getMessage());
+    }
+
     @ExceptionHandler(QuoteLimitExceededException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleQuoteLimitExceeded(QuoteLimitExceededException ex) {
