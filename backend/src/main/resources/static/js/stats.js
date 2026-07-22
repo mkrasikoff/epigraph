@@ -20,18 +20,11 @@
 /** How many months of activity the screen looks back over. */
 const STATS_MONTHS_WINDOW = 12;
 
-/** Once a daily streak passes this many days, the fact strip reports it in months instead. */
+/** Once the usage streak passes this many days, the fact strip reports it in whole months. */
 const STATS_STREAK_MONTH_THRESHOLD = 30;
 
-/**
- * Local-date key ("y-m-d") for streak day-bucketing. Using the Date's own local getters
- * (not a UTC millis divide) keeps "consecutive days" aligned with the user's calendar.
- * @param {Date} d
- * @returns {string}
- */
-function statsDayKey(d) {
-    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
-}
+/** Roughly how many days make up a "month" when the streak is shown in months. */
+const STATS_DAYS_PER_MONTH = 30;
 
 /** How many days count as "recent" for the tile deltas. */
 const STATS_RECENT_DAYS = 30;
@@ -64,8 +57,7 @@ function computeStats(list) {
     const authorFirstAdded = new Map(); // author → earliest added timestamp
     const sourceSet = new Set();
     const tagCounts = new Map();
-    const activeMonths = new Set();     // year*12+month for every quote that has a timestamp
-    const activeDays = new Set();       // "y-m-d" local-date key for every datable quote
+    const monthTotals = new Map();      // year*12+month → count, across ALL months (for the all-time record)
 
     let favCount = 0;
     let withSource = 0;
@@ -108,8 +100,7 @@ function computeStats(list) {
 
             const d = new Date(added);
             const key = d.getFullYear() * 12 + d.getMonth();
-            activeMonths.add(key);
-            activeDays.add(statsDayKey(d));
+            monthTotals.set(key, (monthTotals.get(key) || 0) + 1);
             const bucket = monthKeyIndex[key];
             if (bucket !== undefined) months[bucket].count++;
 
@@ -122,29 +113,21 @@ function computeStats(list) {
 
     const total = list.length;
 
-    // Peak month within the visible window (drives the "record: N in <month>" caption).
+    // Peak month within the visible 12-month window — scales the bar heights and highlights
+    // the tallest bar(s). Distinct from the all-time record below.
     let peakMonthIndex = -1, peakMonthCount = 0;
     months.forEach((m, i) => {
         if (m.count > peakMonthCount) { peakMonthCount = m.count; peakMonthIndex = i; }
     });
 
-    // Current streak: consecutive months ending with this one that each got ≥1 quote. Walks
-    // back through activeMonths (not just the 12-window) so a long streak reports its true length.
-    let monthStreak = 0;
-    for (let cursor = nowDate.getFullYear() * 12 + nowDate.getMonth(); activeMonths.has(cursor); cursor--) {
-        monthStreak++;
-    }
-
-    // Consecutive-day streak of adding quotes, ending today. A one-day grace lets a streak
-    // that hasn't been extended *yet today* still count (anchor slides to yesterday) — the day
-    // isn't over. The facts strip shows this in days, switching to monthStreak past 30 days.
-    let dayStreak = 0;
-    const dayCursor = new Date(nowDate);
-    if (!activeDays.has(statsDayKey(dayCursor))) dayCursor.setDate(dayCursor.getDate() - 1);
-    while (activeDays.has(statsDayKey(dayCursor))) {
-        dayStreak++;
-        dayCursor.setDate(dayCursor.getDate() - 1);
-    }
+    // All-time record month across the whole collection (not just the visible window) — drives
+    // the "Record: N in <month> <year>" caption. May fall outside the 12-month chart.
+    let allTimePeakCount = 0, allTimePeakKey = -1;
+    monthTotals.forEach((count, key) => {
+        if (count > allTimePeakCount) { allTimePeakCount = count; allTimePeakKey = key; }
+    });
+    const allTimePeakYear = allTimePeakKey >= 0 ? Math.floor(allTimePeakKey / 12) : null;
+    const allTimePeakMonth = allTimePeakKey >= 0 ? allTimePeakKey % 12 : null;
 
     // Authors by quote count (desc) — top list + favorite author. Ties resolve to whichever
     // entry the stable sort saw first; good enough, this isn't a leaderboard.
@@ -183,8 +166,9 @@ function computeStats(list) {
         months,
         peakMonthIndex,
         peakMonthCount,
-        monthStreak,
-        dayStreak,
+        allTimePeakCount,
+        allTimePeakYear,
+        allTimePeakMonth,
         avgLength: total ? Math.round(textLenSum / total) : 0,
         savedFromFriends,
         withSourcePct: total ? Math.round((withSource / total) * 100) : 0,
@@ -212,6 +196,9 @@ function renderStats() {
     if (!body) return;
 
     const s = computeStats(quotes);
+    // The usage streak (days in a row using Epigraph) is not derivable from quotes — it lives in
+    // the "week_streak" achievement's uncapped progress, the same source the profile/Settings use.
+    s.usageStreak = statsUsageStreak();
 
     body.innerHTML = s.total === 0 ? statsEmptyMarkup() : statsOverviewMarkup(s);
 
@@ -219,7 +206,33 @@ function renderStats() {
     // baked into the [data-i18n] elements in the templates above.
     applyI18n(body);
 
-    if (s.total > 0) animateStatsVisuals();
+    if (s.total > 0) {
+        animateStatsVisuals();
+        statsEnsureUsageStreakLoaded(s);
+    }
+}
+
+/** The real "days in a row" usage streak, or 0 when the achievements payload isn't loaded yet. */
+function statsUsageStreak() {
+    return achievementStatuses?.find(a => a.key === 'week_streak')?.progress || 0;
+}
+
+/**
+ * The achievements payload (which carries the usage streak) is only fetched when Settings opens
+ * or after an achievement check — so opening Stats directly can find it unloaded, hiding the
+ * streak fact. When that's the case, fetch it once and patch just the facts strip back in, so
+ * the rest of the already-rendered screen (and its entrance animations) stays put.
+ */
+function statsEnsureUsageStreakLoaded(s) {
+    if (achievementStatuses !== null || (typeof isGuest !== 'undefined' && isGuest)) return;
+    Api.getAchievements().then(list => {
+        achievementStatuses = list;
+        const facts = document.getElementById('stats-facts');
+        if (!facts) return; // user navigated away before the fetch resolved
+        s.usageStreak = statsUsageStreak();
+        facts.innerHTML = statsFactsMarkup(s);
+        applyI18n(facts);
+    }).catch(() => {});
 }
 
 /** Empty state for a collection with no quotes yet. */
@@ -244,10 +257,10 @@ function statsEmptyMarkup() {
  *  top authors/tags, and the "interesting" facts strip. */
 function statsOverviewMarkup(s) {
     return `
-        <header class="stats-header">
+        <div class="stats-header">
             <h2 data-i18n="statsTitle">Статистика коллекции</h2>
             <p class="stats-subtitle" data-i18n="statsSubtitle">Ваша коллекция в цифрах</p>
-        </header>
+        </div>
 
         <div class="stats-section-label" data-i18n="statsSectionOverview">Обзор</div>
         <div class="stats-tiles">
@@ -275,7 +288,7 @@ function statsOverviewMarkup(s) {
         </div>
 
         <div class="stats-section-label" data-i18n="statsSectionInteresting">Интересное</div>
-        <div class="stats-facts">
+        <div class="stats-facts" id="stats-facts">
             ${statsFactsMarkup(s)}
         </div>
     `;
@@ -377,12 +390,13 @@ function statsActivityChartMarkup(s) {
     const shortMonths = t('statsMonthsShort').split(',');
     const max = s.peakMonthCount;
 
-    const peakBucket = s.months[s.peakMonthIndex];
-    const peakCaption = s.peakMonthCount > 0
+    // "Record" is the all-time best month (may be outside the visible window); the highlighted
+    // bar(s) below still reflect the window's own peak, which is what scales the chart.
+    const peakCaption = s.allTimePeakCount > 0
         ? `<div class="stats-chart-peak">${t('statsChartPeak', {
-              count: s.peakMonthCount,
-              month: t('statsMonthsPeak').split(',')[peakBucket.month],
-              year: peakBucket.year,
+              count: s.allTimePeakCount,
+              month: t('statsMonthsPeak').split(',')[s.allTimePeakMonth],
+              year: s.allTimePeakYear,
           })}</div>`
         : '';
 
@@ -473,11 +487,11 @@ function statsInlineEmptyMarkup(icon, textKey) {
  */
 function statsFactsMarkup(s) {
     const facts = [];
-    if (s.dayStreak > 0) {
-        // Show the streak in days, switching to whole months once it's long enough that a
+    if (s.usageStreak > 0) {
+        // Show the usage streak in days, switching to whole months once it's long enough that a
         // day count would read awkwardly ("47 дней" → "1 месяц").
-        const useMonths = s.dayStreak > STATS_STREAK_MONTH_THRESHOLD;
-        const n = useMonths ? s.monthStreak : s.dayStreak;
+        const useMonths = s.usageStreak > STATS_STREAK_MONTH_THRESHOLD;
+        const n = useMonths ? Math.floor(s.usageStreak / STATS_DAYS_PER_MONTH) : s.usageStreak;
         const word = useMonths ? monthCountWord(n) : dayCountWord(n);
         facts.push(statsFactMarkup('🔥', `${n} ${word}`, 'statsFactStreakLabel'));
     }
