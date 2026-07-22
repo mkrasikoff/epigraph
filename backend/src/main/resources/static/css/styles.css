@@ -1555,7 +1555,9 @@ body.modal-lock-scroll {
 }
 
 .card-btn.fav.active {
-    color: var(--color-gold);
+    /* Favorite = the theme accent, matching the QOD "В избранном" button (#btn-fav-qod.is-active),
+       so the favorite colour is consistent app-wide and native to every theme (TASK-136). */
+    color: var(--color-primary);
 }
 
 /* Saved state of the friend-quote "+" (TASK-129): a settled accent check, no
@@ -3467,7 +3469,14 @@ body.modal-lock-scroll {
     margin: 0 auto;
 }
 
+/* Plain <div>, not <header> — a bare <header> would inherit the app's sticky top-bar rule
+   (background panel, border-bottom, blur, sticky). Title left, subtitle right on one baseline. */
 .stats-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
     margin-bottom: var(--space-6);
 }
 
@@ -3475,7 +3484,6 @@ body.modal-lock-scroll {
     font-family: var(--font-display);
     font-size: var(--text-xl);
     font-weight: 500;
-    margin-bottom: var(--space-2);
 }
 
 .stats-subtitle {
@@ -3562,8 +3570,8 @@ body.modal-lock-scroll {
 }
 
 .stats-hero-glyph--hash {
-    font-size: 3.5rem;
-    top: 0.15em;
+    font-size: 2.75rem;
+    top: 0.25em;
 }
 
 .stats-hero-cap,
@@ -3667,12 +3675,15 @@ body.modal-lock-scroll {
     vertical-align: middle;
 }
 
-.stats-dot-fav { background: var(--color-gold); }
+/* Favorites use --color-primary — the same accent as the QOD "В избранном" button — so the
+   favorite colour is consistent app-wide and reads as native in every theme (not gold, which
+   clashed with e.g. Sunset / Cosmos / Classic). */
+.stats-dot-fav { background: var(--color-primary); }
 .stats-dot-plain { background: var(--color-surface-dynamic); }
 
 .stats-ring-track { stroke: var(--color-surface-dynamic); }
 .stats-ring-arc {
-    stroke: var(--color-gold);
+    stroke: var(--color-primary);
     transition: stroke-dashoffset 0.7s ease;
 }
 
