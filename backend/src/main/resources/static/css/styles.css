@@ -3907,6 +3907,302 @@ body.modal-lock-scroll {
     margin-top: var(--space-1);
 }
 
+/* ── Metric-card grid (registry cards, free + Plus) ──────────────────────── */
+.stats-metric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.stats-card-sub {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin: 2px 0 var(--space-4);
+}
+
+/* ── Growth area chart ──────────────────────────────────────────────────── */
+.stats-growth-svg {
+    width: 100%;
+    height: 96px;
+    display: block;
+    margin-top: auto;
+}
+
+.stats-growth-fill { fill: var(--color-primary); fill-opacity: 0.14; }
+.stats-growth-line { fill: none; stroke: var(--color-primary); stroke-width: 2; }
+
+/* ── Length histogram ───────────────────────────────────────────────────── */
+.stats-hbars {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-4);
+    height: 110px;
+    padding: 0 var(--space-2);
+    margin-top: auto;
+}
+
+.stats-hbar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    height: 100%;
+}
+
+.stats-hbar {
+    width: 100%;
+    max-width: 46px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm) var(--radius-sm) 2px 2px;
+    min-height: 2px;
+}
+
+.stats-hbar-val { font-size: var(--text-xs); color: var(--color-text-muted); }
+.stats-hbar-lbl { font-size: var(--text-xs); color: var(--color-text-faint); }
+
+/* ── Card header with an action (used by the clickable "book" card) ─────── */
+.stats-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.stats-book-cycle {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color var(--transition), border-color var(--transition);
+}
+
+.stats-book-cycle:hover { color: var(--color-primary); border-color: var(--color-text-faint); }
+
+/* ── Collection as a book ───────────────────────────────────────────────── */
+.stats-book {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.stats-book--clickable {
+    cursor: pointer;
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
+    margin-left: calc(var(--space-2) * -1);
+    transition: background 0.22s ease;
+}
+
+.stats-book--clickable:hover { background: var(--color-surface-2); }
+
+/* Plays on cycle (class added in cycleStatsBook) — a quick fade+lift so the swap is felt. */
+.stats-book-anim { animation: statsBookSwap 0.32s ease; }
+
+@keyframes statsBookSwap {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.stats-book-ic { font-size: var(--text-2xl); opacity: 0.8; }
+.stats-book-val { font-size: var(--text-lg); font-weight: 700; line-height: 1.1; }
+.stats-book-sub { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1); }
+
+/* ── Language stacked bar ───────────────────────────────────────────────── */
+.stats-langbar {
+    display: flex;
+    height: 14px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: auto;
+}
+
+.stats-langbar > span { display: block; }
+
+/* Shared colour classes for both bar segments and legend dots — warm palette, no gold. */
+.stats-langc-ru { background: var(--color-primary); }
+.stats-langc-en { background: color-mix(in oklab, var(--color-primary) 42%, var(--color-surface-dynamic)); }
+.stats-langc-other { background: var(--color-text-muted); }
+
+.stats-lang-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+    margin-top: var(--space-4);
+}
+
+.stats-lang-row { display: flex; align-items: center; gap: var(--space-2); }
+.stats-lang-name { color: var(--color-text-muted); }
+.stats-lang-pct { margin-left: auto; font-weight: 700; }
+.stats-lang-count { width: 40px; text-align: right; font-size: var(--text-xs); color: var(--color-text-faint); }
+
+/* ── Hall of fame ───────────────────────────────────────────────────────── */
+.stats-hall { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.stats-hall-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+}
+
+.stats-hall-ic { font-size: var(--text-base); width: 22px; text-align: center; }
+.stats-hall-lbl { color: var(--color-text-muted); }
+.stats-hall-val { margin-left: auto; font-weight: 600; text-align: right; }
+
+/* ── Tempo (this vs last quarter) ───────────────────────────────────────── */
+.stats-tempo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--space-5);
+    height: 120px;
+    margin-top: auto;
+}
+
+.stats-tempo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    height: 100%;
+}
+
+.stats-tempo-bar {
+    width: 44px;
+    border-radius: var(--radius-sm) var(--radius-sm) 2px 2px;
+    min-height: 2px;
+}
+
+.stats-tempo-bar--prev { background: var(--color-surface-dynamic); }
+.stats-tempo-bar--cur { background: var(--color-primary); }
+.stats-tempo-n { font-size: var(--text-xs); color: var(--color-text-muted); }
+.stats-tempo-lbl { font-size: var(--text-xs); color: var(--color-text-faint); }
+
+.stats-tempo-delta {
+    align-self: center;
+    margin-bottom: var(--space-6);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.stats-tempo-delta.is-flat { color: var(--color-text-muted); }
+
+/* ── Epigraph Plus section ──────────────────────────────────────────────── */
+.stats-plus-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-plus);
+}
+
+.stats-plus-teaser {
+    position: relative;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    min-height: 250px;
+    margin-top: var(--space-3);
+}
+
+.stats-plus-teaser-preview {
+    padding: var(--space-5);
+    filter: blur(3px);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.stats-teaser-heat {
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 3px;
+    height: 200px;
+}
+
+/* 5 intensity levels, dark base → warm accent, theme-aware (nod to a real contribution graph). */
+.stats-teaser-heat span {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--color-surface-dynamic);
+}
+.stats-teaser-heat span.l1 { background: color-mix(in oklab, var(--color-primary) 25%, var(--color-surface-dynamic)); }
+.stats-teaser-heat span.l2 { background: color-mix(in oklab, var(--color-primary) 50%, var(--color-surface-dynamic)); }
+.stats-teaser-heat span.l3 { background: color-mix(in oklab, var(--color-primary) 75%, var(--color-surface-dynamic)); }
+.stats-teaser-heat span.l4 { background: var(--color-primary); }
+
+.stats-plus-teaser-over {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--space-2);
+    padding: var(--space-6);
+    background: linear-gradient(180deg,
+        oklch(from var(--color-bg) l c h / 0.35),
+        oklch(from var(--color-bg) l c h / 0.78));
+}
+
+.stats-plus-lock {
+    flex: none; /* column-flex item mustn't shrink vertically — keeps the badge a circle, not a pill */
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-full);
+    background: var(--color-plus);
+    color: var(--color-plus-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-1);
+}
+
+.stats-plus-teaser-title {
+    font-size: var(--text-base);
+    font-weight: 700;
+}
+
+.stats-plus-teaser-text {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    max-width: 380px;
+}
+
+.stats-plus-teaser-cta {
+    margin-top: var(--space-3);
+    background: var(--color-surface-dynamic);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    font: inherit;
+    font-weight: 700;
+    font-size: var(--text-sm);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.stats-plus-teaser-cta:hover {
+    background: var(--color-surface-offset);
+    border-color: var(--color-text-faint);
+}
+
 /* ── Empty state ────────────────────────────────────────────────────────── */
 .stats-empty {
     text-align: center;
@@ -3953,7 +4249,9 @@ body.modal-lock-scroll {
     .stats-tiles { grid-template-columns: repeat(2, 1fr); }
     .stats-hero-row,
     .stats-row2,
-    .stats-row3 { grid-template-columns: 1fr; }
+    .stats-row3,
+    .stats-metric-grid,
+    .stats-plus-teaser-preview { grid-template-columns: 1fr; }
     .stats-facts { grid-template-columns: repeat(2, 1fr); }
     .stats-rank-nm { flex-basis: 90px; }
 }

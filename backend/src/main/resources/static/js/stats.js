@@ -29,6 +29,46 @@ const STATS_DAYS_PER_MONTH = 30;
 /** How many days count as "recent" for the tile deltas. */
 const STATS_RECENT_DAYS = 30;
 
+// =============================================================================
+// CARD REGISTRY
+// Standalone metric cards register here by a stable id, so the screen can lay
+// them out by tier (free vs Epigraph Plus) and a future profile can pin any card
+// by id. The MVP "Обзор" summary block (tiles/heroes/ring/chart/top-lists/facts)
+// is intentionally NOT part of this registry — only the standalone metric cards
+// added from here on are pinnable. Populated in later chunks (B/C).
+// Each entry: { tier: 'free' | 'plus', titleKey, render(stats) -> inner HTML }.
+// render() returns the FULL card inner (its own title/sub/viz) so a card is
+// self-contained and can be dropped anywhere (stats screen, profile pin slot).
+// =============================================================================
+const STATS_CARDS = {
+    growth:   { tier: 'free', titleKey: 'statsCardGrowth',   render: statsGrowthCard },
+    length:   { tier: 'free', titleKey: 'statsCardLength',   render: statsLengthCard },
+    book:     { tier: 'free', titleKey: 'statsCardBook',     render: statsBookCard },
+    language: { tier: 'free', titleKey: 'statsCardLanguage', render: statsLanguageCard },
+    hall:     { tier: 'free', titleKey: 'statsCardHall',     render: statsHallCard },
+    tempo:    { tier: 'free', titleKey: 'statsCardTempo',    render: statsTempoCard },
+};
+
+/** Last computeStats() result, cached so in-card interactions can re-render without recomputing. */
+let statsCurrent = null;
+
+/** Registered cards for a tier, as [{ id, tier, titleKey, render }]. */
+function statsCardsByTier(tier) {
+    return Object.entries(STATS_CARDS)
+        .filter(([, card]) => card.tier === tier)
+        .map(([id, card]) => ({ id, ...card }));
+}
+
+/** Wraps a card's self-contained inner HTML in the metric-card shell (stable id for pinning). */
+function statsRenderCard(card, s) {
+    return `<div class="stats-card stats-metric-card" data-card-id="${card.id}">${card.render(s)}</div>`;
+}
+
+/** True when the signed-in user has Epigraph Plus. */
+function statsIsPlus() {
+    return !!(typeof currentUser !== 'undefined' && currentUser && currentUser.plus);
+}
+
 /**
  * Computes every statistic the screen needs in a single O(n) pass over the quotes.
  * Pure: takes the quotes array, returns a plain data object — no DOM, no i18n. Rendering
@@ -59,18 +99,48 @@ function computeStats(list) {
     const tagCounts = new Map();
     const monthTotals = new Map();      // year*12+month → count, across ALL months (for the all-time record)
 
+    const lengthBuckets = { short: 0, medium: 0, long: 0 }; // by character count: <80, 80–200, >200
+    const langSplit = { ru: 0, en: 0, other: 0 };           // dominant script per quote
+    const dayCounts = new Map();                            // y*10000+m*100+d → adds that day
+
     let favCount = 0;
     let withSource = 0;
     let savedFromFriends = 0;
     let addedRecent = 0;
     let textLenSum = 0;
+    let totalWords = 0;
+    let maxWords = 0;
+    let minWords = Infinity;
+    let busiestDayCount = 0;
+    let busiestDayTs = null;
     let earliestAdded = null;
     let latestAdded = null;
 
     for (const q of list) {
         if (q.fav) favCount++;
 
-        textLenSum += (q.text || '').trim().length;
+        const text = (q.text || '').trim();
+        textLenSum += text.length;
+
+        // Word count (simple whitespace split — no stopwords/stemmer needed here).
+        const words = text ? text.split(/\s+/).length : 0;
+        totalWords += words;
+        if (words > maxWords) maxWords = words;
+        if (words > 0 && words < minWords) minWords = words;
+
+        // Length bucket by character count.
+        if (text.length > 0) {
+            if (text.length < 80) lengthBuckets.short++;
+            else if (text.length <= 200) lengthBuckets.medium++;
+            else lengthBuckets.long++;
+        }
+
+        // Dominant script → language of the quote (Cyrillic vs Latin letter counts).
+        const cyr = (text.match(/[а-яёА-ЯЁ]/g) || []).length;
+        const lat = (text.match(/[a-zA-Z]/g) || []).length;
+        if (cyr === 0 && lat === 0) langSplit.other++;
+        else if (cyr >= lat) langSplit.ru++;
+        else langSplit.en++;
 
         const author = (q.author || '').trim();
         if (author) {
@@ -104,6 +174,12 @@ function computeStats(list) {
             const bucket = monthKeyIndex[key];
             if (bucket !== undefined) months[bucket].count++;
 
+            // Busiest calendar day (for the Hall of Fame).
+            const dayKey = d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate();
+            const dc = (dayCounts.get(dayKey) || 0) + 1;
+            dayCounts.set(dayKey, dc);
+            if (dc > busiestDayCount) { busiestDayCount = dc; busiestDayTs = added; }
+
             if (author) {
                 const prev = authorFirstAdded.get(author);
                 if (prev === undefined || added < prev) authorFirstAdded.set(author, added);
@@ -128,6 +204,28 @@ function computeStats(list) {
     });
     const allTimePeakYear = allTimePeakKey >= 0 ? Math.floor(allTimePeakKey / 12) : null;
     const allTimePeakMonth = allTimePeakKey >= 0 ? allTimePeakKey % 12 : null;
+
+    // Cumulative growth series — one point per calendar month from the first datable quote to
+    // the last (gaps filled so inactive months read as flat), values are running totals.
+    const monthKeysSorted = [...monthTotals.keys()].sort((a, b) => a - b);
+    const growthSeries = [];
+    if (monthKeysSorted.length) {
+        let cumulative = 0;
+        for (let k = monthKeysSorted[0]; k <= monthKeysSorted[monthKeysSorted.length - 1]; k++) {
+            cumulative += monthTotals.get(k) || 0;
+            growthSeries.push(cumulative);
+        }
+    }
+
+    // Tempo: quotes added this calendar quarter vs the previous one (from the all-time month map).
+    const nowMonthKey = nowDate.getFullYear() * 12 + nowDate.getMonth();
+    const thisQStartKey = nowDate.getFullYear() * 12 + Math.floor(nowDate.getMonth() / 3) * 3;
+    const lastQStartKey = thisQStartKey - 3;
+    let tempoThisQuarter = 0, tempoLastQuarter = 0;
+    monthTotals.forEach((count, key) => {
+        if (key >= thisQStartKey && key <= nowMonthKey) tempoThisQuarter += count;
+        else if (key >= lastQStartKey && key < thisQStartKey) tempoLastQuarter += count;
+    });
 
     // Authors by quote count (desc) — top list + favorite author. Ties resolve to whichever
     // entry the stable sort saw first; good enough, this isn't a leaderboard.
@@ -169,6 +267,16 @@ function computeStats(list) {
         allTimePeakCount,
         allTimePeakYear,
         allTimePeakMonth,
+        growthSeries,
+        tempoThisQuarter,
+        tempoLastQuarter,
+        lengthBuckets,
+        langSplit,
+        totalWords,
+        maxWords,
+        minWords: minWords === Infinity ? 0 : minWords,
+        busiestDayCount,
+        busiestDayTs,
         avgLength: total ? Math.round(textLenSum / total) : 0,
         savedFromFriends,
         withSourcePct: total ? Math.round((withSource / total) * 100) : 0,
@@ -199,8 +307,11 @@ function renderStats() {
     // The usage streak (days in a row using Epigraph) is not derivable from quotes — it lives in
     // the "week_streak" achievement's uncapped progress, the same source the profile/Settings use.
     s.usageStreak = statsUsageStreak();
+    statsCurrent = s; // cached for in-card interactions (e.g. cycling the "collection as a book" title)
 
-    body.innerHTML = s.total === 0 ? statsEmptyMarkup() : statsOverviewMarkup(s);
+    body.innerHTML = s.total === 0
+        ? statsEmptyMarkup()
+        : statsOverviewMarkup(s) + statsFreeCardsSection(s) + statsFactsSection(s) + statsPlusSection(s);
 
     // Re-apply translations so the active language wins over the Russian fallback text
     // baked into the [data-i18n] elements in the templates above.
@@ -210,6 +321,96 @@ function renderStats() {
         animateStatsVisuals();
         statsEnsureUsageStreakLoaded(s);
     }
+}
+
+/**
+ * Grid of free-tier metric cards from the registry, flowing straight after the Overview block
+ * (no section label — the free metrics read as one continuous screen; only the Plus section is
+ * a labelled boundary). Empty (renders nothing) until cards are registered.
+ */
+function statsFreeCardsSection(s) {
+    const cards = statsCardsByTier('free');
+    if (cards.length === 0) return '';
+    return `
+        <div class="stats-metric-grid">
+            ${cards.map(c => statsRenderCard(c, s)).join('')}
+        </div>
+    `;
+}
+
+/**
+ * Epigraph Plus section at the bottom of the screen. Plus users get the full cards; everyone
+ * else gets a locked teaser (blurred preview + upgrade CTA). Kept as a separate trailing section,
+ * never interleaved with the free content.
+ */
+function statsPlusSection(s) {
+    const cards = statsCardsByTier('plus');
+    if (statsIsPlus()) {
+        if (cards.length === 0) return '';
+        return `
+            <div class="stats-section-label stats-plus-label" data-i18n="statsPlusSectionTitle">Epigraph Plus</div>
+            <div class="stats-metric-grid">
+                ${cards.map(c => statsRenderCard(c, s)).join('')}
+            </div>
+        `;
+    }
+    return statsPlusTeaserMarkup();
+}
+
+/** Locked teaser shown to non-Plus users: blurred placeholder previews under an upgrade CTA. */
+function statsPlusTeaserMarkup() {
+    return `
+        <div class="stats-section-label stats-plus-label" data-i18n="statsPlusSectionTitle">Epigraph Plus</div>
+        <div class="stats-plus-teaser">
+            <div class="stats-plus-teaser-preview" aria-hidden="true">
+                ${statsTeaserHeatmap()}
+            </div>
+            <div class="stats-plus-teaser-over">
+                <div class="stats-plus-lock" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
+                <div class="stats-plus-teaser-title" data-i18n="statsPlusTeaserTitle">Глубокая аналитика в Epigraph Plus</div>
+                <div class="stats-plus-teaser-text" data-i18n="statsPlusTeaserText">Тепловые карты, тональность, сезонность, сравнение с сообществом и другие диаграммы</div>
+                <button class="stats-plus-teaser-cta" onclick="openPlusInfo()" data-i18n="statsPlusTeaserCta">Открыть Epigraph Plus</button>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Decorative blurred contribution-heatmap grid behind the Plus teaser — reads as rich "deep
+ * analytics" (and nods to the actual "Тепловая карта года" Plus card). Purely visual. Uses the
+ * same pseudo-random scatter + 5 intensity levels as the design mockup so it looks like real
+ * hidden data rather than a smooth gradient; levels are theme-aware (surface-dynamic → primary).
+ */
+function statsTeaserHeatmap() {
+    let cells = '';
+    for (let i = 0; i < 7 * 26; i++) {
+        const v = statsHeatRand(i * 1.7);
+        const lvl = v < 0.5 ? 0 : v < 0.7 ? 1 : v < 0.85 ? 2 : v < 0.95 ? 3 : 4;
+        cells += lvl === 0 ? '<span></span>' : `<span class="l${lvl}"></span>`;
+    }
+    return `<div class="stats-teaser-heat">${cells}</div>`;
+}
+
+/** Deterministic pseudo-random in [0,1) — frac(sin(x)·10000), matching the design mockup. */
+function statsHeatRand(x) {
+    const n = Math.sin(x) * 10000;
+    return n - Math.floor(n);
+}
+
+/**
+ * Info modal about Epigraph Plus, opened from the teaser CTA. There is no in-app purchase flow —
+ * Plus is activated by a redeem code (TASK-131) — so this explains the value rather than checking out.
+ */
+function openPlusInfo() {
+    showModal(
+        t('statsPlusInfoTitle'),
+        `<p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.5">${t('statsPlusInfoBody')}</p>`,
+        [{ label: t('statsPlusInfoClose'), cls: 'btn-primary', action: closeModal }]
+    );
 }
 
 /** The real "days in a row" usage streak, or 0 when the achievements payload isn't loaded yet. */
@@ -286,7 +487,15 @@ function statsOverviewMarkup(s) {
             ${statsTopAuthorsMarkup(s.topAuthors)}
             ${statsTopTagsMarkup(s.topTags)}
         </div>
+    `;
+}
 
+/**
+ * The "Интересное" facts strip — its own labelled section (3-column tiles), rendered AFTER the
+ * 2-column metric cards so the differing grids don't sit adjacent and read as a broken layout.
+ */
+function statsFactsSection(s) {
+    return `
         <div class="stats-section-label" data-i18n="statsSectionInteresting">Интересное</div>
         <div class="stats-facts" id="stats-facts">
             ${statsFactsMarkup(s)}
@@ -540,6 +749,231 @@ function formatCollectionAge(earliest) {
     return rem > 0
         ? `${years} ${t('statsAgeYearShort')} ${rem} ${t('statsAgeMonthShort')}`
         : `${years} ${t('statsAgeYearShort')}`;
+}
+
+// =============================================================================
+// FREE METRIC CARDS (chunk B)
+// Each returns a self-contained card body (title + sub + viz) for the registry.
+// All derived from computeStats() — pure client-side, no backend.
+// =============================================================================
+
+/** Average words per page used to turn a word count into a page count for the "book" card. */
+const STATS_WORDS_PER_PAGE = 250;
+
+/**
+ * Famous books for the playful "collection as a book" comparison (2 Russian classics, 2 foreign,
+ * 1 Harry Potter). Word counts are rough. nameKey resolves to the RU genitive ("«Войны и мира»")
+ * so it fits "как N × {book}". Each book has a distinct cover-colour emoji so cycling is obvious.
+ */
+const STATS_BOOKS = [
+    { words: 587000, nameKey: 'statsBookWarAndPeace', emoji: '📕' },
+    { words: 211000, nameKey: 'statsBookCrimePunishment', emoji: '📘' },
+    { words: 122000, nameKey: 'statsBookPridePrejudice', emoji: '📗' },
+    { words: 89000,  nameKey: 'statsBookNineteenEightyFour', emoji: '📓' },
+    { words: 77000,  nameKey: 'statsBookHarryPotter', emoji: '📙' },
+];
+
+/** Which book the "collection as a book" card compares to. Randomised per page load; cycled on click. */
+let statsBookIndex = Math.floor(Math.random() * STATS_BOOKS.length);
+
+/** Cycles the "collection as a book" comparison to the next book and re-renders just that card. */
+function cycleStatsBook() {
+    statsBookIndex = (statsBookIndex + 1) % STATS_BOOKS.length;
+    const el = document.querySelector('#stats-body [data-card-id="book"]');
+    if (!el || !statsCurrent) return;
+    el.innerHTML = statsBookCard(statsCurrent);
+    applyI18n(el);
+    // Replay the swap animation on the freshly inserted content (reflow to restart it).
+    const book = el.querySelector('.stats-book');
+    if (book) { book.classList.remove('stats-book-anim'); void book.offsetWidth; book.classList.add('stats-book-anim'); }
+}
+
+/** Cumulative growth area chart over the collection's whole lifetime. */
+function statsGrowthCard(s) {
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardGrowth">Рост коллекции</div>
+        <div class="stats-card-sub" data-i18n="statsCardGrowthSub">Накопительно за всё время</div>
+        ${statsGrowthSvg(s.growthSeries)}
+    `;
+}
+
+/** Builds the growth area+line SVG from a cumulative series. */
+function statsGrowthSvg(series) {
+    const W = 300, H = 96;
+    if (!series || series.length < 2) {
+        return `<svg class="stats-growth-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"></svg>`;
+    }
+    const max = series[series.length - 1] || 1;
+    const n = series.length;
+    const pts = series.map((v, i) => [
+        (i / (n - 1)) * W,
+        H - (v / max) * (H - 4) - 2,
+    ]);
+    const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    return `
+        <svg class="stats-growth-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <path class="stats-growth-fill" d="${line} L${W},${H} L0,${H} Z"/>
+            <path class="stats-growth-line" d="${line}" vector-effect="non-scaling-stroke"/>
+        </svg>
+    `;
+}
+
+/** Histogram of quote lengths: short / medium / long (by character count). */
+function statsLengthCard(s) {
+    const b = s.lengthBuckets;
+    const max = Math.max(b.short, b.medium, b.long, 1);
+    const col = (count, labelKey) => `
+        <div class="stats-hbar-col">
+            <span class="stats-hbar-val">${count}</span>
+            <div class="stats-hbar" style="height:${Math.round((count / max) * 100)}%"></div>
+            <span class="stats-hbar-lbl" data-i18n="${labelKey}"></span>
+        </div>`;
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardLength">Длина цитат</div>
+        <div class="stats-card-sub" data-i18n="statsCardLengthSub">Короткие · средние · длинные</div>
+        <div class="stats-hbars">
+            ${col(b.short, 'statsLengthShort')}
+            ${col(b.medium, 'statsLengthMedium')}
+            ${col(b.long, 'statsLengthLong')}
+        </div>
+    `;
+}
+
+/** Playful "how big is my collection as a book" stat — clickable to compare against another book. */
+function statsBookCard(s) {
+    const book = STATS_BOOKS[statsBookIndex];
+    const pages = Math.max(1, Math.round(s.totalWords / STATS_WORDS_PER_PAGE));
+    const frac = s.totalWords / book.words;
+    const fracStr = frac >= 1 ? frac.toFixed(1) : frac.toFixed(2);
+    return `
+        <div class="stats-card-head">
+            <div>
+                <div class="stats-chart-title" data-i18n="statsCardBook">Коллекция как книга</div>
+                <div class="stats-card-sub" data-i18n="statsCardBookSub">Объём в страницах</div>
+            </div>
+            <button class="stats-book-cycle" type="button" onclick="cycleStatsBook()"
+                    data-i18n-aria="statsBookCycleAria" aria-label="Показать другую книгу">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+            </button>
+        </div>
+        <div class="stats-book stats-book--clickable" onclick="cycleStatsBook()">
+            <div class="stats-book-ic" aria-hidden="true">${book.emoji}</div>
+            <div>
+                <div class="stats-book-val">${t('statsBookPages', { count: pages, word: pageCountWord(pages) })}</div>
+                <div class="stats-book-sub">${t('statsBookWords', {
+                    count: s.totalWords, word: wordCountWord(s.totalWords), frac: fracStr, book: t(book.nameKey),
+                })}</div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Language split by dominant script (Russian / English / other), as a full-width stacked bar +
+ * legend. A bar (not a donut) fills the card width, needs no cramped centre label, and reads
+ * clearly even for the common 1–2-language case. Colours stay within the warm palette (accent
+ * orange + a muted tint), never the clashing gold.
+ */
+function statsLanguageCard(s) {
+    const l = s.langSplit;
+    const total = l.ru + l.en + l.other || 1;
+    const segs = [
+        { count: l.ru, colorCls: 'stats-langc-ru', labelKey: 'statsLangRu' },
+        { count: l.en, colorCls: 'stats-langc-en', labelKey: 'statsLangEn' },
+        { count: l.other, colorCls: 'stats-langc-other', labelKey: 'statsLangOther' },
+    ].filter(seg => seg.count > 0);
+
+    const bar = segs.map(seg =>
+        `<span class="${seg.colorCls}" style="flex:${seg.count}"></span>`
+    ).join('');
+
+    const legend = segs.map(seg =>
+        `<span class="stats-lang-row">
+            <i class="stats-dot ${seg.colorCls}"></i>
+            <span class="stats-lang-name" data-i18n="${seg.labelKey}"></span>
+            <b class="stats-lang-pct">${Math.round((seg.count / total) * 100)}%</b>
+            <span class="stats-lang-count">${seg.count}</span>
+        </span>`
+    ).join('');
+
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardLanguage">Язык коллекции</div>
+        <div class="stats-card-sub" data-i18n="statsCardLanguageSub">По алфавиту текста</div>
+        <div class="stats-langbar" aria-hidden="true">${bar}</div>
+        <div class="stats-lang-legend">${legend}</div>
+    `;
+}
+
+/** "Hall of fame" — record holders of the collection. */
+function statsHallCard(s) {
+    const fullMonths = t('statsMonthsFull').split(',');
+    const rows = [];
+    if (s.earliestAdded) {
+        const d = new Date(s.earliestAdded);
+        rows.push(statsHallRow('🌱', 'statsHallFirst', `${fullMonths[d.getMonth()]} ${d.getFullYear()}`));
+    }
+    if (s.maxWords > 0) {
+        rows.push(statsHallRow('📏', 'statsHallLongest', `${s.maxWords} ${wordCountWord(s.maxWords)}`));
+    }
+    if (s.minWords > 0) {
+        rows.push(statsHallRow('✂️', 'statsHallShortest', `${s.minWords} ${wordCountWord(s.minWords)}`));
+    }
+    if (s.busiestDayCount > 0) {
+        rows.push(statsHallRow('⚡', 'statsHallBusiest', `${s.busiestDayCount} ${quoteCountWord(s.busiestDayCount)}`));
+    }
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardHall">Зал славы</div>
+        <div class="stats-card-sub" data-i18n="statsCardHallSub">Рекордсмены коллекции</div>
+        <div class="stats-hall">${rows.join('')}</div>
+    `;
+}
+
+function statsHallRow(icon, labelKey, value) {
+    return `
+        <div class="stats-hall-row">
+            <span class="stats-hall-ic" aria-hidden="true">${icon}</span>
+            <span class="stats-hall-lbl" data-i18n="${labelKey}"></span>
+            <span class="stats-hall-val">${value}</span>
+        </div>`;
+}
+
+/** How many quotes were added this calendar quarter vs the previous one. */
+function statsTempoCard(s) {
+    const prev = s.tempoLastQuarter, cur = s.tempoThisQuarter;
+    const max = Math.max(prev, cur, 1);
+
+    const now = new Date();
+    const qThis = Math.floor(now.getMonth() / 3);           // 0..3
+    const qPrev = (qThis + 3) % 4;                            // previous quarter number (wraps year)
+    const qLabel = q => t('statsQuarterLabel', { n: q + 1 });
+
+    // Signed delta vs last quarter; blank when there's no prior quarter to compare against.
+    let deltaStr = '', deltaCls = '';
+    if (prev > 0) {
+        const delta = Math.round(((cur - prev) / prev) * 100);
+        deltaStr = `${delta > 0 ? '+' : ''}${delta}%`;
+        deltaCls = delta > 0 ? '' : 'is-flat';
+    }
+
+    const col = (n, barCls, label) => `
+        <div class="stats-tempo-col">
+            <span class="stats-tempo-n">${n}</span>
+            <div class="stats-tempo-bar ${barCls}" style="height:${Math.round((n / max) * 100)}%"></div>
+            <span class="stats-tempo-lbl">${label}</span>
+        </div>`;
+
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardTempo">Темп добавления</div>
+        <div class="stats-card-sub" data-i18n="statsCardTempoSub">Цитат добавлено по кварталам</div>
+        <div class="stats-tempo">
+            ${col(prev, 'stats-tempo-bar--prev', qLabel(qPrev))}
+            <div class="stats-tempo-delta ${deltaCls}">${deltaStr}</div>
+            ${col(cur, 'stats-tempo-bar--cur', qLabel(qThis))}
+        </div>
+    `;
 }
 
 /**
