@@ -435,6 +435,12 @@ const TRANSLATIONS = {
         pluralMonth1:                   'месяц',
         pluralMonth2:                   'месяца',
         pluralMonth5:                   'месяцев',
+        pluralWord1:                    'слово',
+        pluralWord2:                    'слова',
+        pluralWord5:                    'слов',
+        pluralPage1:                    'страница',
+        pluralPage2:                    'страницы',
+        pluralPage5:                    'страниц',
         // Genitive month names, for "с мая 2026" — toLocaleDateString's long
         // month is nominative ("май"), which reads wrong after the preposition.
         monthsGenitive:                 'января,февраля,марта,апреля,мая,июня,июля,августа,сентября,октября,ноября,декабря',
@@ -523,6 +529,46 @@ const TRANSLATIONS = {
         statsMonthsShort:               'янв,фев,мар,апр,май,июн,июл,авг,сен,окт,ноя,дек',
         statsMonthsPeak:                'январе,феврале,марте,апреле,мае,июне,июле,августе,сентябре,октябре,ноябре,декабре',
         statsSectionInteresting:        'Интересное',
+        statsSectionMore:               'Ещё аналитика',
+        statsCardGrowth:                'Рост коллекции',
+        statsCardGrowthSub:             'Накопительно за всё время',
+        statsCardLength:                'Длина цитат',
+        statsCardLengthSub:             'Короткие · средние · длинные',
+        statsLengthShort:               'короткие',
+        statsLengthMedium:              'средние',
+        statsLengthLong:                'длинные',
+        statsCardBook:                  'Коллекция как книга',
+        statsCardBookSub:               'Объём в страницах',
+        statsBookPages:                 '≈ {count} {word}',
+        statsBookWords:                 '{count} {word} · как {frac} × {book}',
+        statsBookCycleAria:             'Показать другую книгу',
+        statsBookWarAndPeace:           '«Войны и мира»',
+        statsBookCrimePunishment:       '«Преступления и наказания»',
+        statsBookPridePrejudice:        '«Гордости и предубеждения»',
+        statsBookNineteenEightyFour:    '«1984»',
+        statsBookHarryPotter:           '«Гарри Поттера и философского камня»',
+        statsCardLanguage:              'Язык коллекции',
+        statsCardLanguageSub:           'По алфавиту текста',
+        statsLangRu:                    'Русский',
+        statsLangEn:                    'Английский',
+        statsLangOther:                 'Другое',
+        statsCardHall:                  'Зал славы',
+        statsCardHallSub:               'Рекордсмены коллекции',
+        statsHallFirst:                 'Первая цитата',
+        statsHallLongest:               'Самая длинная',
+        statsHallShortest:              'Самая короткая',
+        statsHallBusiest:               'Рекорд за день',
+        statsCardTempo:                 'Темп добавления',
+        statsCardTempoSub:              'Цитат добавлено по кварталам',
+        statsQuarterLabel:              '{n} квартал',
+        statsMonthsFull:                'январь,февраль,март,апрель,май,июнь,июль,август,сентябрь,октябрь,ноябрь,декабрь',
+        statsPlusSectionTitle:          'Epigraph Plus',
+        statsPlusTeaserTitle:           'Глубокая аналитика в Epigraph Plus',
+        statsPlusTeaserText:            'Тепловые карты, тональность, сезонность, сравнение с сообществом и другие диаграммы',
+        statsPlusTeaserCta:             'Открыть Epigraph Plus',
+        statsPlusInfoTitle:             'Epigraph Plus',
+        statsPlusInfoBody:              'Epigraph Plus открывает глубокую аналитику коллекции — тепловые карты активности, тональность, сезонность, сравнение с сообществом и другие диаграммы. Подписка активируется по промокоду.',
+        statsPlusInfoClose:             'Понятно',
         statsFactStreakLabel:           'подряд в Epigraph',
         statsFactAvgLenLabel:           'символов — средняя длина цитаты',
         statsFactSavedLabel:            'сохранено от друзей',
@@ -999,6 +1045,12 @@ const TRANSLATIONS = {
         pluralMonth1:                   'month',
         pluralMonth2:                   'months',
         pluralMonth5:                   'months',
+        pluralWord1:                    'word',
+        pluralWord2:                    'words',
+        pluralWord5:                    'words',
+        pluralPage1:                    'page',
+        pluralPage2:                    'pages',
+        pluralPage5:                    'pages',
         monthsGenitive:                 'January,February,March,April,May,June,July,August,September,October,November,December',
         statsSummary:                   '{total} {word} · {favorites} favorited',
 
@@ -1085,6 +1137,46 @@ const TRANSLATIONS = {
         statsMonthsShort:               'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
         statsMonthsPeak:                'January,February,March,April,May,June,July,August,September,October,November,December',
         statsSectionInteresting:        'Interesting',
+        statsSectionMore:               'More analytics',
+        statsCardGrowth:                'Collection growth',
+        statsCardGrowthSub:             'Cumulative, all time',
+        statsCardLength:                'Quote length',
+        statsCardLengthSub:             'Short · medium · long',
+        statsLengthShort:               'short',
+        statsLengthMedium:              'medium',
+        statsLengthLong:                'long',
+        statsCardBook:                  'Collection as a book',
+        statsCardBookSub:               'Size in pages',
+        statsBookPages:                 '≈ {count} {word}',
+        statsBookWords:                 '{count} {word} · {frac} × {book}',
+        statsBookCycleAria:             'Show another book',
+        statsBookWarAndPeace:           'War and Peace',
+        statsBookCrimePunishment:       'Crime and Punishment',
+        statsBookPridePrejudice:        'Pride and Prejudice',
+        statsBookNineteenEightyFour:    '1984',
+        statsBookHarryPotter:           "Harry Potter and the Philosopher's Stone",
+        statsCardLanguage:              'Collection language',
+        statsCardLanguageSub:           'By the script of the text',
+        statsLangRu:                    'Russian',
+        statsLangEn:                    'English',
+        statsLangOther:                 'Other',
+        statsCardHall:                  'Hall of fame',
+        statsCardHallSub:               'Record holders',
+        statsHallFirst:                 'First quote',
+        statsHallLongest:               'Longest',
+        statsHallShortest:              'Shortest',
+        statsHallBusiest:               'Best day',
+        statsCardTempo:                 'Adding pace',
+        statsCardTempoSub:              'Quotes added per quarter',
+        statsQuarterLabel:              'Q{n}',
+        statsMonthsFull:                'January,February,March,April,May,June,July,August,September,October,November,December',
+        statsPlusSectionTitle:          'Epigraph Plus',
+        statsPlusTeaserTitle:           'Deeper analytics in Epigraph Plus',
+        statsPlusTeaserText:            'Heatmaps, sentiment, seasonality, community comparison and more charts',
+        statsPlusTeaserCta:             'Explore Epigraph Plus',
+        statsPlusInfoTitle:             'Epigraph Plus',
+        statsPlusInfoBody:              'Epigraph Plus unlocks deeper collection analytics — activity heatmaps, sentiment, seasonality, community comparison and more charts. The subscription is activated with a redeem code.',
+        statsPlusInfoClose:             'Got it',
         statsFactStreakLabel:           'in a row in Epigraph',
         statsFactAvgLenLabel:           'characters — average quote length',
         statsFactSavedLabel:            'saved from friends',
@@ -1212,6 +1304,30 @@ function monthCountWord(n) {
         return n === 1 ? t('pluralMonth1') : t('pluralMonth2');
     }
     return pluralRu(n, t('pluralMonth1'), t('pluralMonth2'), t('pluralMonth5'));
+}
+
+/**
+ * Same as quoteCountWord() but for "word(s)" — used by the stats text metrics ("9 240 слов").
+ * @param {number} n
+ * @returns {string}
+ */
+function wordCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralWord1') : t('pluralWord2');
+    }
+    return pluralRu(n, t('pluralWord1'), t('pluralWord2'), t('pluralWord5'));
+}
+
+/**
+ * Same as quoteCountWord() but for "page(s)" — used by the "collection as a book" stat.
+ * @param {number} n
+ * @returns {string}
+ */
+function pageCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralPage1') : t('pluralPage2');
+    }
+    return pluralRu(n, t('pluralPage1'), t('pluralPage2'), t('pluralPage5'));
 }
 
 /**
