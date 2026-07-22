@@ -1,7 +1,7 @@
 /**
  * router.js — Hash-based routing for Epigraph.
  *
- * Maps URL hashes (#today, #all, #add, #settings, #friends) to views and drives switchView() on
+ * Maps URL hashes (#today, #all, #add, #settings, #friends, #stats) to views and drives switchView() on
  * initial load and on browser back/forward. Extracted from auth.js (TASK-127).
  *
  * Depends on:
@@ -13,7 +13,7 @@
 // =============================================================================
 // HASH ROUTING
 // Syncs browser URL hash with the active view and handles back/forward navigation.
-// Supported hashes: #today, #all, #add, #settings, #friends
+// Supported hashes: #today, #all, #add, #settings, #friends, #stats
 // =============================================================================
 /** Maps URL hashes to view identifiers. */
 const HASH_TO_VIEW = {
@@ -22,6 +22,7 @@ const HASH_TO_VIEW = {
     '#add':      'add',
     '#settings': 'settings',
     '#friends':  'friends',
+    '#stats':    'stats',
 };
 
 /**

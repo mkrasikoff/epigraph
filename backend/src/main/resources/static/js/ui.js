@@ -533,9 +533,10 @@ function switchView(id) {
         moveAllToggleIndicators();
     }
     if (id === 'friends') renderFriendsView();
+    if (id === 'stats') renderStats();
 
     // Update URL hash to reflect the current section (enables back button and bookmarking)
-    const hashMap = { qod: '#today', list: '#all', add: '#add', settings: '#settings', friends: '#friends' };
+    const hashMap = { qod: '#today', list: '#all', add: '#add', settings: '#settings', friends: '#friends', stats: '#stats' };
     const newHash = hashMap[id] || '#today';
     if (window.location.hash !== newHash) {
         window.history.pushState(null, '', newHash);

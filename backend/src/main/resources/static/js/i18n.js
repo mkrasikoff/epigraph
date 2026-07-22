@@ -432,6 +432,9 @@ const TRANSLATIONS = {
         pluralDay1:                     'день',
         pluralDay2:                     'дня',
         pluralDay5:                     'дней',
+        pluralMonth1:                   'месяц',
+        pluralMonth2:                   'месяца',
+        pluralMonth5:                   'месяцев',
         // Genitive month names, for "с мая 2026" — toLocaleDateString's long
         // month is nominative ("май"), which reads wrong after the preposition.
         monthsGenitive:                 'января,февраля,марта,апреля,мая,июня,июля,августа,сентября,октября,ноября,декабря',
@@ -473,7 +476,7 @@ const TRANSLATIONS = {
         shareLinkError:                 'Не удалось создать ссылку',
 
         settingsQuotesVisibilityTitle:  'Что видят друзья',
-        settingsQuotesVisibilityDesc:   'Посторонние не видят их никогда.',
+        settingsQuotesVisibilityDesc:   'Посторонние не видят ваши цитаты.',
         quotesVisibilityNone:           'Ничего',
         quotesVisibilityNoneDesc:       'Друзья не видят ни одной цитаты',
         quotesVisibilityFavorites:      'Только избранное',
@@ -484,6 +487,51 @@ const TRANSLATIONS = {
 
         // ── Friends (TASK-129) ────────────────────────────────────────────────
         accountMenuFriends:             'Друзья',
+        accountMenuStats:               'Статистика',
+        statsTitle:                     'Статистика коллекции',
+        statsSubtitle:                  'Ваша коллекция в цифрах',
+        statsSectionOverview:           'Обзор',
+        statsTileQuotes:                'Цитат',
+        statsTileAuthors:               'Авторов',
+        statsTileSources:               'Источников',
+        statsTileTags:                  'Тегов',
+        statsDeltaAddedMonth:           '+{count} за месяц',
+        statsDeltaNewAuthors:           '+{count} за месяц',
+        statsTileSourcesHint:           'книги, статьи, фильмы',
+        statsTileTagsHint:              'темы и настроения',
+        statsHeroFavAuthor:             'Любимый автор',
+        statsHeroFavTag:                'Любимый тег',
+        statsHeroAuthorMeta:            '{count} {word} · {fav} в избранном',
+        statsHeroTagMeta:               '{count} {word} · самая частая тема',
+        statsHeroNoAuthorTitle:         'Пока без авторов',
+        statsHeroNoAuthorMeta:          'Добавьте автора к цитате',
+        statsHeroNoTagTitle:            'Пока без тегов',
+        statsHeroNoTagMeta:             'Добавьте теги к цитатам',
+        statsFavRingCenter:             'в избранном',
+        statsFavLegendFav:              '{count} избранных',
+        statsFavLegendPlain:            '{count} обычных',
+        statsEmptyTitle:                'Пока нечего показывать',
+        statsEmptyText:                 'Добавьте первую цитату — и здесь появятся ваши авторы, темы и динамика коллекции.',
+        statsEmptyBtn:                  'Добавить цитату',
+        statsChartTitle:                'Активность за 12 месяцев',
+        statsChartPeak:                 'Рекорд: {count} в {month} {year}',
+        statsTopAuthorsTitle:           'Топ авторов',
+        statsTopTagsTitle:              'Топ тегов',
+        statsNoData:                    'Пока нет данных',
+        statsAuthorsEmptyText:          'Укажите авторов у цитат',
+        statsTagsEmptyText:             'Добавьте теги к цитатам',
+        statsMonthsShort:               'янв,фев,мар,апр,май,июн,июл,авг,сен,окт,ноя,дек',
+        statsMonthsPeak:                'январе,феврале,марте,апреле,мае,июне,июле,августе,сентябре,октябре,ноябре,декабре',
+        statsSectionInteresting:        'Интересное',
+        statsFactStreakLabel:           'подряд с новыми цитатами',
+        statsFactAvgLenLabel:           'символов — средняя длина цитаты',
+        statsFactSavedLabel:            'сохранено от друзей',
+        statsFactSourceLabel:           'цитат с указанным источником',
+        statsFactSingleAuthorsLabel:    'авторов с единственной цитатой',
+        statsFactAgeLabel:              'возраст коллекции',
+        statsAgeYearShort:              'г',
+        statsAgeMonthShort:             'мес',
+        statsAgeLessMonth:              '< 1 мес',
         friendsTitle:                   'Друзья',
         friendsBackAria:                'Назад',
         friendsSearchPlaceholder:       'Поиск по имени',
@@ -948,6 +996,9 @@ const TRANSLATIONS = {
         pluralDay1:                     'day',
         pluralDay2:                     'days',
         pluralDay5:                     'days',
+        pluralMonth1:                   'month',
+        pluralMonth2:                   'months',
+        pluralMonth5:                   'months',
         monthsGenitive:                 'January,February,March,April,May,June,July,August,September,October,November,December',
         statsSummary:                   '{total} {word} · {favorites} favorited',
 
@@ -987,7 +1038,7 @@ const TRANSLATIONS = {
         shareLinkError:                 'Couldn\'t create the link',
 
         settingsQuotesVisibilityTitle:  'What friends see',
-        settingsQuotesVisibilityDesc:   'People who aren\'t friends never see them.',
+        settingsQuotesVisibilityDesc:   'People who aren\'t friends never see your quotes.',
         quotesVisibilityNone:           'Nothing',
         quotesVisibilityNoneDesc:       'Friends see none of your quotes',
         quotesVisibilityFavorites:      'Favourites only',
@@ -998,6 +1049,51 @@ const TRANSLATIONS = {
 
         // ── Friends (TASK-129) ────────────────────────────────────────────────
         accountMenuFriends:             'Friends',
+        accountMenuStats:               'Statistics',
+        statsTitle:                     'Collection statistics',
+        statsSubtitle:                  'Your collection in numbers',
+        statsSectionOverview:           'Overview',
+        statsTileQuotes:                'Quotes',
+        statsTileAuthors:               'Authors',
+        statsTileSources:               'Sources',
+        statsTileTags:                  'Tags',
+        statsDeltaAddedMonth:           '+{count} this month',
+        statsDeltaNewAuthors:           '+{count} this month',
+        statsTileSourcesHint:           'books, articles, films',
+        statsTileTagsHint:              'topics & moods',
+        statsHeroFavAuthor:             'Favorite author',
+        statsHeroFavTag:                'Favorite tag',
+        statsHeroAuthorMeta:            '{count} {word} · {fav} favorited',
+        statsHeroTagMeta:               '{count} {word} · most frequent theme',
+        statsHeroNoAuthorTitle:         'No authors yet',
+        statsHeroNoAuthorMeta:          'Add an author to a quote',
+        statsHeroNoTagTitle:            'No tags yet',
+        statsHeroNoTagMeta:             'Add tags to your quotes',
+        statsFavRingCenter:             'favorited',
+        statsFavLegendFav:              '{count} favorited',
+        statsFavLegendPlain:            '{count} regular',
+        statsEmptyTitle:                'Nothing to show yet',
+        statsEmptyText:                 'Add your first quote — your authors, themes and collection dynamics will appear here.',
+        statsEmptyBtn:                  'Add a quote',
+        statsChartTitle:                'Activity over 12 months',
+        statsChartPeak:                 'Record: {count} in {month} {year}',
+        statsTopAuthorsTitle:           'Top authors',
+        statsTopTagsTitle:              'Top tags',
+        statsNoData:                    'No data yet',
+        statsAuthorsEmptyText:          'Add authors to your quotes',
+        statsTagsEmptyText:             'Add tags to your quotes',
+        statsMonthsShort:               'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
+        statsMonthsPeak:                'January,February,March,April,May,June,July,August,September,October,November,December',
+        statsSectionInteresting:        'Interesting',
+        statsFactStreakLabel:           'in a row with new quotes',
+        statsFactAvgLenLabel:           'characters — average quote length',
+        statsFactSavedLabel:            'saved from friends',
+        statsFactSourceLabel:           'quotes with a source',
+        statsFactSingleAuthorsLabel:    'authors with a single quote',
+        statsFactAgeLabel:              'collection age',
+        statsAgeYearShort:              'y',
+        statsAgeMonthShort:             'mo',
+        statsAgeLessMonth:              '< 1 mo',
         friendsTitle:                   'Friends',
         friendsBackAria:                'Back',
         friendsSearchPlaceholder:       'Search by name',
@@ -1103,6 +1199,19 @@ function dayCountWord(n) {
         return n === 1 ? t('pluralDay1') : t('pluralDay2');
     }
     return pluralRu(n, t('pluralDay1'), t('pluralDay2'), t('pluralDay5'));
+}
+
+/**
+ * Same as quoteCountWord() but for "month(s)" — used by the stats streak fact once a
+ * daily streak passes a month ("5 месяцев подряд"). Russian has three forms.
+ * @param {number} n
+ * @returns {string}
+ */
+function monthCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralMonth1') : t('pluralMonth2');
+    }
+    return pluralRu(n, t('pluralMonth1'), t('pluralMonth2'), t('pluralMonth5'));
 }
 
 /**
