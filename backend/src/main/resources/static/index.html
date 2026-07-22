@@ -415,6 +415,14 @@
                         <span data-i18n="accountMenuFriends">Друзья</span>
                         <span class="account-menu-count" id="account-menu-friends-count" style="display:none"></span>
                     </button>
+                    <button class="account-menu-item" role="menuitem" onclick="closeAccountMenu(); switchView('stats');">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                        <span data-i18n="accountMenuStats">Статистика</span>
+                    </button>
                     <button class="account-menu-item" role="menuitem" onclick="logout()">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -1220,6 +1228,13 @@
             </section>
         </div>
 
+        <!-- STATS (TASK-136) — collection statistics; reached from the account menu, not the
+             nav tabs. Body is rendered client-side by renderStats() in stats.js from the already
+             loaded `quotes` array (no backend endpoint). -->
+        <div class="view" id="view-stats">
+            <section class="stats-section" id="stats-body"></section>
+        </div>
+
         <!-- FRIEND PROFILE (TASK-129) — immersive: global header/nav are hidden and the
              page is painted in the friend's theme style, in the viewer's own light/dark
              mode. Body is rendered by renderFriendProfile() in friends.js. -->
@@ -1272,6 +1287,7 @@
 <script src="/js/auth.js"></script>
 <script src="/js/account.js"></script>
 <script src="/js/friends.js"></script>
+<script src="/js/stats.js"></script>
 <script src="/js/tags.js"></script>
 <script src="/js/notifications.js"></script>
 <script src="/js/quotes-edit.js"></script>
