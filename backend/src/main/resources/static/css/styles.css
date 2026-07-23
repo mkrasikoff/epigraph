@@ -4147,6 +4147,21 @@ body.modal-lock-scroll {
 .stats-season-spoke { stroke: var(--color-primary); }
 .stats-season-lbl { font-size: 10px; fill: var(--color-text-muted); }
 
+/* ── Plus: language complexity gauge ────────────────────────────────────── */
+.stats-complexity {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: auto 0;
+}
+.stats-complexity-arc { width: 118px; height: 72px; flex-shrink: 0; display: block; }
+.stats-complexity-track { stroke: var(--color-surface-dynamic); }
+.stats-complexity-fill { stroke: var(--color-primary); }
+.stats-complexity-lbl { color: var(--color-text); font-size: var(--text-lg); font-weight: 600; line-height: 1.1; }
+.stats-complexity-rsn { color: var(--color-text-muted); font-size: var(--text-xs); margin-top: var(--space-1); }
+.stats-complexity-fac { color: var(--color-text-muted); font-size: var(--text-xs); margin-top: 2px; }
+.stats-complexity-note { color: var(--color-text-faint); font-size: var(--text-xs); margin-top: var(--space-3); }
+
 /* ── Plus: author cloud ─────────────────────────────────────────────────── */
 .stats-authorcloud {
     display: flex;
