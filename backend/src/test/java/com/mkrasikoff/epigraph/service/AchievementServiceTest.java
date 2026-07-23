@@ -212,6 +212,20 @@ class AchievementServiceTest {
     }
 
     @Test
+    @DisplayName("getRecentActivityDates: keeps only dates within the window, order preserved")
+    void getRecentActivityDates_windowsToRecent() {
+        LocalDate today = LocalDate.now(ACTIVITY_ZONE);
+        when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of(
+                today,
+                today.minusDays(10),
+                today.minusDays(100)   // outside a 30-day window
+        ));
+
+        assertThat(achievementService.getRecentActivityDates(USER_ID, 30))
+                .containsExactly(today, today.minusDays(10));
+    }
+
+    @Test
     @DisplayName("currentStreak: returns 0 for a user with no activity at all")
     void currentStreak_returnsZeroWithoutActivity() {
         when(activityDayRepo.findActivityDatesDesc(USER_ID)).thenReturn(List.of());

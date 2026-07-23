@@ -179,6 +179,14 @@ const Api = {
         fetch('/api/achievements/me', { headers: authHeaders() }).then(r => r.json()),
 
     /**
+     * Recent activity dates (ISO "yyyy-MM-dd" strings, ~last 4 months) for the stats-screen
+     * activity heatmap (TASK-136). Lazy — only fetched when a Plus user opens the stats screen.
+     * @returns {Promise<string[]>}
+     */
+    getActivityDays: () =>
+        fetch('/api/achievements/activity-days', { headers: authHeaders() }).then(r => r.json()),
+
+    /**
      * Records the "explorer" achievement's change_theme action from the
      * light/dark appearance toggle. No body — see AchievementController.
      * @returns {Promise<Response>}

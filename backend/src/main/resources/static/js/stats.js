@@ -41,12 +41,17 @@ const STATS_RECENT_DAYS = 30;
 // self-contained and can be dropped anywhere (stats screen, profile pin slot).
 // =============================================================================
 const STATS_CARDS = {
-    growth:   { tier: 'free', titleKey: 'statsCardGrowth',   render: statsGrowthCard },
-    length:   { tier: 'free', titleKey: 'statsCardLength',   render: statsLengthCard },
-    book:     { tier: 'free', titleKey: 'statsCardBook',     render: statsBookCard },
-    language: { tier: 'free', titleKey: 'statsCardLanguage', render: statsLanguageCard },
-    hall:     { tier: 'free', titleKey: 'statsCardHall',     render: statsHallCard },
-    tempo:    { tier: 'free', titleKey: 'statsCardTempo',    render: statsTempoCard },
+    growth:       { tier: 'free', titleKey: 'statsCardGrowth',      render: statsGrowthCard },
+    length:       { tier: 'free', titleKey: 'statsCardLength',      render: statsLengthCard },
+    book:         { tier: 'free', titleKey: 'statsCardBook',        render: statsBookCard },
+    language:     { tier: 'free', titleKey: 'statsCardLanguage',    render: statsLanguageCard },
+    hall:         { tier: 'free', titleKey: 'statsCardHall',        render: statsHallCard },
+    tempo:        { tier: 'free', titleKey: 'statsCardTempo',       render: statsTempoCard },
+    heatmap:      { tier: 'plus', titleKey: 'statsCardHeatmap',     render: statsHeatmapCard },
+    seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
+    authorLength: { tier: 'plus', titleKey: 'statsCardAuthorLength', render: statsAuthorLengthCard },
+    authorCloud:  { tier: 'plus', titleKey: 'statsCardAuthorCloud', render: statsAuthorCloudCard },
+    authorScatter:{ tier: 'plus', titleKey: 'statsCardAuthorScatter', render: statsAuthorScatterCard },
 };
 
 /** Last computeStats() result, cached so in-card interactions can re-render without recomputing. */
@@ -94,6 +99,7 @@ function computeStats(list) {
 
     const authorCounts = new Map();     // author → total quotes
     const authorFavCounts = new Map();  // author → favorited quotes
+    const authorWords = new Map();      // author → total words (for avg length per author)
     const authorFirstAdded = new Map(); // author → earliest added timestamp
     const sourceSet = new Set();
     const tagCounts = new Map();
@@ -145,6 +151,7 @@ function computeStats(list) {
         const author = (q.author || '').trim();
         if (author) {
             authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
+            authorWords.set(author, (authorWords.get(author) || 0) + words);
             if (q.fav) authorFavCounts.set(author, (authorFavCounts.get(author) || 0) + 1);
         }
 
@@ -249,6 +256,27 @@ function computeStats(list) {
     let singleQuoteAuthors = 0;
     authorCounts.forEach(c => { if (c === 1) singleQuoteAuthors++; });
 
+    // ── Plus-tier aggregates ────────────────────────────────────────────────
+    // Additions grouped by month-of-year across all years (seasonality radial).
+    const seasonality = new Array(12).fill(0);
+    monthTotals.forEach((count, key) => { seasonality[((key % 12) + 12) % 12] += count; });
+
+    // Average words per author — only authors with ≥2 quotes so a single long quote can't top it.
+    const authorAvgWords = authorsByCount
+        .filter(([, count]) => count >= 2)
+        .map(([name, count]) => ({ name, count, avg: Math.round((authorWords.get(name) || 0) / count) }))
+        .sort((a, b) => b.avg - a.avg)
+        .slice(0, 5);
+
+    // Author cloud — most-quoted authors, sized by count.
+    const authorCloud = authorsByCount.slice(0, 8).map(([name, count]) => ({ name, count }));
+
+    // Scatter: quote count × favorite-rate, for authors with ≥2 quotes (else fav-rate is 0/1 noise).
+    const authorScatter = authorsByCount
+        .filter(([, count]) => count >= 2)
+        .slice(0, 16)
+        .map(([name, count]) => ({ name, count, favRate: (authorFavCounts.get(name) || 0) / count }));
+
     return {
         total,
         distinctAuthors: authorCounts.size,
@@ -285,6 +313,11 @@ function computeStats(list) {
         addedRecent,
         earliestAdded,
         latestAdded,
+        seasonality,
+        authorAvgWords,
+        authorCloud,
+        authorScatter,
+        dayCounts,
     };
 }
 
@@ -320,6 +353,7 @@ function renderStats() {
     if (s.total > 0) {
         animateStatsVisuals();
         statsEnsureUsageStreakLoaded(s);
+        statsEnsureActivityLoaded();
     }
 }
 
@@ -381,7 +415,7 @@ function statsPlusTeaserMarkup() {
 
 /**
  * Decorative blurred contribution-heatmap grid behind the Plus teaser — reads as rich "deep
- * analytics" (and nods to the actual "Тепловая карта года" Plus card). Purely visual. Uses the
+ * analytics" (and nods to the actual "Активность" heatmap Plus card). Purely visual. Uses the
  * same pseudo-random scatter + 5 intensity levels as the design mockup so it looks like real
  * hidden data rather than a smooth gradient; levels are theme-aware (surface-dynamic → primary).
  */
@@ -974,6 +1008,210 @@ function statsTempoCard(s) {
             ${col(cur, 'stats-tempo-bar--cur', qLabel(qThis))}
         </div>
     `;
+}
+
+// =============================================================================
+// PLUS METRIC CARDS (chunk C)
+// Deeper analytics, gated to Epigraph Plus. Still pure client-side from computeStats().
+// =============================================================================
+
+/** Recent activity day-keys (days the user visited), loaded lazily from the backend; null until then. */
+let statsActivityDays = null;
+
+/**
+ * Activity calendar: the current month laid out as a familiar Monday-first calendar grid, with
+ * days the user visited tinted and days they also added a quote highlighted brighter. Visited-days
+ * come from the backend (UserActivityDay); until that fetch resolves, only quote-days show (they
+ * imply activity). A single month always fills the card as a symmetric block, unlike the old
+ * multi-month grid that only ever populated on the recent (right) edge.
+ */
+function statsHeatmapCard(s) {
+    const now = new Date();
+    const rawMonth = t('statsMonthsFull').split(',')[now.getMonth()];
+    const monthName = rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1);
+    const todayCol = (now.getDay() + 6) % 7; // Monday-first column of today's weekday
+    const dow = t('statsWeekdaysShort').split(',')
+        .map((d, i) => `<span${i === todayCol ? ' class="is-today"' : ''}>${escHtml(d)}</span>`).join('');
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardHeatmap">Активность</div>
+        <div class="stats-card-sub">${t('statsCalendarSub', { month: monthName })}</div>
+        <div class="stats-cal-dow">${dow}</div>
+        ${statsCalendarGrid(s.dayCounts, statsActivityDays)}
+        <div class="stats-heat-legend">
+            <span class="stats-cal-cell l-visit"></span><span data-i18n="statsHeatVisit">заходили</span>
+            <span class="stats-cal-cell l-quote"></span><span data-i18n="statsHeatQuote">+ цитата</span>
+        </div>
+    `;
+}
+
+/**
+ * Builds the current month as a Monday-first calendar: leading blanks pad to the 1st's weekday,
+ * then one cell per day. A day is "quote" (brightest) if a quote was added, else "visit" if the
+ * user was active, else empty. Today is ringed; future days in this month stay empty placeholders.
+ */
+function statsCalendarGrid(dayCounts, activitySet) {
+    const now = new Date();
+    const year = now.getFullYear(), month = now.getMonth(), todayDate = now.getDate();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // 0 = Monday
+
+    let cells = '';
+    for (let i = 0; i < firstDow; i++) cells += `<span class="stats-cal-cell is-blank"></span>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+        const key = year * 10000 + month * 100 + d;
+        let cls = 'stats-cal-cell';
+        if ((dayCounts.get(key) || 0) > 0) cls += ' l-quote';
+        else if (activitySet && activitySet.has(key)) cls += ' l-visit';
+        if (d > todayDate) cls += ' is-future';
+        cells += `<span class="${cls}"></span>`;
+    }
+    return `<div class="stats-cal">${cells}</div>`;
+}
+
+/**
+ * Fetches the user's recent activity days once (Plus only) and re-renders just the heatmap card
+ * with visited-days filled in — same lazy-patch pattern as the usage streak.
+ */
+function statsEnsureActivityLoaded() {
+    if (statsActivityDays !== null || !statsIsPlus()) return;
+    Api.getActivityDays().then(dates => {
+        statsActivityDays = new Set((dates || []).map(iso => {
+            const [y, m, d] = iso.split('-').map(Number);
+            return y * 10000 + (m - 1) * 100 + d; // match dayCounts' 0-based month key
+        }));
+        const card = document.querySelector('#stats-body [data-card-id="heatmap"]');
+        if (!card || !statsCurrent) return;
+        card.innerHTML = statsHeatmapCard(statsCurrent);
+        applyI18n(card);
+    }).catch(() => {});
+}
+
+/** Radial chart of additions by month of the year (aggregated across all years). */
+function statsSeasonalityCard(s) {
+    const vals = s.seasonality;
+    const max = Math.max(...vals, 1);
+    const months = t('statsMonthsFull').split(',');
+    const cx = 75, cy = 75, r0 = 22, rMax = 54;
+    let spokes = '';
+    vals.forEach((v, i) => {
+        const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+        const r1 = r0 + (rMax - r0) * (v / max);
+        const x1 = cx + Math.cos(a) * r0, y1 = cy + Math.sin(a) * r0;
+        const x2 = cx + Math.cos(a) * r1, y2 = cy + Math.sin(a) * r1;
+        const lx = cx + Math.cos(a) * (rMax + 15), ly = cy + Math.sin(a) * (rMax + 15);
+        spokes += `<line class="stats-season-spoke" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke-width="6" stroke-linecap="round" opacity="${(0.4 + (v / max) * 0.6).toFixed(2)}"/>`;
+        spokes += `<text class="stats-season-lbl" x="${lx.toFixed(1)}" y="${(ly + 3).toFixed(1)}" text-anchor="middle">${months[i].charAt(0).toUpperCase()}</text>`;
+    });
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardSeasonality">Сезонность</div>
+        <div class="stats-card-sub" data-i18n="statsCardSeasonalitySub">В какие месяцы вы активнее</div>
+        <svg class="stats-season" viewBox="0 0 150 150" aria-hidden="true">
+            <circle cx="${cx}" cy="${cy}" r="${r0}" fill="none" class="stats-ring-track" stroke-width="1"/>
+            ${spokes}
+        </svg>
+    `;
+}
+
+/** Average quote length (in words) for your most-quoted authors — who you quote at length. */
+function statsAuthorLengthCard(s) {
+    const list = s.authorAvgWords;
+    const body = list.length === 0
+        ? statsInlineEmptyMarkup('author', 'statsAuthorsEmptyText')
+        : `<div class="stats-rank-list">${(() => {
+            const max = Math.max(...list.map(a => a.avg), 1);
+            return list.map(a => {
+                const ratio = a.avg / max;
+                const tint = Math.round(45 + ratio * 55); // higher avg → brighter, so bars differ in hue too
+                return `
+                <div class="stats-rank">
+                    <span class="stats-rank-nm">${escHtml(a.name)}</span>
+                    <span class="stats-rank-track"><span class="stats-rank-fill" style="width:0;background:color-mix(in oklab, var(--color-primary) ${tint}%, var(--color-surface-dynamic))" data-w="${(ratio * 100).toFixed(0)}"></span></span>
+                    <span class="stats-rank-ct">${a.avg}</span>
+                </div>`;
+            }).join('');
+        })()}</div>`;
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardAuthorLength">Длина цитат по авторам</div>
+        <div class="stats-card-sub" data-i18n="statsCardAuthorLengthSub">Среднее слов на цитату</div>
+        ${body}
+    `;
+}
+
+/** Author cloud — most-quoted authors sized by their quote count. */
+function statsAuthorCloudCard(s) {
+    const list = s.authorCloud;
+    const body = list.length === 0
+        ? statsInlineEmptyMarkup('author', 'statsAuthorsEmptyText')
+        : `<div class="stats-authorcloud">${(() => {
+            const max = list[0].count;
+            return list.map(a => {
+                const ratio = a.count / max;
+                const size = (0.85 + ratio * 1.05).toFixed(2); // rem
+                const tint = Math.round(6 + ratio * 94); // top authors orange, tail fades toward grey
+                return `<span style="font-size:${size}rem;color:color-mix(in oklab, var(--color-primary) ${tint}%, var(--color-text-faint))">${escHtml(a.name)}</span>`;
+            }).join('');
+        })()}</div>`;
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardAuthorCloud">Облако авторов</div>
+        <div class="stats-card-sub" data-i18n="statsCardAuthorCloudSub">Размер — число цитат</div>
+        ${body}
+    `;
+}
+
+/** Scatter of authors: quote count (x) × favorite rate (y), with quadrant guides. */
+function statsAuthorScatterCard(s) {
+    const pts = s.authorScatter;
+    const W = 300, H = 150, padX = 24, padY = 16;
+    let dots = '', hits = '';
+    if (pts.length) {
+        const maxCount = Math.max(...pts.map(p => p.count), 1);
+        pts.forEach(p => {
+            const x = padX + (p.count / maxCount) * (W - padX * 2);
+            const y = H - padY - p.favRate * (H - padY * 2);
+            const rDot = 3 + (p.count / maxCount) * 5;
+            const tip = `${p.name} · ${p.count} ${quoteCountWord(p.count)} · ${Math.round(p.favRate * 100)}%`;
+            dots += `<circle class="stats-scatter-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rDot.toFixed(1)}"></circle>`;
+            // Larger transparent hit-target on top, so hovering a tiny dot reliably shows the tooltip.
+            hits += `<circle class="stats-scatter-hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rDot + 8).toFixed(1)}" data-tip="${escHtml(tip)}"></circle>`;
+        });
+    }
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardAuthorScatter">Авторы: глубина × любовь</div>
+        <div class="stats-card-sub" data-i18n="statsCardAuthorScatterSub">Число цитат × доля избранного</div>
+        <div class="stats-scatter-wrap" onmousemove="statsScatterMove(event)" onmouseleave="statsScatterHideTip(event)">
+            <svg class="stats-scatter" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+                <line class="stats-scatter-axis" x1="${W / 2}" y1="6" x2="${W / 2}" y2="${H - 8}"/>
+                <line class="stats-scatter-axis" x1="16" y1="${H / 2}" x2="${W - 12}" y2="${H / 2}"/>
+                ${dots}
+                ${hits}
+            </svg>
+            <div class="stats-scatter-tip" hidden></div>
+        </div>
+        <div class="stats-scatter-legend">
+            <span data-i18n="statsScatterX">→ больше цитат</span>
+            <span data-i18n="statsScatterY">↑ чаще в избранном</span>
+        </div>
+    `;
+}
+
+/** Positions the scatter tooltip under the cursor when hovering a point's hit-target. */
+function statsScatterMove(e) {
+    const wrap = e.currentTarget;
+    const tip = wrap.querySelector('.stats-scatter-tip');
+    if (!tip) return;
+    const hit = e.target.closest ? e.target.closest('.stats-scatter-hit') : null;
+    if (!hit) { tip.hidden = true; return; }
+    tip.textContent = hit.getAttribute('data-tip');
+    tip.hidden = false;
+    const rect = wrap.getBoundingClientRect();
+    tip.style.left = (e.clientX - rect.left) + 'px';
+    tip.style.top = (e.clientY - rect.top - 10) + 'px';
+}
+
+/** Hides the scatter tooltip when the cursor leaves the plot area. */
+function statsScatterHideTip(e) {
+    const tip = e.currentTarget.querySelector('.stats-scatter-tip');
+    if (tip) tip.hidden = true;
 }
 
 /**
