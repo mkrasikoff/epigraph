@@ -4159,6 +4159,24 @@ body.modal-lock-scroll {
 
 .stats-authorcloud span { color: var(--color-primary); font-weight: 600; }
 
+/* ── Free: word cloud (hero + swarm) ────────────────────────────────────── */
+.stats-wordcloud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 11px;
+    line-height: 1.25;
+    margin-top: var(--space-3);
+}
+.stats-wordcloud span { font-weight: 600; }
+.stats-wordcloud-hero {
+    width: 100%;
+    font-size: 2.4rem;
+    line-height: 1.05;
+    color: var(--color-primary-hover);
+    margin-bottom: var(--space-1);
+}
+
 /* ── Plus: author scatter ───────────────────────────────────────────────── */
 .stats-scatter-wrap { position: relative; margin-top: auto; }
 .stats-scatter { width: 100%; height: 150px; display: block; }
