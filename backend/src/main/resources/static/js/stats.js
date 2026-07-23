@@ -50,6 +50,7 @@ const STATS_CARDS = {
     tempo:        { tier: 'free', titleKey: 'statsCardTempo',       render: statsTempoCard },
     heatmap:      { tier: 'plus', titleKey: 'statsCardHeatmap',     render: statsHeatmapCard },
     seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
+    complexity:   { tier: 'plus', titleKey: 'statsCardComplexity', render: statsComplexityCard },
     authorLength: { tier: 'plus', titleKey: 'statsCardAuthorLength', render: statsAuthorLengthCard },
     authorCloud:  { tier: 'plus', titleKey: 'statsCardAuthorCloud', render: statsAuthorCloudCard },
     authorScatter:{ tier: 'plus', titleKey: 'statsCardAuthorScatter', render: statsAuthorScatterCard },
@@ -319,6 +320,7 @@ function computeStats(list) {
         authorCloud,
         authorScatter,
         wordCloud: statsWordCloud(list),
+        complexity: statsComplexity(list),
         dayCounts,
     };
 }
@@ -1141,6 +1143,44 @@ function statsSeasonalityCard(s) {
             <circle cx="${cx}" cy="${cy}" r="${r0}" fill="none" class="stats-ring-track" stroke-width="1"/>
             ${spokes}
         </svg>
+    `;
+}
+
+/**
+ * Language complexity — a rough heuristic (from stats-text.js), shown as a gauge arc + one of
+ * five qualitative bands + the raw factors + an honest disclaimer. Never surfaces the 0–100 score
+ * as a number, since the estimate isn't that precise.
+ */
+function statsComplexityCard(s) {
+    const c = s.complexity;
+    const titleSub = `
+        <div class="stats-chart-title" data-i18n="statsCardComplexity">Сложность языка</div>
+        <div class="stats-card-sub" data-i18n="statsCardComplexitySub">Оценка по длине слов и фраз</div>`;
+    if (!c) {
+        return `${titleSub}${statsInlineEmptyMarkup('tag', 'statsComplexityEmptyText')}`;
+    }
+    const label = t('statsComplexityLevels').split(',')[c.band];
+    const reason = t('statsComplexityReasons').split('|')[c.band];
+    const factors = t('statsComplexityFactors', {
+        word: c.avgWordLen.toFixed(1),
+        sentence: Math.round(c.avgSentenceLen),
+    });
+    const dash = 157; // ≈ π·50, the semicircle arc length
+    const offset = (dash * (1 - c.score / 100)).toFixed(1);
+    return `
+        ${titleSub}
+        <div class="stats-complexity">
+            <svg class="stats-complexity-arc" viewBox="0 0 120 74" aria-hidden="true">
+                <path d="M10 64 A50 50 0 0 1 110 64" fill="none" class="stats-complexity-track" stroke-width="11" stroke-linecap="round"/>
+                <path d="M10 64 A50 50 0 0 1 110 64" fill="none" class="stats-complexity-fill" stroke-width="11" stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${offset}"/>
+            </svg>
+            <div class="stats-complexity-text">
+                <div class="stats-complexity-lbl">${escHtml(label)}</div>
+                <div class="stats-complexity-rsn">${escHtml(reason)}</div>
+                <div class="stats-complexity-fac">${escHtml(factors)}</div>
+            </div>
+        </div>
+        <div class="stats-complexity-note">⚠ <span data-i18n="statsComplexityDisclaimer">Приблизительная оценка, а не научный индекс</span></div>
     `;
 }
 

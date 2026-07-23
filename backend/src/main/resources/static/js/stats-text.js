@@ -197,3 +197,57 @@ function statsWordCloud(list, topN) {
     arr.sort((a, b) => b.count - a.count || a.word.localeCompare(b.word));
     return arr.slice(0, topN);
 }
+
+// -----------------------------------------------------------------------------
+// Language complexity — a deliberately rough heuristic (NOT a validated readability
+// index like Flesch). Blends three normalised factors, equally weighted:
+//   • average word length (letters per word)
+//   • average sentence length (words per sentence)
+//   • share of long words (≥ 10 letters)
+// Returns a 0–100 score (surfaced only as a 5-band label + gauge fill, never a number)
+// plus the raw factors for the caption. null when there's no text to measure.
+// -----------------------------------------------------------------------------
+const STATS_COMPLEXITY_LONG_WORD = 10; // letters; a word this long counts as "long"
+
+/** Linear normalise v from [lo, hi] into [0, 1], clamped. */
+function statsNorm(v, lo, hi) {
+    return Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
+}
+
+function statsComplexity(list) {
+    let words = 0, letters = 0, longWords = 0, sentences = 0;
+    for (const q of list) {
+        const text = (q && q.text) || '';
+        if (!text.trim()) continue;
+        const tokens = statsTokenize(text);
+        words += tokens.length;
+        for (const tok of tokens) {
+            letters += tok.length;
+            if (tok.length >= STATS_COMPLEXITY_LONG_WORD) longWords++;
+        }
+        // Sentences: run of terminators = one boundary; a text with none is still one sentence.
+        const ends = (text.match(/[.!?…]+/g) || []).length;
+        sentences += Math.max(1, ends);
+    }
+    if (words === 0) return null;
+
+    const avgWordLen = letters / words;
+    const avgSentenceLen = words / sentences;
+    const longWordShare = longWords / words;
+
+    // Ranges chosen so typical prose lands mid-scale; endpoints are "very simple" / "very dense".
+    const score01 = (
+        statsNorm(avgWordLen, 4.0, 7.5) +
+        statsNorm(avgSentenceLen, 6, 22) +
+        statsNorm(longWordShare, 0, 0.22)
+    ) / 3;
+
+    const score = Math.round(score01 * 100);
+    return {
+        score,
+        band: Math.min(4, Math.floor(score / 20)), // 0..4
+        avgWordLen,
+        avgSentenceLen,
+        longWordShare,
+    };
+}
