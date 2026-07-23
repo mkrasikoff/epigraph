@@ -43,6 +43,7 @@ const STATS_RECENT_DAYS = 30;
 const STATS_CARDS = {
     growth:       { tier: 'free', titleKey: 'statsCardGrowth',      render: statsGrowthCard },
     length:       { tier: 'free', titleKey: 'statsCardLength',      render: statsLengthCard },
+    wordCloud:    { tier: 'free', titleKey: 'statsCardWordCloud',   render: statsWordCloudCard },
     book:         { tier: 'free', titleKey: 'statsCardBook',        render: statsBookCard },
     language:     { tier: 'free', titleKey: 'statsCardLanguage',    render: statsLanguageCard },
     hall:         { tier: 'free', titleKey: 'statsCardHall',        render: statsHallCard },
@@ -317,6 +318,7 @@ function computeStats(list) {
         authorAvgWords,
         authorCloud,
         authorScatter,
+        wordCloud: statsWordCloud(list),
         dayCounts,
     };
 }
@@ -870,6 +872,36 @@ function statsLengthCard(s) {
             ${col(b.medium, 'statsLengthMedium')}
             ${col(b.long, 'statsLengthLong')}
         </div>
+    `;
+}
+
+/**
+ * Word cloud — most frequent words across all quote texts (stemmed, stop-words removed by
+ * stats-text.js). "Hero" layout: the single most-common word large on its own line, the rest
+ * flowing below sized/faded by frequency (warm accent → grey tail).
+ */
+function statsWordCloudCard(s) {
+    const list = s.wordCloud || [];
+    const body = list.length === 0
+        ? statsInlineEmptyMarkup('tag', 'statsWordsEmptyText')
+        : (() => {
+            const max = list[0].count;
+            const rest = list.slice(1).map(w => {
+                const ratio = w.count / max;
+                const size = (0.8 + ratio * 0.8).toFixed(2); // rem
+                const tint = Math.round(10 + ratio * 90);
+                return `<span style="font-size:${size}rem;color:color-mix(in oklab, var(--color-primary) ${tint}%, var(--color-text-faint))">${escHtml(w.word)}</span>`;
+            }).join('');
+            return `
+                <div class="stats-wordcloud">
+                    <span class="stats-wordcloud-hero">${escHtml(list[0].word)}</span>
+                    ${rest}
+                </div>`;
+        })();
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardWordCloud">Облако слов</div>
+        <div class="stats-card-sub" data-i18n="statsCardWordCloudSub">Частые слова в ваших цитатах</div>
+        ${body}
     `;
 }
 

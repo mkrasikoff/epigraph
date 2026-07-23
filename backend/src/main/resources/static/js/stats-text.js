@@ -1,0 +1,199 @@
+// =============================================================================
+// stats-text.js — text-analysis layer for the statistics screen.
+//
+// Pure, DOM-free helpers shared by text-based metrics (word cloud today; reading
+// time / language complexity / duplicates later). Loaded before stats.js.
+//
+// Pipeline: tokenize → drop stop-words & short tokens → Snowball-stem (ru + en,
+// picked per token by script) → count by stem, remembering the most frequent
+// surface form to display. Runs synchronously; if large collections ever make
+// this janky, statsWordCloud() is the natural unit to move into a Web Worker.
+// =============================================================================
+
+/**
+ * Common Russian + English stop-words (and their frequent inflected forms), kept
+ * as raw lowercased surface forms so filtering happens before stemming. Not
+ * exhaustive — just enough to keep the cloud meaningful rather than full of
+ * "и / the / это / that".
+ */
+const STATS_STOPWORDS = new Set([
+    // Russian — conjunctions, prepositions, pronouns, particles, common verbs.
+    'и', 'а', 'но', 'да', 'или', 'либо', 'ни', 'же', 'бы', 'ли', 'то', 'что', 'чтобы',
+    'как', 'так', 'вот', 'уже', 'ещё', 'еще', 'тут', 'там', 'здесь', 'где', 'когда',
+    'если', 'потому', 'поэтому', 'зато', 'однако', 'хотя', 'также', 'тоже', 'разве',
+    'в', 'во', 'на', 'за', 'по', 'из', 'из-за', 'от', 'до', 'к', 'ко', 'с', 'со', 'у',
+    'о', 'об', 'обо', 'про', 'над', 'под', 'при', 'без', 'для', 'через', 'между',
+    'я', 'ты', 'он', 'она', 'оно', 'мы', 'вы', 'они', 'меня', 'тебя', 'его', 'её', 'ее',
+    'нас', 'вас', 'их', 'мне', 'тебе', 'ему', 'ей', 'нам', 'вам', 'им', 'себя', 'себе',
+    'мой', 'моя', 'моё', 'мое', 'мои', 'твой', 'наш', 'ваш', 'свой', 'своя', 'своё', 'свои',
+    'этот', 'эта', 'это', 'эти', 'тот', 'та', 'те', 'такой', 'такая', 'такие', 'весь',
+    'вся', 'всё', 'все', 'сам', 'сама', 'само', 'сами', 'кто', 'чем', 'чём', 'кого', 'чего',
+    'не', 'нет', 'ну', 'уж', 'аж', 'лишь', 'только', 'даже', 'вон', 'бывает',
+    'быть', 'был', 'была', 'было', 'были', 'есть', 'нету', 'будет', 'будут', 'будь',
+    'мочь', 'может', 'можно', 'нужно', 'надо', 'стал', 'стало', 'стали', 'стать',
+    'который', 'которая', 'которое', 'которые', 'этому', 'этого', 'того', 'тем', 'этим',
+    // English.
+    'the', 'a', 'an', 'and', 'or', 'but', 'nor', 'so', 'yet', 'as', 'if', 'than', 'then',
+    'of', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'about', 'into', 'from', 'up', 'down',
+    'out', 'off', 'over', 'under', 'again', 'once', 'here', 'there', 'when', 'where', 'why',
+    'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such',
+    'no', 'not', 'only', 'own', 'same', 'too', 'very', 'can', 'will', 'just', 'now',
+    'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my',
+    'your', 'his', 'its', 'our', 'their', 'this', 'that', 'these', 'those', 'who', 'whom',
+    'is', 'am', 'are', 'was', 'were', 'be', 'been', 'being', 'do', 'does', 'did', 'has',
+    'have', 'had', 'having', 'would', 'should', 'could', 'may', 'might', 'must', 'shall',
+]);
+
+/** Splits text into lowercased alphabetic tokens (Cyrillic or Latin runs), ё→е normalised. */
+function statsTokenize(text) {
+    return (text || '').toLowerCase().replace(/ё/g, 'е').match(/[a-zа-я]+/g) || [];
+}
+
+// -----------------------------------------------------------------------------
+// Russian Snowball (Porter) stemmer. Ordered-alternation port of the reference
+// algorithm — approximate but stable enough to collapse inflected forms of the
+// same word into one cloud entry. Endings are matched within the RV region only.
+// -----------------------------------------------------------------------------
+const STATS_RU_RVRE = /^(.*?[аеиоуыэюя])(.*)$/;
+const STATS_RU_PERFECTIVE = /((ив|ивши|ившись|ыв|ывши|ывшись)|((?<=[ая])(в|вши|вшись)))$/;
+const STATS_RU_REFLEXIVE = /(с[яь])$/;
+const STATS_RU_ADJECTIVE = /(ее|ие|ые|ое|ими|ыми|ей|ий|ый|ой|ем|им|ым|ом|его|ого|ему|ому|их|ых|ую|юю|ая|яя|ою|ею)$/;
+const STATS_RU_PARTICIPLE = /((ивш|ывш|ующ)|((?<=[ая])(ем|нн|вш|ющ|щ)))$/;
+const STATS_RU_VERB = /((ила|ыла|ена|ейте|уйте|ите|или|ыли|ей|уй|ил|ыл|им|ым|ен|ило|ыло|ено|ят|ует|уют|ит|ыт|ены|ить|ыть|ишь|ую|ю)|((?<=[ая])(ла|на|ете|йте|ли|й|л|ем|н|ло|но|ет|ют|ны|ть|ешь|нно)))$/;
+const STATS_RU_NOUN = /(а|ев|ов|ие|ье|е|иями|ями|ами|еи|ии|и|ией|ей|ой|ий|й|иям|ям|ием|ем|ам|ом|о|у|ах|иях|ях|ы|ь|ию|ью|ю|ия|ья|я)$/;
+const STATS_RU_DERIVATIONAL = /(ост|ость)$/;
+const STATS_RU_SUPERLATIVE = /(ейше|ейш)$/;
+
+function statsStemRu(word) {
+    const m = STATS_RU_RVRE.exec(word);
+    if (!m) return word;
+    const head = m[1];
+    let rv = m[2];
+
+    // Step 1: perfective gerund; else reflexive, then adjectival / verb / noun.
+    let so = rv.replace(STATS_RU_PERFECTIVE, '');
+    if (so === rv) {
+        rv = rv.replace(STATS_RU_REFLEXIVE, '');
+        so = rv.replace(STATS_RU_ADJECTIVE, '');
+        if (so !== rv) {
+            rv = so.replace(STATS_RU_PARTICIPLE, '');
+        } else {
+            so = rv.replace(STATS_RU_VERB, '');
+            rv = so !== rv ? so : rv.replace(STATS_RU_NOUN, '');
+        }
+    } else {
+        rv = so;
+    }
+
+    // Step 2: trailing и.
+    rv = rv.replace(/и$/, '');
+    // Step 3: derivational (ость / ост) within R2 ≈ rv here.
+    if (STATS_RU_DERIVATIONAL.test(rv)) rv = rv.replace(STATS_RU_DERIVATIONAL, '');
+    // Step 4: soft sign; else superlative + нн→н.
+    so = rv.replace(/ь$/, '');
+    if (so !== rv) {
+        rv = so;
+    } else {
+        rv = rv.replace(STATS_RU_SUPERLATIVE, '').replace(/нн$/, 'н');
+    }
+    return head + rv;
+}
+
+// -----------------------------------------------------------------------------
+// English Porter stemmer — the classic compact algorithm (Porter, 1980).
+// -----------------------------------------------------------------------------
+const STATS_EN_STEP2 = {
+    ational: 'ate', tional: 'tion', enci: 'ence', anci: 'ance', izer: 'ize', bli: 'ble',
+    alli: 'al', entli: 'ent', eli: 'e', ousli: 'ous', ization: 'ize', ation: 'ate',
+    ator: 'ate', alism: 'al', iveness: 'ive', fulness: 'ful', ousness: 'ous', aliti: 'al',
+    iviti: 'ive', biliti: 'ble', logi: 'log',
+};
+const STATS_EN_STEP3 = { icate: 'ic', ative: '', alize: 'al', iciti: 'ic', ical: 'ic', ful: '', ness: '' };
+
+function statsStemEn(word) {
+    if (word.length < 3) return word;
+    const c = '[^aeiou]', v = '[aeiouy]';
+    const C = c + '[^aeiouy]*', V = v + '[aeiou]*';
+    const mgr0 = new RegExp('^(' + C + ')?' + V + C);
+    const mgr1 = new RegExp('^(' + C + ')?' + V + C + V + C);
+    const meq1 = new RegExp('^(' + C + ')?' + V + C + '(' + V + ')?$');
+    const s_v = new RegExp('^(' + C + ')?' + v);
+
+    let w = word;
+    // Step 1a.
+    if (/(ss|i)es$/.test(w)) w = w.replace(/(ss|i)es$/, '$1');
+    else if (/([^s])s$/.test(w)) w = w.replace(/([^s])s$/, '$1');
+    // Step 1b.
+    if (/eed$/.test(w)) { if (mgr0.test(w.replace(/eed$/, ''))) w = w.replace(/eed$/, 'ee'); }
+    else if (/(ed|ing)$/.test(w)) {
+        const stem = w.replace(/(ed|ing)$/, '');
+        if (s_v.test(stem)) {
+            w = stem;
+            if (/(at|bl|iz)$/.test(w)) w += 'e';
+            else if (/([^aeiouylsz])\1$/.test(w)) w = w.slice(0, -1);
+            else if (meq1.test(w)) w += 'e';
+        }
+    }
+    // Step 1c.
+    if (/y$/.test(w)) { const stem = w.replace(/y$/, ''); if (s_v.test(stem)) w = stem + 'i'; }
+    // Step 2.
+    let m2 = w.match(/(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/);
+    if (m2 && mgr0.test(w.slice(0, -m2[0].length))) w = w.slice(0, -m2[0].length) + STATS_EN_STEP2[m2[0]];
+    // Step 3.
+    let m3 = w.match(/(icate|ative|alize|iciti|ical|ful|ness)$/);
+    if (m3 && mgr0.test(w.slice(0, -m3[0].length))) w = w.slice(0, -m3[0].length) + STATS_EN_STEP3[m3[0]];
+    // Step 4.
+    const m4 = w.match(/(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/);
+    if (m4 && mgr1.test(w.slice(0, -m4[0].length))) w = w.slice(0, -m4[0].length);
+    else if (/(s|t)ion$/.test(w) && mgr1.test(w.slice(0, -3))) w = w.slice(0, -3);
+    // Step 5.
+    if (/e$/.test(w)) {
+        const stem = w.slice(0, -1);
+        if (mgr1.test(stem) || (meq1.test(stem) && !/^([^aeiouy][^aeiouy]*)?[aeiouy][^aeiouwxy]$/.test(stem))) w = stem;
+    }
+    if (/ll$/.test(w) && mgr1.test(w)) w = w.slice(0, -1);
+    return w;
+}
+
+/** Stems a lowercased token, dispatching by script (Cyrillic → ru, else → en). */
+function statsStem(word) {
+    return /[а-я]/.test(word) ? statsStemRu(word) : statsStemEn(word);
+}
+
+/**
+ * Word-frequency cloud from a quote list: counts by stem, but returns the most
+ * frequent surface form of each stem so the label reads naturally. Sorted by
+ * count desc; ties broken alphabetically for stable output.
+ * @param {Array} list   - quotes (uses q.text)
+ * @param {number} topN  - max entries to return (default 14)
+ * @returns {Array<{word:string,count:number}>}
+ */
+function statsWordCloud(list, topN) {
+    topN = topN || 14;
+    const stems = new Map(); // stem → { count, forms: Map<surface, count> }
+    for (const q of list) {
+        const tokens = statsTokenize(q && q.text);
+        for (const raw of tokens) {
+            if (raw.length < 3) continue;
+            if (STATS_STOPWORDS.has(raw)) continue;
+            const stem = statsStem(raw);
+            if (!stem || stem.length < 2) continue;
+            let e = stems.get(stem);
+            if (!e) { e = { count: 0, forms: new Map() }; stems.set(stem, e); }
+            e.count++;
+            e.forms.set(raw, (e.forms.get(raw) || 0) + 1);
+        }
+    }
+
+    const arr = [];
+    stems.forEach(e => {
+        let best = '', bestC = -1;
+        e.forms.forEach((c, form) => {
+            // Prefer the more frequent form; on a tie, the shorter (usually the lemma-ish) one.
+            if (c > bestC || (c === bestC && form.length < best.length)) { bestC = c; best = form; }
+        });
+        arr.push({ word: best, count: e.count });
+    });
+    arr.sort((a, b) => b.count - a.count || a.word.localeCompare(b.word));
+    return arr.slice(0, topN);
+}
