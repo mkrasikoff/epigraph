@@ -441,6 +441,15 @@ const TRANSLATIONS = {
         pluralPage1:                    'страница',
         pluralPage2:                    'страницы',
         pluralPage5:                    'страниц',
+        pluralMovie1:                   'фильм',
+        pluralMovie2:                   'фильма',
+        pluralMovie5:                   'фильмов',
+        pluralEpisode1:                 'выпуск',
+        pluralEpisode2:                 'выпуска',
+        pluralEpisode5:                 'выпусков',
+        pluralSong1:                    'песня',
+        pluralSong2:                    'песни',
+        pluralSong5:                    'песен',
         // Genitive month names, for "с мая 2026" — toLocaleDateString's long
         // month is nominative ("май"), which reads wrong after the preposition.
         monthsGenitive:                 'января,февраля,марта,апреля,мая,июня,июля,августа,сентября,октября,ноября,декабря',
@@ -544,6 +553,17 @@ const TRANSLATIONS = {
         statsComplexityFactors:         'среднее слово {word} · во фразе {sentence}',
         statsComplexityDisclaimer:      'Приблизительная оценка, не научный индекс',
         statsComplexityEmptyText:       'Добавьте цитаты с текстом — оценим сложность',
+        statsCardReading:               'Время чтения',
+        statsCardReadingSub:            'Сколько читать всю коллекцию',
+        statsReadingHM:                 '{h} ч {m} мин',
+        statsReadingH:                  '{h} ч',
+        statsReadingM:                  '{m} мин',
+        statsReadingMovies:             '≈ {n} {word}',
+        statsReadingPodcast:            '≈ {n} {word} подкаста',
+        statsReadingSongs:              '≈ {n} {word}',
+        statsReadingFlight:             '≈ рейс {route}',
+        statsReadingTrips:              'Москва–Петербург|85;Москва–Казань|105;Москва–Сочи|140;Москва–Екатеринбург|150;Москва–Новосибирск|250;Москва–Иркутск|340;Москва–Владивосток|530',
+        statsReadingEmptyText:          'Добавьте цитаты с текстом — посчитаем время',
         statsLengthShort:               'короткие',
         statsLengthMedium:              'средние',
         statsLengthLong:                'длинные',
@@ -1077,6 +1097,15 @@ const TRANSLATIONS = {
         pluralPage1:                    'page',
         pluralPage2:                    'pages',
         pluralPage5:                    'pages',
+        pluralMovie1:                   'movie',
+        pluralMovie2:                   'movies',
+        pluralMovie5:                   'movies',
+        pluralEpisode1:                 'episode',
+        pluralEpisode2:                 'episodes',
+        pluralEpisode5:                 'episodes',
+        pluralSong1:                    'song',
+        pluralSong2:                    'songs',
+        pluralSong5:                    'songs',
         monthsGenitive:                 'January,February,March,April,May,June,July,August,September,October,November,December',
         statsSummary:                   '{total} {word} · {favorites} favorited',
 
@@ -1178,6 +1207,17 @@ const TRANSLATIONS = {
         statsComplexityFactors:         'average word {word} · per sentence {sentence}',
         statsComplexityDisclaimer:      'A rough estimate, not a scientific index',
         statsComplexityEmptyText:       'Add quotes with text to gauge complexity',
+        statsCardReading:               'Reading time',
+        statsCardReadingSub:            'How long to read everything',
+        statsReadingHM:                 '{h} hr {m} min',
+        statsReadingH:                  '{h} hr',
+        statsReadingM:                  '{m} min',
+        statsReadingMovies:             '≈ {n} {word}',
+        statsReadingPodcast:            '≈ {n} podcast {word}',
+        statsReadingSongs:              '≈ {n} {word}',
+        statsReadingFlight:             '≈ a {route} flight',
+        statsReadingTrips:              'London–Paris|80;Paris–Rome|125;Berlin–Madrid|180;London–Athens|230;London–Tenerife|275;Helsinki–Malaga|320',
+        statsReadingEmptyText:          'Add quotes with text to estimate reading time',
         statsLengthShort:               'short',
         statsLengthMedium:              'medium',
         statsLengthLong:                'long',
@@ -1380,6 +1420,30 @@ function pageCountWord(n) {
         return n === 1 ? t('pluralPage1') : t('pluralPage2');
     }
     return pluralRu(n, t('pluralPage1'), t('pluralPage2'), t('pluralPage5'));
+}
+
+/** "movie(s)" for the reading-time equivalents. */
+function movieCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralMovie1') : t('pluralMovie2');
+    }
+    return pluralRu(n, t('pluralMovie1'), t('pluralMovie2'), t('pluralMovie5'));
+}
+
+/** "episode(s)" for the reading-time equivalents. */
+function episodeCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralEpisode1') : t('pluralEpisode2');
+    }
+    return pluralRu(n, t('pluralEpisode1'), t('pluralEpisode2'), t('pluralEpisode5'));
+}
+
+/** "song(s)" for the reading-time equivalents. */
+function songCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralSong1') : t('pluralSong2');
+    }
+    return pluralRu(n, t('pluralSong1'), t('pluralSong2'), t('pluralSong5'));
 }
 
 /**

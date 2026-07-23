@@ -4162,6 +4162,13 @@ body.modal-lock-scroll {
 .stats-complexity-fac { color: var(--color-text-muted); font-size: var(--text-xs); margin-top: 2px; }
 .stats-complexity-note { color: var(--color-text-faint); font-size: var(--text-xs); margin-top: var(--space-3); }
 
+/* ── Plus: reading time (equivalents) ───────────────────────────────────── */
+.stats-reading { margin: auto 0; }
+.stats-reading-big { color: var(--color-text); font-size: var(--text-xl); font-weight: 600; line-height: 1.05; }
+.stats-reading-rows { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4); }
+.stats-reading-row { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text); font-size: var(--text-sm); }
+.stats-reading-ic { width: 1.4rem; text-align: center; flex-shrink: 0; }
+
 /* ── Plus: author cloud ─────────────────────────────────────────────────── */
 .stats-authorcloud {
     display: flex;
