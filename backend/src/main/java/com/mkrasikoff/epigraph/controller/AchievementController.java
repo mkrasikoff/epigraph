@@ -31,6 +31,15 @@ public class AchievementController {
     }
 
     /**
+     * Recent activity dates (last ~4 months) for the stats-screen activity heatmap (TASK-136).
+     * Read-only window over the same rows that back the streak/badge counts.
+     */
+    @GetMapping("/activity-days")
+    public List<java.time.LocalDate> activityDays(@AuthenticationPrincipal Long userId) {
+        return achievementService.getRecentActivityDates(userId, 120);
+    }
+
+    /**
      * Records the "change_theme" action for "explorer" from the light/dark
      * appearance toggle — not from PATCH /api/user/me/theme (theme *style*),
      * which every brand-new user can't reach: every non-classic style is
