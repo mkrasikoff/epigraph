@@ -50,6 +50,7 @@ const STATS_CARDS = {
     tempo:        { tier: 'free', titleKey: 'statsCardTempo',       render: statsTempoCard },
     heatmap:      { tier: 'plus', titleKey: 'statsCardHeatmap',     render: statsHeatmapCard },
     seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
+    reading:      { tier: 'plus', titleKey: 'statsCardReading',     render: statsReadingTimeCard },
     complexity:   { tier: 'plus', titleKey: 'statsCardComplexity', render: statsComplexityCard },
     authorLength: { tier: 'plus', titleKey: 'statsCardAuthorLength', render: statsAuthorLengthCard },
     authorCloud:  { tier: 'plus', titleKey: 'statsCardAuthorCloud', render: statsAuthorCloudCard },
@@ -1143,6 +1144,68 @@ function statsSeasonalityCard(s) {
             <circle cx="${cx}" cy="${cy}" r="${r0}" fill="none" class="stats-ring-track" stroke-width="1"/>
             ${spokes}
         </svg>
+    `;
+}
+
+/** Average reading speed (words/min) for the reading-time estimate — comfortable adult pace. */
+const STATS_READING_WPM = 180;
+
+/** Formats a duration in minutes as "4 ч 20 мин" / "45 мин" / "3 ч" (i18n-driven). */
+function statsReadingFmt(min) {
+    const h = Math.floor(min / 60), m = min % 60;
+    if (h > 0 && m > 0) return t('statsReadingHM', { h, m });
+    if (h > 0) return t('statsReadingH', { h });
+    return t('statsReadingM', { m });
+}
+
+/**
+ * Reading time — how long it'd take to read the whole collection (totalWords ÷ WPM), presented as
+ * relatable equivalents: a couple of numeric anchors (movies / podcast episodes / songs, whichever
+ * give a sensible count) plus the single localized flight whose duration is closest to the total.
+ * The flight list is per-language (ru: CIS routes, en: European), so it localizes automatically.
+ */
+function statsReadingTimeCard(s) {
+    const total = s.totalWords || 0;
+    const titleSub = `
+        <div class="stats-chart-title" data-i18n="statsCardReading">Время чтения</div>
+        <div class="stats-card-sub" data-i18n="statsCardReadingSub">Сколько читать всю коллекцию</div>`;
+    if (total === 0) {
+        return `${titleSub}${statsInlineEmptyMarkup('tag', 'statsReadingEmptyText')}`;
+    }
+    const minutes = Math.max(1, Math.round(total / STATS_READING_WPM));
+
+    // Numeric equivalents: walk anchors large→small, keep the first two that round to ≥1.
+    const anchors = [
+        { min: 115, emoji: '🎬', line: n => t('statsReadingMovies', { n, word: movieCountWord(n) }) },
+        { min: 40, emoji: '🎧', line: n => t('statsReadingPodcast', { n, word: episodeCountWord(n) }) },
+        { min: 3.5, emoji: '🎵', line: n => t('statsReadingSongs', { n, word: songCountWord(n) }) },
+    ];
+    const rows = [];
+    for (const a of anchors) {
+        const n = Math.round(minutes / a.min);
+        if (n >= 1) rows.push({ emoji: a.emoji, text: a.line(n) });
+        if (rows.length === 2) break;
+    }
+    // Nearest flight — only when the total is a sensible flight length.
+    if (minutes >= 45) {
+        const trips = t('statsReadingTrips').split(';').map(x => {
+            const [route, m] = x.split('|');
+            return { route, min: parseInt(m, 10) };
+        });
+        let best = trips[0];
+        trips.forEach(tp => { if (Math.abs(tp.min - minutes) < Math.abs(best.min - minutes)) best = tp; });
+        rows.push({ emoji: '✈️', text: t('statsReadingFlight', { route: best.route }) });
+    }
+
+    const rowsHtml = rows.map(r =>
+        `<div class="stats-reading-row"><span class="stats-reading-ic" aria-hidden="true">${r.emoji}</span>${escHtml(r.text)}</div>`
+    ).join('');
+    return `
+        ${titleSub}
+        <div class="stats-reading">
+            <div class="stats-reading-big">${escHtml(statsReadingFmt(minutes))}</div>
+            <div class="stats-reading-rows">${rowsHtml}</div>
+        </div>
     `;
 }
 
