@@ -187,6 +187,19 @@ public class AchievementService {
         return streak;
     }
 
+    /**
+     * The user's recent activity dates (days they were active), within the last {@code withinDays}
+     * days, for the stats-screen activity heatmap (TASK-136). Reuses the same rows that feed the
+     * streak/badge counts — no new writes, just a windowed read.
+     */
+    @Transactional(readOnly = true)
+    public List<LocalDate> getRecentActivityDates(Long userId, int withinDays) {
+        LocalDate cutoff = LocalDate.now(ACTIVITY_ZONE).minusDays(withinDays);
+        return activityDayRepo.findActivityDatesDesc(userId).stream()
+                .filter(date -> !date.isBefore(cutoff))
+                .toList();
+    }
+
     private void upsertProgress(Long userId, String achievementKey, long currentValue, int threshold) {
         AchievementProgress row = progressRepo.findByUserIdAndAchievementKey(userId, achievementKey)
                 .orElseGet(() -> {
