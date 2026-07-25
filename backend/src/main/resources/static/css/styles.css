@@ -4366,98 +4366,75 @@ body.modal-lock-scroll {
 }
 
 .stats-plus-teaser {
-    position: relative;
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    min-height: 250px;
-    margin-top: var(--space-3);
-}
-
-.stats-plus-teaser-preview {
-    padding: var(--space-5);
-    filter: blur(3px);
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.stats-teaser-heat {
-    display: grid;
-    grid-template-rows: repeat(7, 1fr);
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    gap: 3px;
-    height: 200px;
-}
-
-/* 5 intensity levels, dark base → warm accent, theme-aware (nod to a real contribution graph). */
-.stats-teaser-heat span {
-    aspect-ratio: 1;
-    border-radius: 2px;
-    background: var(--color-surface-dynamic);
-}
-.stats-teaser-heat span.l1 { background: color-mix(in oklab, var(--color-primary) 25%, var(--color-surface-dynamic)); }
-.stats-teaser-heat span.l2 { background: color-mix(in oklab, var(--color-primary) 50%, var(--color-surface-dynamic)); }
-.stats-teaser-heat span.l3 { background: color-mix(in oklab, var(--color-primary) 75%, var(--color-surface-dynamic)); }
-.stats-teaser-heat span.l4 { background: var(--color-primary); }
-
-.stats-plus-teaser-over {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: var(--space-2);
-    padding: var(--space-6);
-    background: linear-gradient(180deg,
-        oklch(from var(--color-bg) l c h / 0.35),
-        oklch(from var(--color-bg) l c h / 0.78));
-}
-
-.stats-plus-lock {
-    flex: none; /* column-flex item mustn't shrink vertically — keeps the badge a circle, not a pill */
-    width: 46px;
-    height: 46px;
-    border-radius: var(--radius-full);
-    background: var(--color-plus);
-    color: var(--color-plus-ink);
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-bottom: var(--space-1);
-}
-
-.stats-plus-teaser-title {
-    font-size: var(--text-base);
-    font-weight: 700;
-}
-
-.stats-plus-teaser-text {
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-    max-width: 380px;
-}
-
-.stats-plus-teaser-cta {
-    margin-top: var(--space-3);
-    background: var(--color-surface-dynamic);
-    color: var(--color-text);
+    gap: var(--space-8);
+    flex-wrap: wrap;
     border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6) var(--space-8);
+    margin-top: var(--space-3);
+    background: radial-gradient(120% 140% at 100% 0%, var(--color-primary-highlight), var(--color-surface));
+}
+
+/* Fanned deck of decorative card previews (aria-hidden — illustrative, not the user's data). */
+.stats-plus-fan {
+    position: relative;
+    width: 300px;
+    height: 158px;
+    flex: none;
+}
+.stats-teaser-mini {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 176px;
+    min-height: 150px;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-divider);
+    overflow: hidden;
+}
+.stats-teaser-mini--back  { transform: rotate(-9deg) translateX(4px);   opacity: 0.45; z-index: 1; }
+.stats-teaser-mini--mid   { transform: rotate(-3deg) translateX(52px);  opacity: 0.7;  z-index: 2; }
+.stats-teaser-mini--front { transform: rotate(4deg)  translateX(100px); z-index: 3; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
+.stats-teaser-mini-t { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; margin-bottom: var(--space-3); }
+
+/* Mood spectrum — same accent-ramp + grey as the real card, so it can't clash in any theme. */
+.stats-teaser-mood { display: flex; height: 12px; border-radius: var(--radius-full); overflow: hidden; margin-top: var(--space-4); }
+.stats-teaser-mood span { display: block; }
+.stats-teaser-mood span:nth-child(1) { background: color-mix(in oklab, var(--color-primary) 45%, #ffffff); }
+.stats-teaser-mood span:nth-child(2) { background: var(--color-text-muted); }
+.stats-teaser-mood span:nth-child(3) { background: color-mix(in oklab, var(--color-primary) 55%, #000000); }
+
+.stats-teaser-season { width: 74px; height: 74px; display: block; margin: var(--space-2) auto 0; }
+
+.stats-teaser-heatmini { display: grid; grid-template-columns: repeat(13, 1fr); gap: 2.5px; }
+.stats-teaser-heatmini span { aspect-ratio: 1; border-radius: 2px; background: var(--color-surface-dynamic); }
+.stats-teaser-heatmini span.l1 { background: color-mix(in oklab, var(--color-primary) 25%, var(--color-surface-dynamic)); }
+.stats-teaser-heatmini span.l2 { background: color-mix(in oklab, var(--color-primary) 50%, var(--color-surface-dynamic)); }
+.stats-teaser-heatmini span.l3 { background: color-mix(in oklab, var(--color-primary) 75%, var(--color-surface-dynamic)); }
+.stats-teaser-heatmini span.l4 { background: var(--color-primary); }
+
+.stats-plus-pitch { flex: 1; min-width: 220px; }
+.stats-plus-count { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
+.stats-plus-count-n { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; color: var(--color-primary); line-height: 1; }
+.stats-plus-count-lbl { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
+.stats-plus-teaser-text { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5; margin: var(--space-2) 0 var(--space-4); max-width: 420px; }
+.stats-plus-teaser-cta {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    border: none;
     font: inherit;
     font-weight: 700;
     font-size: var(--text-sm);
     padding: var(--space-3) var(--space-6);
     border-radius: var(--radius-full);
     cursor: pointer;
-    transition: background var(--transition), border-color var(--transition);
+    transition: background var(--transition);
 }
-
-.stats-plus-teaser-cta:hover {
-    background: var(--color-surface-offset);
-    border-color: var(--color-text-faint);
-}
+.stats-plus-teaser-cta:hover { background: var(--color-primary-hover); }
 
 /* ── Empty state ────────────────────────────────────────────────────────── */
 .stats-empty {
@@ -4506,10 +4483,15 @@ body.modal-lock-scroll {
     .stats-hero-row,
     .stats-row2,
     .stats-row3,
-    .stats-metric-grid,
-    .stats-plus-teaser-preview { grid-template-columns: 1fr; }
+    .stats-metric-grid { grid-template-columns: 1fr; }
     .stats-facts { grid-template-columns: repeat(2, 1fr); }
     .stats-rank-nm { flex-basis: 90px; }
+    /* Plus teaser: stack pitch under the fan and shrink the deck so it never overflows. */
+    .stats-plus-teaser { flex-direction: column; align-items: flex-start; gap: var(--space-5); padding: var(--space-5); }
+    .stats-plus-fan { width: 232px; height: 148px; margin: 0 auto; }
+    .stats-teaser-mini { width: 140px; }
+    .stats-teaser-mini--mid { transform: rotate(-3deg) translateX(44px); }
+    .stats-teaser-mini--front { transform: rotate(4deg) translateX(88px); }
 }
 
 .friends-section h2 {
