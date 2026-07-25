@@ -450,6 +450,9 @@ const TRANSLATIONS = {
         pluralSong1:                    'песня',
         pluralSong2:                    'песни',
         pluralSong5:                    'песен',
+        pluralPair1:                    'пара',
+        pluralPair2:                    'пары',
+        pluralPair5:                    'пар',
         // Genitive month names, for "с мая 2026" — toLocaleDateString's long
         // month is nominative ("май"), which reads wrong after the preposition.
         monthsGenitive:                 'января,февраля,марта,апреля,мая,июня,июля,августа,сентября,октября,ноября,декабря',
@@ -564,6 +567,19 @@ const TRANSLATIONS = {
         statsReadingFlight:             '≈ рейс {route}',
         statsReadingTrips:              'Москва–Петербург|85;Москва–Казань|105;Москва–Сочи|140;Москва–Екатеринбург|150;Москва–Новосибирск|250;Москва–Иркутск|340;Москва–Владивосток|530',
         statsReadingEmptyText:          'Добавьте цитаты с текстом — посчитаем время',
+        statsCardDup:                   'Гигиена: дубликаты',
+        statsCardDupSub:                'Похожие и повторяющиеся цитаты',
+        statsDupExact:                  'точный повтор',
+        statsDupContained:              'расширенная версия',
+        statsDupSimilar:                'похожи на {pct}%',
+        statsDupBadge:                  '{n} {word}',
+        statsDupMore:                   '+ ещё {n} {word}',
+        statsDupDismiss:                'не дубликат',
+        statsDupNoAuthor:               'без автора',
+        statsDupCleanTitle:             'Дубликатов нет',
+        statsDupCleanSub:               'все ваши цитаты уникальны',
+        statsDupViewAll:                'Показать в «Мои цитаты» →',
+        dupFilterChip:                  'Дубликаты · {n}',
         statsLengthShort:               'короткие',
         statsLengthMedium:              'средние',
         statsLengthLong:                'длинные',
@@ -1106,6 +1122,9 @@ const TRANSLATIONS = {
         pluralSong1:                    'song',
         pluralSong2:                    'songs',
         pluralSong5:                    'songs',
+        pluralPair1:                    'pair',
+        pluralPair2:                    'pairs',
+        pluralPair5:                    'pairs',
         monthsGenitive:                 'January,February,March,April,May,June,July,August,September,October,November,December',
         statsSummary:                   '{total} {word} · {favorites} favorited',
 
@@ -1218,6 +1237,19 @@ const TRANSLATIONS = {
         statsReadingFlight:             '≈ a {route} flight',
         statsReadingTrips:              'London–Paris|80;Paris–Rome|125;Berlin–Madrid|180;London–Athens|230;London–Tenerife|275;Helsinki–Malaga|320',
         statsReadingEmptyText:          'Add quotes with text to estimate reading time',
+        statsCardDup:                   'Hygiene: duplicates',
+        statsCardDupSub:                'Similar and repeated quotes',
+        statsDupExact:                  'exact copy',
+        statsDupContained:              'extended version',
+        statsDupSimilar:                '{pct}% similar',
+        statsDupBadge:                  '{n} {word}',
+        statsDupMore:                   '+ {n} more {word}',
+        statsDupDismiss:                'not a duplicate',
+        statsDupNoAuthor:               'no author',
+        statsDupCleanTitle:             'No duplicates',
+        statsDupCleanSub:               'all your quotes are unique',
+        statsDupViewAll:                'Show in My quotes →',
+        dupFilterChip:                  'Duplicates · {n}',
         statsLengthShort:               'short',
         statsLengthMedium:              'medium',
         statsLengthLong:                'long',
@@ -1444,6 +1476,14 @@ function songCountWord(n) {
         return n === 1 ? t('pluralSong1') : t('pluralSong2');
     }
     return pluralRu(n, t('pluralSong1'), t('pluralSong2'), t('pluralSong5'));
+}
+
+/** "pair(s)" for the duplicates card. */
+function pairCountWord(n) {
+    if (currentLanguage !== 'ru') {
+        return n === 1 ? t('pluralPair1') : t('pluralPair2');
+    }
+    return pluralRu(n, t('pluralPair1'), t('pluralPair2'), t('pluralPair5'));
 }
 
 /**

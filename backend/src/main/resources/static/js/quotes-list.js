@@ -74,7 +74,19 @@ function renderQuoteCard(q, index, rankMap) {
 function renderList(resetPage = true) {
     const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
 
+    // The duplicates stats card can narrow the list to just the quotes it flagged (dupFilterIds).
+    const dupChip = document.getElementById('dup-filter-chip');
+    if (dupChip) {
+        dupChip.innerHTML = dupFilterIds
+            ? `<button class="dup-chip" type="button" onclick="clearDupFilter()">
+                   <span>${escHtml(t('dupFilterChip', { n: dupFilterIds.size }))}</span>
+                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+               </button>`
+            : '';
+    }
+
     let filteredQuotes = quotes.filter(q => {
+        if (dupFilterIds && !dupFilterIds.has(q.id)) return false;
         if (currentFilter === 'fav' && !q.fav) return false;
         if (!query) return true;
 
@@ -346,8 +358,15 @@ function setCardExpanded(card, expand) {
  */
 function setFilter(filter, btn) {
     currentFilter = filter;
+    dupFilterIds = null; // choosing a tab exits the duplicates-only view
     document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    renderList();
+}
+
+/** Clears the duplicates-only narrowing (the chip's ✕) and re-renders the full list. */
+function clearDupFilter() {
+    dupFilterIds = null;
     renderList();
 }
 

@@ -251,3 +251,129 @@ function statsComplexity(list) {
         longWordShare,
     };
 }
+
+// -----------------------------------------------------------------------------
+// Duplicate / near-duplicate detection ("hygiene"). Finds quote pairs that are
+// the same or nearly the same text. Similarity is measured over *stemmed content
+// words* (stop-words dropped), which — unlike character trigrams — sees through
+// re-wording and word order, so "you don't rise to your goals" and "we don't rise
+// to goals" read as the same quote. Kinds:
+//   • identical normalized text                → "exact"
+//   • normalized text of one ⊆ the other, or   → "contained" (one extends the other)
+//     stem-overlap ≥ STATS_DUP_CONTAINMENT       (pure Jaccard misses this)
+//   • stem-Jaccard ≥ STATS_DUP_THRESHOLD        → "similar" (re-worded)
+// Candidates come from a stem inverted index (not an O(n²) sweep). Pairs whose key
+// is in `ignore` (the user's "not a duplicate" list) are dropped.
+// -----------------------------------------------------------------------------
+const STATS_DUP_THRESHOLD = 0.75;    // stemmed-word Jaccard for "similar"
+const STATS_DUP_CONTAINMENT = 0.9;   // overlap coefficient for "one contains the other"
+const STATS_DUP_MIN_LEN = 20;        // ignore very short texts (too noisy)
+const STATS_DUP_MIN_TOKENS = 4;      // "similar"/overlap needs this many content words (else exact/substring only)
+const STATS_DUP_COMMON_BUCKET = 400; // skip ultra-common stems when gathering candidates
+
+/** Normalises text for comparison: lowercase, ё→е, strip punctuation, collapse whitespace. */
+function statsNormalizeText(text) {
+    return (text || '').toLowerCase().replace(/ё/g, 'е')
+        .replace(/[^a-zа-я0-9 ]+/gi, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/** Set of stemmed content words (stop-words and sub-3-letter tokens removed). */
+function statsContentStems(text) {
+    const set = new Set();
+    for (const raw of statsTokenize(text)) {
+        if (raw.length < 3 || STATS_STOPWORDS.has(raw)) continue;
+        const stem = statsStem(raw);
+        if (stem && stem.length >= 2) set.add(stem);
+    }
+    return set;
+}
+
+/** Size of the intersection of two sets (iterates the smaller one). */
+function statsIntersectSize(a, b) {
+    const [small, large] = a.size < b.size ? [a, b] : [b, a];
+    let n = 0;
+    small.forEach(x => { if (large.has(x)) n++; });
+    return n;
+}
+
+/** Stable unordered pair key from two quote ids. */
+function statsDupKey(idA, idB) {
+    return idA < idB ? idA + ':' + idB : idB + ':' + idA;
+}
+
+/**
+ * @param {Array} list       - quotes (uses q.id, q.text, q.author)
+ * @param {Set}   [ignore]   - pair keys (statsDupKey) the user marked "not a duplicate"
+ * @param {number} [maxPairs]
+ * @returns {{pairs:Array, pairCount:number, quoteCount:number}}
+ */
+function statsDuplicates(list, ignore, maxPairs) {
+    maxPairs = maxPairs || 30;
+    const items = [];
+    for (const q of list) {
+        if (q == null || q.id == null) continue;
+        const norm = statsNormalizeText(q.text);
+        if (norm.length < STATS_DUP_MIN_LEN) continue;
+        items.push({ id: q.id, author: (q.author || ''), text: (q.text || ''), norm, stems: statsContentStems(q.text) });
+    }
+
+    // Stem inverted index → candidate pairs.
+    const index = new Map();
+    items.forEach((it, i) => it.stems.forEach(st => {
+        let bucket = index.get(st);
+        if (!bucket) { bucket = []; index.set(st, bucket); }
+        bucket.push(i);
+    }));
+
+    const pairs = [];
+    const seen = new Set();
+    items.forEach((it, i) => {
+        const cand = new Set();
+        it.stems.forEach(st => {
+            const bucket = index.get(st);
+            if (bucket.length > STATS_DUP_COMMON_BUCKET) return; // perf guard on very common stems
+            bucket.forEach(j => { if (j > i) cand.add(j); });
+        });
+        // Substring/exact can still hold even when stem-candidacy didn't fire, but a shared stem is a
+        // precondition for any real overlap here, so gathering candidates from the index is enough.
+        cand.forEach(j => {
+            const other = items[j];
+            const key = statsDupKey(it.id, other.id);
+            if (seen.has(key)) return;
+            seen.add(key);
+            if (ignore && ignore.has(key)) return;
+
+            const enoughTokens = it.stems.size >= STATS_DUP_MIN_TOKENS && other.stems.size >= STATS_DUP_MIN_TOKENS;
+            const inter = statsIntersectSize(it.stems, other.stems);
+            const jaccard = inter / (it.stems.size + other.stems.size - inter || 1);
+            const overlap = inter / (Math.min(it.stems.size, other.stems.size) || 1);
+            const substring = it.norm === other.norm ? false
+                : (it.norm.includes(other.norm) || other.norm.includes(it.norm));
+
+            // Order matters: textual containment is definitively "contained"; otherwise a high
+            // Jaccard means "re-worded" (similar); a high overlap with low Jaccard means one text
+            // carries extra content the other doesn't (contained).
+            let kind = null, score = 0;
+            if (it.norm === other.norm) { kind = 'exact'; score = 1; }
+            else if (substring) { kind = 'contained'; score = overlap; }
+            else if (enoughTokens && jaccard >= STATS_DUP_THRESHOLD) { kind = 'similar'; score = jaccard; }
+            else if (enoughTokens && overlap >= STATS_DUP_CONTAINMENT) { kind = 'contained'; score = overlap; }
+            if (!kind) return;
+
+            pairs.push({
+                a: { id: it.id, author: it.author, text: it.text },
+                b: { id: other.id, author: other.author, text: other.text },
+                kind,
+                score,
+            });
+        });
+    });
+
+    // Strongest first; exact > contained > similar, then by score.
+    const rank = { exact: 3, contained: 2, similar: 1 };
+    pairs.sort((p, q) => (rank[q.kind] - rank[p.kind]) || (q.score - p.score));
+
+    const involved = new Set();
+    pairs.forEach(p => { involved.add(p.a.id); involved.add(p.b.id); });
+    return { pairs: pairs.slice(0, maxPairs), pairCount: pairs.length, quoteCount: involved.size, quoteIds: [...involved] };
+}

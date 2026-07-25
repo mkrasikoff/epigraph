@@ -490,7 +490,13 @@ function switchView(id) {
     moveNavIndicator();
 
     if (id !== 'qod') document.body.classList.remove('no-scroll');
+    if (id !== 'list') dupFilterIds = null; // the duplicates-only narrowing is per-visit
     if (id === 'list') {
+        // Arriving from the stats duplicates card: reset the scroll BEFORE the (large) render so
+        // there's no flash of the previous position, and skip the share-highlight path below —
+        // otherwise it would scroll to a specific card, reading as an extra "find a quote" jump.
+        if (dupFilterIds) window.scrollTo({ top: 0, behavior: 'auto' });
+
         renderList();
 
         // A pending share-page redirect means the target card must not be hidden
@@ -499,7 +505,7 @@ function switchView(id) {
         // stick — instead, reuse the same incremental-append path loadMoreQuotes()
         // uses (renderList(false)) to reveal the rest without re-rendering (and
         // thus re-animating) the cards already on screen.
-        if (hasPendingSharedImport()) {
+        if (!dupFilterIds && hasPendingSharedImport()) {
             listVisibleCount = quotes.length;
             renderList(false);
             highlightPendingSharedImport();
