@@ -456,21 +456,26 @@ function statsPlusSection(s) {
     return statsPlusTeaserMarkup();
 }
 
-/** Locked teaser shown to non-Plus users: blurred placeholder previews under an upgrade CTA. */
+/**
+ * Locked teaser for non-Plus users: a fanned deck of accurate decorative card previews next to a
+ * "N analytics in Plus" pitch + upgrade CTA. The count is read live from the registry, so it stays
+ * correct as Plus cards are added. Previews are aria-hidden (illustrative, not the user's data).
+ */
 function statsPlusTeaserMarkup() {
+    const count = statsCardsByTier('plus').length;
     return `
         <div class="stats-section-label stats-plus-label" data-i18n="statsPlusSectionTitle">Epigraph Plus</div>
         <div class="stats-plus-teaser">
-            <div class="stats-plus-teaser-preview" aria-hidden="true">
-                ${statsTeaserHeatmap()}
+            <div class="stats-plus-fan" aria-hidden="true">
+                <div class="stats-teaser-mini stats-teaser-mini--back">${statsTeaserMini('heat')}</div>
+                <div class="stats-teaser-mini stats-teaser-mini--mid">${statsTeaserMini('season')}</div>
+                <div class="stats-teaser-mini stats-teaser-mini--front">${statsTeaserMini('mood')}</div>
             </div>
-            <div class="stats-plus-teaser-over">
-                <div class="stats-plus-lock" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
+            <div class="stats-plus-pitch">
+                <div class="stats-plus-count">
+                    <span class="stats-plus-count-n">${count}</span>
+                    <span class="stats-plus-count-lbl" data-i18n="statsPlusTeaserCount">аналитик в Epigraph Plus</span>
                 </div>
-                <div class="stats-plus-teaser-title" data-i18n="statsPlusTeaserTitle">Глубокая аналитика в Epigraph Plus</div>
                 <div class="stats-plus-teaser-text" data-i18n="statsPlusTeaserText">Тепловые карты, тональность, сезонность, сравнение с сообществом и другие диаграммы</div>
                 <button class="stats-plus-teaser-cta" onclick="openPlusInfo()" data-i18n="statsPlusTeaserCta">Открыть Epigraph Plus</button>
             </div>
@@ -479,19 +484,35 @@ function statsPlusTeaserMarkup() {
 }
 
 /**
- * Decorative blurred contribution-heatmap grid behind the Plus teaser — reads as rich "deep
- * analytics" (and nods to the actual "Активность" heatmap Plus card). Purely visual. Uses the
- * same pseudo-random scatter + 5 intensity levels as the design mockup so it looks like real
- * hidden data rather than a smooth gradient; levels are theme-aware (surface-dynamic → primary).
+ * One decorative preview for the teaser fan — an illustrative thumbnail of a real Plus card
+ * (mood spectrum / seasonality radial / activity heatmap). Fixed sample shapes; colours are
+ * theme-aware via CSS. Titles reuse the real card i18n keys so they translate for free.
  */
-function statsTeaserHeatmap() {
+function statsTeaserMini(type) {
+    if (type === 'mood') {
+        return `<div class="stats-teaser-mini-t" data-i18n="statsCardMood">Настроение</div>
+            <div class="stats-teaser-mood"><span style="width:44%"></span><span style="width:38%"></span><span style="width:18%"></span></div>`;
+    }
+    if (type === 'season') {
+        let spokes = '';
+        for (let i = 0; i < 12; i++) {
+            const ang = (-90 + i * 30) * Math.PI / 180;
+            const val = 0.35 + statsHeatRand(i * 2.3 + 9) * 0.65;
+            const x0 = (30 + Math.cos(ang) * 7).toFixed(1), y0 = (30 + Math.sin(ang) * 7).toFixed(1);
+            const x1 = (30 + Math.cos(ang) * (7 + val * 15)).toFixed(1), y1 = (30 + Math.sin(ang) * (7 + val * 15)).toFixed(1);
+            spokes += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" opacity="${(0.5 + val * 0.5).toFixed(2)}"/>`;
+        }
+        return `<div class="stats-teaser-mini-t" data-i18n="statsCardSeasonality">Сезонность</div>
+            <svg class="stats-teaser-season" viewBox="0 0 60 60"><circle cx="30" cy="30" r="23" fill="none" stroke="var(--color-surface-dynamic)" stroke-width="1"/>${spokes}</svg>`;
+    }
     let cells = '';
-    for (let i = 0; i < 7 * 26; i++) {
-        const v = statsHeatRand(i * 1.7);
+    for (let i = 0; i < 13 * 5; i++) {
+        const v = statsHeatRand(i * 1.7 + 3);
         const lvl = v < 0.5 ? 0 : v < 0.7 ? 1 : v < 0.85 ? 2 : v < 0.95 ? 3 : 4;
         cells += lvl === 0 ? '<span></span>' : `<span class="l${lvl}"></span>`;
     }
-    return `<div class="stats-teaser-heat">${cells}</div>`;
+    return `<div class="stats-teaser-mini-t" data-i18n="statsCardHeatmap">Активность</div>
+        <div class="stats-teaser-heatmini">${cells}</div>`;
 }
 
 /** Deterministic pseudo-random in [0,1) — frac(sin(x)·10000), matching the design mockup. */
