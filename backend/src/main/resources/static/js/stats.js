@@ -54,6 +54,7 @@ const STATS_CARDS = {
     reading:      { tier: 'plus', titleKey: 'statsCardReading',     render: statsReadingTimeCard },
     complexity:   { tier: 'plus', titleKey: 'statsCardComplexity', render: statsComplexityCard },
     mood:         { tier: 'plus', titleKey: 'statsCardMood',        render: statsMoodCard },
+    milestones:   { tier: 'plus', titleKey: 'statsCardMilestones', render: statsMilestonesCard },
     authorLength: { tier: 'plus', titleKey: 'statsCardAuthorLength', render: statsAuthorLengthCard },
     authorCloud:  { tier: 'plus', titleKey: 'statsCardAuthorCloud', render: statsAuthorCloudCard },
     authorScatter:{ tier: 'plus', titleKey: 'statsCardAuthorScatter', render: statsAuthorScatterCard },
@@ -325,8 +326,63 @@ function computeStats(list) {
         wordCloud: statsWordCloud(list),
         complexity: statsComplexity(list),
         mood: statsSentiment(list),
+        milestones: statsMilestones(total, earliestAdded, months, now),
         duplicates: statsDuplicates(list, statsDupIgnoreSet()),
         dayCounts,
+    };
+}
+
+// Milestone ladder for the collection-size progress track — also the forecast targets.
+const STATS_MILESTONE_LADDER = [25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000];
+const STATS_MS_PER_MONTH = 30.44 * 24 * 60 * 60 * 1000;
+
+/**
+ * Collection milestones + pace forecast, from the quote count and `added` timestamps only.
+ * pace = trailing momentum (last ≤6 month-buckets) once the collection is a couple of months
+ * old, else the lifetime average — so a fresh burst or a lull is reflected without whipsawing
+ * tiny collections. Returns the ladder rungs around the current size, fill within the current
+ * rung, current pace, and the estimated calendar month the next rung is reached (null when pace
+ * is 0 or every rung is cleared).
+ * @returns {Object|null} null when the collection is empty.
+ */
+function statsMilestones(total, earliestAdded, months, now) {
+    if (!total) return null;
+    const monthsElapsed = earliestAdded ? Math.max(1, (now - earliestAdded) / STATS_MS_PER_MONTH) : 1;
+    const lifetimePace = total / monthsElapsed;
+
+    let recent = 0;
+    const span = Math.min(6, months.length);
+    for (let i = months.length - span; i < months.length; i++) recent += months[i].count;
+    const recentPace = recent / Math.min(span, Math.max(1, Math.ceil(monthsElapsed)));
+    const pace = (monthsElapsed >= 2 && recent > 0) ? recentPace : lifetimePace;
+
+    let next = null;
+    for (const v of STATS_MILESTONE_LADDER) { if (v > total) { next = v; break; } }
+
+    // Track markers: the two most-recently-reached rungs (when they exist) plus the next rung,
+    // laid out on a line spanning [leftmost shown rung … next], with `now` sitting between them.
+    const reached = STATS_MILESTONE_LADDER.filter(v => v <= total).slice(-2);
+    const leftValue = reached.length ? reached[0] : 0;
+    const rightValue = next != null ? next : total;
+    const range = Math.max(1, rightValue - leftValue);
+    const pos = v => Math.max(0, Math.min(100, Math.round(((v - leftValue) / range) * 100)));
+    const rungs = reached.map(v => ({ value: v, pct: pos(v), achieved: true }));
+    if (next != null) rungs.push({ value: next, pct: 100, achieved: false });
+
+    let forecast = null;
+    if (next && pace > 0) {
+        const monthsToNext = Math.ceil((next - total) / pace);
+        const d = new Date(new Date(now).getFullYear(), new Date(now).getMonth() + monthsToNext, 1);
+        forecast = { monthIndex: d.getMonth(), year: d.getFullYear() };
+    }
+
+    // Display pace: whole quotes/month, or quotes/year when slower than one a month.
+    const perMonth = pace >= 1;
+    return {
+        total, next, forecast,
+        paceValue: perMonth ? Math.round(pace) : Math.max(1, Math.round(pace * 12)),
+        paceUnit: perMonth ? 'month' : 'year',
+        track: { nowPct: pos(total), rungs },
     };
 }
 
@@ -476,6 +532,12 @@ function statsEnsureUsageStreakLoaded(s) {
         s.usageStreak = statsUsageStreak();
         facts.innerHTML = statsFactsMarkup(s);
         applyI18n(facts);
+        // The milestones card's achievement line also depends on this payload — patch it in too.
+        const mile = document.querySelector('#stats-body [data-card-id="milestones"]');
+        if (mile) {
+            mile.innerHTML = statsMilestonesCard(s);
+            applyI18n(mile);
+        }
     }).catch(() => {});
 }
 
@@ -1432,6 +1494,77 @@ function statsMoodCard(s) {
         <div class="stats-mood-q">${qLine}</div>
         <div class="stats-complexity-note">⚠ <span data-i18n="statsMoodDisclaimer">Оценка по словарю, а не по смыслу</span></div>
     `;
+}
+
+/**
+ * Milestones & forecast — where the collection sits between size milestones, the month it's
+ * estimated to reach the next one at the current pace, and (when the achievements payload is
+ * loaded) the nearest in-progress achievement. Pure from quotes[]; the achievement line is
+ * patched in by statsEnsureUsageStreakLoaded once the payload arrives.
+ */
+function statsMilestonesCard(s) {
+    const titleSub = `
+        <div class="stats-chart-title" data-i18n="statsCardMilestones">Вехи и прогноз</div>
+        <div class="stats-card-sub" data-i18n="statsCardMilestonesSub">Темп коллекции и ближайшие рубежи</div>`;
+    const m = s.milestones;
+    if (!m) {
+        return `${titleSub}${statsInlineEmptyMarkup('tag', 'statsMileEmptyText')}`;
+    }
+
+    const paceStr = t(m.paceUnit === 'month' ? 'statsMilePaceMonth' : 'statsMilePaceYear', { n: m.paceValue });
+    const hero = `
+        <div class="stats-mile-hero">
+            <span class="stats-mile-num">${m.total}</span>
+            <span class="stats-mile-word">${escHtml(quoteCountWord(m.total))}</span>
+            <span class="stats-mile-pace">· ${escHtml(paceStr)}</span>
+        </div>`;
+
+    const track = `
+        <div class="stats-mile-track">
+            <div class="stats-mile-line"><div class="stats-mile-fill" style="width:${m.track.nowPct}%"></div></div>
+            ${m.track.rungs.map(r => `
+                <div class="stats-mile-mk ${r.achieved ? 'is-done' : 'is-next'}" style="left:${r.pct}%">
+                    <span class="stats-mile-mk-cap">${r.value}</span>
+                </div>`).join('')}
+            <div class="stats-mile-mk is-now" style="left:${m.track.nowPct}%">
+                <span class="stats-mile-mk-now" data-i18n="statsMileNow">сейчас</span>
+            </div>
+        </div>`;
+
+    // Forecast + nearest achievement as one white paragraph, matching the mockup: the milestone
+    // target and the forecast date are accented. The bold spans are our own markup, so the line
+    // is injected as HTML — only the achievement title (a translated label) is escaped.
+    let forecastHtml;
+    if (!m.next) {
+        forecastHtml = `<span data-i18n="statsMileMax">Все рубежи взяты — рекордная коллекция</span>`;
+    } else {
+        const target = `<b class="stats-mile-hl">${m.next} ${escHtml(quoteCountWord(m.next))}</b>`;
+        if (m.forecast) {
+            const date = `<b class="stats-mile-hl">${t('statsMonthsForecast').split(',')[m.forecast.monthIndex]} ${m.forecast.year}</b>`;
+            forecastHtml = t('statsMileForecast', { target, date });
+        } else {
+            forecastHtml = t('statsMileForecastSlow', { target });
+        }
+    }
+    const ach = statsNearestAchievement();
+    if (ach) {
+        forecastHtml += ' ' + t('statsMileAch', {
+            title: escHtml(t(achievementTitleKey(ach.key))),
+            progress: ach.progress,
+            threshold: ach.threshold,
+        });
+    }
+
+    return `${titleSub}${hero}${track}<div class="stats-mile-forecast">${forecastHtml}</div>`;
+}
+
+/** Nearest-to-completion in-progress achievement, excluding quote-count badges (the track already shows those). */
+function statsNearestAchievement() {
+    const statuses = (typeof achievementStatuses !== 'undefined' && achievementStatuses) || [];
+    const cand = statuses.filter(a => !a.unlocked && a.threshold > 0 && a.progress < a.threshold && a.rewardType !== 'badge');
+    if (!cand.length) return null;
+    cand.sort((a, b) => (b.progress / b.threshold) - (a.progress / a.threshold));
+    return cand[0];
 }
 
 /** Average quote length (in words) for your most-quoted authors — who you quote at length. */
