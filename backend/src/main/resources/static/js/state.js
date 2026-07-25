@@ -46,6 +46,7 @@ const AUTH_SUCCESS_FLASH_MS = 450;
 
 let quotes = [];
 let currentFilter = 'all';
+let dupFilterIds = null; // Set<id> when "My quotes" is narrowed to a duplicate set from the stats card, else null
 let currentQodIndex = -1;
 let qodAnchorId = null;
 let editingId = null;
