@@ -4199,6 +4199,79 @@ body.modal-lock-scroll {
     margin-bottom: var(--space-1);
 }
 
+/* ── Free: duplicates ("hygiene") ───────────────────────────────────────── */
+.stats-dup-badge {
+    color: var(--color-primary);
+    background: var(--color-primary-highlight);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+/* "All clean" state — theme accent, never a hard-coded green (would clash with colour themes). */
+.stats-dup-clean { display: flex; align-items: center; gap: var(--space-4); margin: auto 0; }
+.stats-dup-clean-ic {
+    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+    background: var(--color-primary-highlight); color: var(--color-primary);
+    display: flex; align-items: center; justify-content: center;
+}
+.stats-dup-clean-ic svg { width: 26px; height: 26px; }
+.stats-dup-clean-title { color: var(--color-text); font-size: var(--text-base); font-weight: 500; }
+.stats-dup-clean-sub { color: var(--color-text-muted); font-size: var(--text-xs); margin-top: 2px; }
+
+.stats-dup-list { display: flex; flex-direction: column; gap: var(--space-3); margin: var(--space-3) 0 auto; }
+@keyframes statsDupIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+.stats-dup-pair {
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    animation: statsDupIn 0.26s ease;
+    transition: opacity 0.26s ease, transform 0.26s ease;
+}
+/* "not a duplicate" exit — fade + slide in place; the card height is locked in JS so it doesn't jump. */
+.stats-dup-pair.is-removing { opacity: 0; transform: translateX(14px); }
+.stats-dup-pair-head { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
+.stats-dup-meta { color: var(--color-text-muted); font-size: var(--text-xs); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stats-dup-tag {
+    color: var(--color-primary); background: var(--color-primary-highlight);
+    font-size: var(--text-xs); padding: 1px 8px; border-radius: var(--radius-full); white-space: nowrap; flex-shrink: 0;
+}
+.stats-dup-x {
+    margin-left: auto; flex-shrink: 0; background: none; border: none; cursor: pointer;
+    color: var(--color-text-faint); padding: 2px; display: flex; line-height: 0;
+}
+.stats-dup-x:hover { color: var(--color-text-muted); }
+.stats-dup-x svg { width: 15px; height: 15px; }
+.stats-dup-texts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.stats-dup-q {
+    color: var(--color-text); font-size: var(--text-xs); line-height: 1.4;
+    background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-2);
+}
+.stats-dup-footer { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); }
+.stats-dup-more { color: var(--color-text-faint); font-size: var(--text-xs); }
+.stats-dup-view {
+    margin-left: auto;
+    background: none; border: none; padding: 0; cursor: pointer;
+    color: var(--color-primary); font-size: var(--text-xs); font-weight: 500; white-space: nowrap;
+}
+.stats-dup-view:hover { color: var(--color-primary-hover); }
+
+/* Duplicates-only filter, shown as an active accent pill inline with the Все/Избранные tabs. */
+.dup-filter-chip:empty { display: none; }
+.dup-chip {
+    display: inline-flex; align-items: center; gap: var(--space-1);
+    background: var(--color-primary-highlight); color: var(--color-primary);
+    border: 1px solid transparent; border-radius: var(--radius-full); cursor: pointer;
+    padding: var(--space-1) var(--space-3); font-size: var(--text-xs); font-weight: 500;
+}
+.dup-chip:hover { color: var(--color-primary-hover); }
+.dup-chip svg { width: 13px; height: 13px; }
+
 /* ── Plus: author scatter ───────────────────────────────────────────────── */
 .stats-scatter-wrap { position: relative; margin-top: auto; }
 .stats-scatter { width: 100%; height: 150px; display: block; }

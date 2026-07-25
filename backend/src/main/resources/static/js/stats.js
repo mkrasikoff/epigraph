@@ -48,6 +48,7 @@ const STATS_CARDS = {
     language:     { tier: 'free', titleKey: 'statsCardLanguage',    render: statsLanguageCard },
     hall:         { tier: 'free', titleKey: 'statsCardHall',        render: statsHallCard },
     tempo:        { tier: 'free', titleKey: 'statsCardTempo',       render: statsTempoCard },
+    duplicates:   { tier: 'free', titleKey: 'statsCardDup',         render: statsDuplicatesCard },
     heatmap:      { tier: 'plus', titleKey: 'statsCardHeatmap',     render: statsHeatmapCard },
     seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
     reading:      { tier: 'plus', titleKey: 'statsCardReading',     render: statsReadingTimeCard },
@@ -322,6 +323,7 @@ function computeStats(list) {
         authorScatter,
         wordCloud: statsWordCloud(list),
         complexity: statsComplexity(list),
+        duplicates: statsDuplicates(list, statsDupIgnoreSet()),
         dayCounts,
     };
 }
@@ -906,6 +908,140 @@ function statsWordCloudCard(s) {
         <div class="stats-card-sub" data-i18n="statsCardWordCloudSub">Частые слова в ваших цитатах</div>
         ${body}
     `;
+}
+
+// -----------------------------------------------------------------------------
+// Duplicates ("hygiene") — detection lives in stats-text.js; this card shows the
+// found pairs (macket 4: side-by-side previews + a match tag) or a reassuring
+// "all clean" state. The "not a duplicate" dismiss list is client-only, in
+// localStorage — deliberately no backend, it's an auxiliary stats helper.
+// -----------------------------------------------------------------------------
+const STATS_DUP_IGNORE_KEY = 'epigraph_dup_ignore';
+const STATS_DUP_SHOWN = 1; // pairs rendered inline before "+ N more" (one at a time keeps the card short)
+
+/** The set of pair-keys the user marked "not a duplicate" (localStorage-backed). */
+function statsDupIgnoreSet() {
+    try { return new Set(JSON.parse(localStorage.getItem(STATS_DUP_IGNORE_KEY) || '[]')); }
+    catch (e) { return new Set(); }
+}
+
+/**
+ * Marks a pair "not a duplicate": animates the pair out, then persists to the ignore list,
+ * re-detects from live quotes and re-renders the card (revealing the next pair, if any).
+ */
+function statsDupDismiss(key, btn) {
+    const card = document.querySelector('#stats-body [data-card-id="duplicates"]');
+    const finalize = () => {
+        const set = statsDupIgnoreSet();
+        set.add(key);
+        try { localStorage.setItem(STATS_DUP_IGNORE_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+        if (!statsCurrent) return;
+        statsCurrent.duplicates = statsDuplicates(quotes, set);
+        if (card) {
+            card.innerHTML = statsDuplicatesCard(statsCurrent);
+            applyI18n(card);
+            requestAnimationFrame(() => { card.style.minHeight = ''; }); // release lock once next pair is laid out
+        }
+    };
+    const pair = btn && btn.closest ? btn.closest('.stats-dup-pair') : null;
+    if (!pair) { finalize(); return; }
+    // Freeze the card height so it doesn't shrink (pair leaving) then grow (next pair) — the
+    // exit is a plain fade+slide in place; the lock is released once the next pair is laid out.
+    if (card) card.style.minHeight = card.offsetHeight + 'px';
+    let done = false;
+    const run = () => { if (done) return; done = true; finalize(); };
+    requestAnimationFrame(() => pair.classList.add('is-removing'));
+    pair.addEventListener('transitionend', run, { once: true });
+    setTimeout(run, 400);
+}
+
+/** First ~50 chars of a quote, whitespace-collapsed, for the duplicate preview. */
+function statsDupPreview(text) {
+    const clean = (text || '').replace(/\s+/g, ' ').trim();
+    return clean.length > 50 ? clean.slice(0, 50) + '…' : clean;
+}
+
+/** Human match label for a duplicate pair. */
+function statsDupLabel(p) {
+    if (p.kind === 'exact') return t('statsDupExact');
+    if (p.kind === 'contained') return t('statsDupContained');
+    return t('statsDupSimilar', { pct: Math.round(p.score * 100) });
+}
+
+/** Author caption for a pair — one name if shared, both (or the one present) otherwise. */
+function statsDupAuthors(p) {
+    const a = (p.a.author || '').trim(), b = (p.b.author || '').trim();
+    if (a && b && a !== b) return `${a} · ${b}`;
+    return a || b || t('statsDupNoAuthor');
+}
+
+function statsDuplicatesCard(s) {
+    const d = s.duplicates || { pairs: [], pairCount: 0, quoteCount: 0 };
+    const badge = d.pairCount
+        ? `<span class="stats-dup-badge">${escHtml(t('statsDupBadge', { n: d.pairCount, word: pairCountWord(d.pairCount) }))}</span>`
+        : '';
+    const head = `
+        <div class="stats-card-head">
+            <div>
+                <div class="stats-chart-title" data-i18n="statsCardDup">Гигиена: дубликаты</div>
+                <div class="stats-card-sub" data-i18n="statsCardDupSub">Похожие и повторяющиеся цитаты</div>
+            </div>
+            ${badge}
+        </div>`;
+
+    if (d.pairCount === 0) {
+        return `${head}
+            <div class="stats-dup-clean">
+                <div class="stats-dup-clean-ic" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </div>
+                <div>
+                    <div class="stats-dup-clean-title" data-i18n="statsDupCleanTitle">Дубликатов нет</div>
+                    <div class="stats-dup-clean-sub" data-i18n="statsDupCleanSub">все ваши цитаты уникальны</div>
+                </div>
+            </div>`;
+    }
+
+    const rows = d.pairs.slice(0, STATS_DUP_SHOWN).map(p => {
+        const key = statsDupKey(p.a.id, p.b.id);
+        return `
+            <div class="stats-dup-pair">
+                <div class="stats-dup-pair-head">
+                    <span class="stats-dup-meta">${escHtml(statsDupAuthors(p))}</span>
+                    <span class="stats-dup-tag">${escHtml(statsDupLabel(p))}</span>
+                    <button class="stats-dup-x" type="button" onclick="statsDupDismiss('${key}', this)" data-i18n-title="statsDupDismiss" data-i18n-aria="statsDupDismiss" aria-label="не дубликат">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="stats-dup-texts">
+                    <span class="stats-dup-q">${escHtml(statsDupPreview(p.a.text))}</span>
+                    <span class="stats-dup-q">${escHtml(statsDupPreview(p.b.text))}</span>
+                </div>
+            </div>`;
+    }).join('');
+
+    const remaining = d.pairCount - Math.min(STATS_DUP_SHOWN, d.pairs.length);
+    const more = remaining > 0
+        ? `<span class="stats-dup-more">${escHtml(t('statsDupMore', { n: remaining, word: pairCountWord(remaining) }))}</span>`
+        : '';
+    const footer = `
+        <div class="stats-dup-footer">
+            ${more}
+            <button class="stats-dup-view" type="button" onclick="statsDupViewAll()" data-i18n="statsDupViewAll">Показать в «Мои цитаты» →</button>
+        </div>`;
+    return `${head}<div class="stats-dup-list">${rows}</div>${footer}`;
+}
+
+/** Opens "My quotes" filtered to just the quotes involved in duplicates (chip is clearable there). */
+function statsDupViewAll() {
+    const d = statsCurrent && statsCurrent.duplicates;
+    if (!d || !d.quoteIds || !d.quoteIds.length) return;
+    dupFilterIds = new Set(d.quoteIds);
+    // Reset the tab filter to "all" so the duplicate set isn't intersected with "Favorites",
+    // and sync the tab highlight (the first .filter-tab is "all").
+    currentFilter = 'all';
+    document.querySelectorAll('.filter-tab').forEach((b, i) => b.classList.toggle('active', i === 0));
+    location.hash = '#all'; // drives switchView('list') via the router → renderList() reads dupFilterIds
 }
 
 /** Playful "how big is my collection as a book" stat — clickable to compare against another book. */
