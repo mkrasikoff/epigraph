@@ -53,6 +53,7 @@ const STATS_CARDS = {
     seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
     reading:      { tier: 'plus', titleKey: 'statsCardReading',     render: statsReadingTimeCard },
     complexity:   { tier: 'plus', titleKey: 'statsCardComplexity', render: statsComplexityCard },
+    mood:         { tier: 'plus', titleKey: 'statsCardMood',        render: statsMoodCard },
     authorLength: { tier: 'plus', titleKey: 'statsCardAuthorLength', render: statsAuthorLengthCard },
     authorCloud:  { tier: 'plus', titleKey: 'statsCardAuthorCloud', render: statsAuthorCloudCard },
     authorScatter:{ tier: 'plus', titleKey: 'statsCardAuthorScatter', render: statsAuthorScatterCard },
@@ -323,6 +324,7 @@ function computeStats(list) {
         authorScatter,
         wordCloud: statsWordCloud(list),
         complexity: statsComplexity(list),
+        mood: statsSentiment(list),
         duplicates: statsDuplicates(list, statsDupIgnoreSet()),
         dayCounts,
     };
@@ -1380,6 +1382,55 @@ function statsComplexityCard(s) {
             </div>
         </div>
         <div class="stats-complexity-note">⚠ <span data-i18n="statsComplexityDisclaimer">Приблизительная оценка, а не научный индекс</span></div>
+    `;
+}
+
+/**
+ * Collection mood — share of quotes that read light / neutral / dark by a small tone
+ * lexicon (stats-text.js), plus the question-vs-statement split. Reuses the language
+ * bar's palette technique (one accent hue at two intensities + a neutral grey), so the
+ * three segments can't clash in any theme, light or dark. Honest "≈ approximate" caveat,
+ * since it's lexicon-based, not semantic — same spirit as the complexity card.
+ */
+function statsMoodCard(s) {
+    const titleSub = `
+        <div class="stats-chart-title" data-i18n="statsCardMood">Настроение коллекции</div>
+        <div class="stats-card-sub" data-i18n="statsCardMoodSub">Тональность цитат по словам · ≈ примерно</div>`;
+    const m = s.mood;
+    if (!m) {
+        return `${titleSub}${statsInlineEmptyMarkup('tag', 'statsMoodEmptyText')}`;
+    }
+    const total = m.light + m.neutral + m.dark || 1;
+    // Fixed three columns (light | neutral | dark), matching the mockup's number-over-label
+    // layout; a zero segment renders a zero-width bar span but still shows its 0% column.
+    const cols = [
+        { count: m.light,   barCls: 'stats-moodc-light',   colCls: 'stats-mood-col--light',   labelKey: 'statsMoodLight' },
+        { count: m.neutral, barCls: 'stats-moodc-neutral', colCls: 'stats-mood-col--neutral', labelKey: 'statsMoodNeutral' },
+        { count: m.dark,    barCls: 'stats-moodc-dark',    colCls: 'stats-mood-col--dark',    labelKey: 'statsMoodDark' },
+    ];
+
+    const bar = cols.map(c =>
+        `<span class="${c.barCls}" style="flex:${c.count}"></span>`
+    ).join('');
+
+    const legend = cols.map(c =>
+        `<div class="stats-mood-col ${c.colCls}">
+            <b class="stats-mood-pct">${Math.round((c.count / total) * 100)}%</b>
+            <span class="stats-mood-lbl" data-i18n="${c.labelKey}"></span>
+        </div>`
+    ).join('');
+
+    // pct is our own <b> markup (safe), so this line is inserted as HTML, not escaped.
+    const qLine = t('statsMoodQuestions', {
+        pct: `<b class="stats-mood-hl">${Math.round((m.questions / m.total) * 100)}%</b>`,
+    });
+
+    return `
+        ${titleSub}
+        <div class="stats-langbar" aria-hidden="true">${bar}</div>
+        <div class="stats-mood-cols">${legend}</div>
+        <div class="stats-mood-q">${qLine}</div>
+        <div class="stats-complexity-note">⚠ <span data-i18n="statsMoodDisclaimer">Оценка по словарю, а не по смыслу</span></div>
     `;
 }
 

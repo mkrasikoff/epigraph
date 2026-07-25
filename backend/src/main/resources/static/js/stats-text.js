@@ -253,6 +253,89 @@ function statsComplexity(list) {
 }
 
 // -----------------------------------------------------------------------------
+// Collection mood — a deliberately rough sentiment estimate (NOT semantic analysis).
+// Each quote is scored by counting matches against a small light/dark tone lexicon
+// (ru + en), matched on the SAME Snowball stems as the word cloud so inflected forms
+// count ("любовь/любви/любить" all hit). A quote is 'light' when light words outnumber
+// dark, 'dark' when the reverse, else 'neutral' — which includes quotes with no tone
+// words at all (the common case, and honestly so). Also splits quotes into questions
+// vs statements by final punctuation. Returns counts, or null when there's no text.
+// A word lexicon can't read irony, negation or context, so it's surfaced with an
+// "≈ approximate" caveat — never as a precise figure.
+// -----------------------------------------------------------------------------
+const STATS_MOOD_LIGHT_WORDS = [
+    // Russian.
+    'любовь', 'любить', 'любимый', 'счастье', 'счастливый', 'радость', 'радостный',
+    'надежда', 'надеяться', 'свет', 'светлый', 'добро', 'добрый', 'доброта', 'красота',
+    'красивый', 'прекрасный', 'мечта', 'мечтать', 'тепло', 'тёплый', 'улыбка', 'улыбаться',
+    'вера', 'верить', 'весна', 'солнце', 'солнечный', 'жизнь', 'живой', 'свобода', 'свободный',
+    'гармония', 'вдохновение', 'вдохновлять', 'нежность', 'нежный', 'благодарность',
+    'благодарный', 'покой', 'спокойствие', 'чудо', 'чудесный', 'дружба', 'смех', 'смеяться',
+    'восторг', 'ласка', 'цвести', 'расцвет', 'рассвет', 'заря', 'радуга', 'блаженство',
+    // English.
+    'love', 'joy', 'joyful', 'hope', 'hopeful', 'light', 'bright', 'happiness', 'happy',
+    'kindness', 'kind', 'beauty', 'beautiful', 'dream', 'warmth', 'warm', 'smile', 'faith',
+    'spring', 'sun', 'sunny', 'life', 'freedom', 'free', 'harmony', 'inspire', 'inspiration',
+    'gentle', 'tender', 'gratitude', 'grateful', 'peace', 'wonder', 'wonderful', 'delight',
+    'friendship', 'laughter', 'bloom', 'dawn', 'grace', 'bliss', 'radiant',
+];
+const STATS_MOOD_DARK_WORDS = [
+    // Russian.
+    'смерть', 'смертельный', 'умереть', 'страх', 'страшный', 'бояться', 'боль', 'больно',
+    'страдание', 'страдать', 'горе', 'печаль', 'печальный', 'грусть', 'грустный',
+    'одиночество', 'одинокий', 'отчаяние', 'отчаянный', 'тьма', 'тёмный', 'мрак', 'война',
+    'ненависть', 'ненавидеть', 'слёзы', 'плакать', 'холод', 'холодный', 'пустота', 'пустой',
+    'жестокий', 'жестокость', 'зло', 'злой', 'мука', 'мучить', 'рана', 'ранить', 'разбитый',
+    'бездна', 'гибель', 'погибнуть', 'тоска', 'ужас', 'ужасный', 'скорбь', 'мёртвый', 'кровь',
+    'могила', 'потеря', 'потерять', 'тревога', 'безнадёжный', 'ад', 'проклятие',
+    // English.
+    'death', 'dead', 'die', 'dying', 'fear', 'afraid', 'pain', 'painful', 'suffering', 'suffer',
+    'sorrow', 'grief', 'sadness', 'sad', 'loneliness', 'lonely', 'despair', 'darkness', 'dark',
+    'war', 'hatred', 'hate', 'tears', 'cry', 'cold', 'empty', 'emptiness', 'cruel', 'cruelty',
+    'evil', 'agony', 'wound', 'broken', 'abyss', 'doom', 'dread', 'horror', 'misery', 'loss',
+    'lose', 'grave', 'terror', 'anguish', 'hopeless',
+];
+
+/** Stems a raw tone-word list into a Set; drops sub-3-letter entries (short tokens are never scored). */
+function statsBuildMoodLexicon(words) {
+    const set = new Set();
+    for (const w of words) {
+        const norm = w.toLowerCase().replace(/ё/g, 'е');
+        if (norm.length < 3) continue;
+        set.add(statsStem(norm));
+    }
+    return set;
+}
+const STATS_MOOD_LIGHT = statsBuildMoodLexicon(STATS_MOOD_LIGHT_WORDS);
+const STATS_MOOD_DARK = statsBuildMoodLexicon(STATS_MOOD_DARK_WORDS);
+
+/**
+ * @param {Array} list - quotes (uses q.text)
+ * @returns {{light:number,neutral:number,dark:number,questions:number,statements:number,total:number}|null}
+ */
+function statsSentiment(list) {
+    let light = 0, neutral = 0, dark = 0, questions = 0, total = 0;
+    for (const q of list) {
+        const text = (q && q.text) || '';
+        if (!text.trim()) continue;
+        total++;
+        let lh = 0, dh = 0;
+        for (const raw of statsTokenize(text)) {
+            if (raw.length < 3 || STATS_STOPWORDS.has(raw)) continue;
+            const stem = statsStem(raw);
+            if (STATS_MOOD_LIGHT.has(stem)) lh++;
+            else if (STATS_MOOD_DARK.has(stem)) dh++;
+        }
+        if (lh > dh) light++;
+        else if (dh > lh) dark++;
+        else neutral++;
+        if (text.trim().endsWith('?')) questions++;
+    }
+    if (total === 0) return null;
+    return { light, neutral, dark, questions, statements: total - questions, total };
+}
+
+// -----------------------------------------------------------------------------
 // Duplicate / near-duplicate detection ("hygiene"). Finds quote pairs that are
 // the same or nearly the same text. Similarity is measured over *stemmed content
 // words* (stop-words dropped), which — unlike character trigrams — sees through

@@ -4047,6 +4047,37 @@ body.modal-lock-scroll {
 .stats-lang-pct { margin-left: auto; font-weight: 700; }
 .stats-lang-count { width: 40px; text-align: right; font-size: var(--text-xs); color: var(--color-text-faint); }
 
+/* ── Mood spectrum ──────────────────────────────────────────────────────── */
+/* One accent hue tinted toward white ("светлое") and shaded toward black ("тёмное"),
+   with a neutral grey between (reuses .stats-langbar / .stats-lang-legend / .stats-dot).
+   Anchoring to absolute white/black — not a theme surface token — keeps the luminance
+   order (light = brightest, dark = darkest) consistent in BOTH light and dark themes; a
+   surface-relative mix inverts between them. Still a single warm hue + grey, so there are
+   no independent colours that could clash with any theme. */
+.stats-moodc-light   { background: color-mix(in oklab, var(--color-primary) 45%, #ffffff); }
+.stats-moodc-neutral { background: var(--color-text-muted); }
+.stats-moodc-dark    { background: color-mix(in oklab, var(--color-primary) 55%, #000000); }
+
+/* Legend as three columns (number over label), matching the mockup. Number colours mirror
+   the bar segment fills exactly (same color-mix expressions), so each figure reads as the
+   legend for its segment. Caveat inherent to that match: a fill tuned to be very light or
+   very dark is, as text, low-contrast on a same-toned surface — so the "светлое" figure is
+   faint on light themes and "тёмное" is faint on dark themes. Mix each toward
+   var(--color-text) if a readability floor is ever needed. */
+.stats-mood-cols { display: flex; justify-content: space-between; margin-top: var(--space-4); }
+.stats-mood-col { display: flex; flex-direction: column; gap: 2px; }
+.stats-mood-col:first-child { align-items: flex-start; }
+.stats-mood-col:nth-child(2) { align-items: center; }
+.stats-mood-col:last-child { align-items: flex-end; }
+.stats-mood-pct { font-size: var(--text-xl); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+.stats-mood-lbl { font-size: var(--text-xs); color: var(--color-text-muted); }
+.stats-mood-col--light .stats-mood-pct { color: color-mix(in oklab, var(--color-primary) 45%, #ffffff); }
+.stats-mood-col--neutral .stats-mood-pct { color: var(--color-text-muted); }
+.stats-mood-col--dark .stats-mood-pct { color: color-mix(in oklab, var(--color-primary) 55%, #000000); }
+
+.stats-mood-q { margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-text); }
+.stats-mood-hl { color: var(--color-primary); font-weight: 700; }
+
 /* ── Hall of fame ───────────────────────────────────────────────────────── */
 .stats-hall { display: flex; flex-direction: column; gap: var(--space-3); }
 
