@@ -50,14 +50,15 @@ const STATS_CARDS = {
     tempo:        { tier: 'free', titleKey: 'statsCardTempo',       render: statsTempoCard },
     duplicates:   { tier: 'free', titleKey: 'statsCardDup',         render: statsDuplicatesCard },
     heatmap:      { tier: 'plus', titleKey: 'statsCardHeatmap',     render: statsHeatmapCard },
-    seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
+    authorScatter:{ tier: 'plus', titleKey: 'statsCardAuthorScatter', render: statsAuthorScatterCard },
     reading:      { tier: 'plus', titleKey: 'statsCardReading',     render: statsReadingTimeCard },
     complexity:   { tier: 'plus', titleKey: 'statsCardComplexity', render: statsComplexityCard },
     mood:         { tier: 'plus', titleKey: 'statsCardMood',        render: statsMoodCard },
     milestones:   { tier: 'plus', titleKey: 'statsCardMilestones', render: statsMilestonesCard },
     authorLength: { tier: 'plus', titleKey: 'statsCardAuthorLength', render: statsAuthorLengthCard },
     authorCloud:  { tier: 'plus', titleKey: 'statsCardAuthorCloud', render: statsAuthorCloudCard },
-    authorScatter:{ tier: 'plus', titleKey: 'statsCardAuthorScatter', render: statsAuthorScatterCard },
+    seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
+    community:    { tier: 'plus', titleKey: 'statsCardCommunity',    render: statsCommunityCard },
 };
 
 /** Last computeStats() result, cached so in-card interactions can re-render without recomputing. */
@@ -419,6 +420,7 @@ function renderStats() {
         animateStatsVisuals();
         statsEnsureUsageStreakLoaded(s);
         statsEnsureActivityLoaded();
+        statsEnsureCommunityLoaded();
     }
 }
 
@@ -1339,6 +1341,166 @@ function statsEnsureActivityLoaded() {
         if (!card || !statsCurrent) return;
         card.innerHTML = statsHeatmapCard(statsCurrent);
         applyI18n(card);
+    }).catch(() => {});
+}
+
+// -----------------------------------------------------------------------------
+// "Место в сообществе" (community comparison, Plus) — TASK-136.
+// The only stat that needs a backend: everything else is computed from the local
+// quotes[], but ranking against other users can't be. The nightly snapshot
+// (GET /api/stats/community) returns anonymous percentile-threshold arrays; the
+// client finds its own standing by looking up its own metrics against them.
+// -----------------------------------------------------------------------------
+
+/** Session cache for the community snapshot. null = not fetched; then the response object. */
+let statsCommunity = null;
+
+/** Below this cohort a percentile is meaningless (you'd be ranked against ~nobody). */
+const STATS_COMMUNITY_MIN_COHORT = 2;
+
+/**
+ * Percentile rank (0..100) of `value` within the sorted `thresholds` (101 ints): the
+ * largest p whose threshold is ≤ value, i.e. "you are at least as large as p% of people".
+ * @returns {number|null} null when there are no thresholds.
+ */
+function statsPercentileRank(thresholds, value) {
+    if (!thresholds || thresholds.length === 0) return null;
+    let p = 0;
+    for (let i = 0; i < thresholds.length; i++) {
+        if (thresholds[i] <= value) p = i;
+        else break;
+    }
+    return p;
+}
+
+/** "You are bigger than N%" — the rank, clamped to 1..99 so the copy never claims 0/100%. */
+function statsCommBiggerThan(rank) {
+    return Math.max(1, Math.min(99, rank));
+}
+
+/** "Top N%" — the complement of the rank, clamped to 1..99. */
+function statsCommTopPct(rank) {
+    return Math.max(1, Math.min(99, 100 - rank));
+}
+
+/**
+ * The real community size distribution as a smooth curve, with the user marked at
+ * their own value. Shape is a kernel-density estimate over the 101 percentile
+ * thresholds (a quantile sample of the distribution): the density peaks where
+ * collection sizes cluster, so on a right-skewed cohort it's a hump toward the
+ * small end with a tail out to the big collectors — and the "you" marker sits at
+ * the user's true position on that axis. Smoothed on a sqrt-compressed axis so small,
+ * skewed cohorts read as one hump, not a step. aria-hidden — the figures are the headline
+ * and bars; this shows *where on the distribution* the user falls.
+ * @param {number[]} thresholds - 101 sorted percentile values of collection size
+ * @param {number}   value      - the user's own collection size
+ */
+function statsCommunityCurve(thresholds, value) {
+    const W = 300, H = 90, topPad = 10, baseY = H - 3, N = 64;
+    // Work on a sqrt-compressed axis: collection sizes are heavily right-skewed, and a
+    // linear axis lets one big collector stretch everything into a corner (the "slide with
+    // a dip" look). sqrt is monotonic (order and the user's standing are preserved), it just
+    // spreads the crowded small end and reins in the tail so the shape reads as one hump.
+    const tf = v => Math.sqrt(Math.max(0, v));
+    const s = thresholds.map(tf);
+    const min = s[0], max = s[s.length - 1];
+    const range = Math.max(1e-6, max - min);
+    const bw = range / 5; // kernel bandwidth — smaller = wobblier, larger = flatter
+    const dens = [];
+    for (let i = 0; i <= N; i++) {
+        const x = min + (i / N) * range;
+        let d = 0;
+        for (let k = 0; k < s.length; k++) {
+            const u = (x - s[k]) / bw;
+            d += Math.exp(-0.5 * u * u); // gaussian kernel
+        }
+        dens.push(d);
+    }
+    const peak = Math.max(...dens, 1e-9);
+    const pts = dens.map((d, i) => [(i / N) * W, baseY - (d / peak) * (baseY - topPad)]);
+    const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    const youX = Math.max(3, Math.min(W - 3, ((tf(value) - min) / range) * W));
+    return `
+        <svg class="stats-comm-curve" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <path class="stats-comm-fill" d="M0,${baseY} ${line} L${W},${baseY} Z"/>
+            <path class="stats-comm-line" d="${line}" vector-effect="non-scaling-stroke"/>
+            <line class="stats-comm-you" x1="${youX.toFixed(1)}" y1="${topPad - 6}" x2="${youX.toFixed(1)}" y2="${baseY}"/>
+        </svg>`;
+}
+
+/** One breakdown row: label · percentile bar (animated via .stats-rank-fill) · "топ N%". */
+function statsCommunityRow(labelKey, rank) {
+    return `
+        <div class="stats-comm-row">
+            <span class="stats-comm-row-l" data-i18n="${labelKey}"></span>
+            <span class="stats-rank-track"><span class="stats-rank-fill" style="width:0" data-w="${rank}"></span></span>
+            <span class="stats-comm-row-v">${t('statsCommunityTopShort', { pct: statsCommTopPct(rank) })}</span>
+        </div>`;
+}
+
+/**
+ * "Место в сообществе" card. Renders a loading placeholder until the snapshot is
+ * fetched (statsEnsureCommunityLoaded patches it in), an "among the first" state
+ * while the cohort is too small to rank, or the full comparison otherwise. The
+ * headline dramatises collection size; the three rows break down size / activity /
+ * favourites. All ranks are computed locally from `s` against the snapshot.
+ */
+function statsCommunityCard(s) {
+    const head = `<div class="stats-chart-title" data-i18n="statsCardCommunity">Место в сообществе</div>
+        <div class="stats-card-sub" data-i18n="statsCommunitySub">Как ваша коллекция смотрится рядом с другими</div>`;
+
+    if (statsCommunity === null) {
+        return `${head}<div class="stats-comm-note" data-i18n="statsCommunityLoading">Сравниваем с сообществом…</div>`;
+    }
+    if (!statsCommunity.cohortSize || statsCommunity.cohortSize < STATS_COMMUNITY_MIN_COHORT) {
+        return `${head}
+            <div class="stats-comm-early">
+                <div class="stats-comm-early-glyph" aria-hidden="true">🌱</div>
+                <div class="stats-comm-early-title" data-i18n="statsCommunityEarlyTitle">Вы среди первых</div>
+                <div class="stats-comm-early-text" data-i18n="statsCommunityEarlyText">Сравнение появится, когда в Epigraph наберётся больше читателей.</div>
+            </div>`;
+    }
+
+    const sizeRank = statsPercentileRank(statsCommunity.sizePercentiles, s.total) ?? 0;
+    const actRank = statsPercentileRank(statsCommunity.activityPercentiles, s.addedRecent) ?? 0;
+    const favRank = statsPercentileRank(statsCommunity.favPctPercentiles, s.favPct) ?? 0;
+
+    return `
+        ${head}
+        <div class="stats-comm-hero">
+            <div class="stats-comm-top">${t('statsCommunityTopWord')} <span class="stats-comm-top-n">${statsCommTopPct(sizeRank)}</span><span class="stats-comm-top-pct">%</span></div>
+            <div class="stats-comm-sub">${t('statsCommunityBiggerThan', { pct: statsCommBiggerThan(sizeRank) })}</div>
+        </div>
+        ${statsCommunityCurve(statsCommunity.sizePercentiles, s.total)}
+        <div class="stats-comm-legend">
+            <span data-i18n="statsCommunityLess">меньше</span>
+            <span class="stats-comm-legend-you">${t('statsCommunityYouCount', { count: s.total, word: quoteCountWord(s.total) })}</span>
+            <span data-i18n="statsCommunityMore">больше</span>
+        </div>
+        <div class="stats-comm-rows">
+            ${statsCommunityRow('statsCommunityRowSize', sizeRank)}
+            ${statsCommunityRow('statsCommunityRowActivity', actRank)}
+            ${statsCommunityRow('statsCommunityRowFav', favRank)}
+        </div>
+    `;
+}
+
+/**
+ * Fetches the community snapshot once (Plus only) and re-renders just the card —
+ * same lazy-patch pattern as the heatmap. Re-animates the freshly inserted rank
+ * fills, which the initial animateStatsVisuals() pass missed (card was a placeholder).
+ */
+function statsEnsureCommunityLoaded() {
+    if (statsCommunity !== null || !statsIsPlus()) return;
+    Api.getCommunityStats().then(snapshot => {
+        statsCommunity = snapshot || { cohortSize: 0 };
+        const card = document.querySelector('#stats-body [data-card-id="community"]');
+        if (!card || !statsCurrent) return;
+        card.innerHTML = statsCommunityCard(statsCurrent);
+        applyI18n(card);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            card.querySelectorAll('.stats-rank-fill').forEach(f => { f.style.width = (f.dataset.w || 0) + '%'; });
+        }));
     }).catch(() => {});
 }
 
