@@ -63,4 +63,17 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
     @Query("SELECT q.importedFromQuoteId FROM Quote q " +
             "WHERE q.userId = :userId AND q.importedFromQuoteId IN :sourceIds")
     List<Long> findSavedSourceIds(@Param("userId") Long userId, @Param("sourceIds") List<Long> sourceIds);
+
+    /**
+     * One row per user (with >= 1 quote) for the nightly community snapshot
+     * (CommunityStatsService): {@code [userId, total, recent, favs]} where
+     * {@code recent} counts quotes added at or after {@code cutoff} and
+     * {@code favs} counts favourited quotes. Aggregates only — the userId is
+     * used to bound the loop, never stored in the snapshot.
+     */
+    @Query("SELECT q.userId, COUNT(q), " +
+            "SUM(CASE WHEN q.added >= :cutoff THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN q.fav = true THEN 1 ELSE 0 END) " +
+            "FROM Quote q WHERE q.userId IS NOT NULL GROUP BY q.userId")
+    List<Object[]> aggregatePerUserStats(@Param("cutoff") long cutoff);
 }

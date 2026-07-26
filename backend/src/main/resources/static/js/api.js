@@ -187,6 +187,15 @@ const Api = {
         fetch('/api/achievements/activity-days', { headers: authHeaders() }).then(r => r.json()),
 
     /**
+     * Community distribution snapshot for the "Место в сообществе" Plus card (TASK-136).
+     * Anonymous aggregates only — same payload for every user. Lazy — fetched once when a
+     * Plus user opens the stats screen.
+     * @returns {Promise<Object>} { cohortSize, updatedAt, sizePercentiles, activityPercentiles, favPctPercentiles }
+     */
+    getCommunityStats: () =>
+        fetch('/api/stats/community', { headers: authHeaders() }).then(r => r.json()),
+
+    /**
      * Records the "explorer" achievement's change_theme action from the
      * light/dark appearance toggle. No body — see AchievementController.
      * @returns {Promise<Response>}
