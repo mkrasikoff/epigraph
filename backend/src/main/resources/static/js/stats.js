@@ -478,7 +478,12 @@ function statsPlusTeaserMarkup() {
                     <span class="stats-plus-count-n">${count}</span>
                     <span class="stats-plus-count-lbl" data-i18n="statsPlusTeaserCount">аналитик в Epigraph Plus</span>
                 </div>
-                <div class="stats-plus-teaser-text" data-i18n="statsPlusTeaserText">Тепловые карты, тональность, сезонность, сравнение с сообществом и другие диаграммы</div>
+                <ul class="stats-plus-feats">
+                    <li><i aria-hidden="true">✓</i><span data-i18n="statsPlusFeatHeat">Тепловые карты активности</span></li>
+                    <li><i aria-hidden="true">✓</i><span data-i18n="statsPlusFeatMood">Тональность и настроение</span></li>
+                    <li><i aria-hidden="true">✓</i><span data-i18n="statsPlusFeatSeason">Сезонность по месяцам</span></li>
+                    <li><i aria-hidden="true">✓</i><span data-i18n="statsPlusFeatCommunity">Сравнение с сообществом</span></li>
+                </ul>
                 <button class="stats-plus-teaser-cta" onclick="openPlusInfo()" data-i18n="statsPlusTeaserCta">Открыть Epigraph Plus</button>
             </div>
         </div>
@@ -560,6 +565,12 @@ function statsEnsureUsageStreakLoaded(s) {
         if (mile) {
             mile.innerHTML = statsMilestonesCard(s);
             applyI18n(mile);
+        }
+        // The activity card's rail shows the streak — refresh it once the streak is known.
+        const heat = document.querySelector('#stats-body [data-card-id="heatmap"]');
+        if (heat) {
+            heat.innerHTML = statsHeatmapCard(s);
+            applyI18n(heat);
         }
     }).catch(() => {});
 }
@@ -1290,16 +1301,54 @@ function statsHeatmapCard(s) {
     const todayCol = (now.getDay() + 6) % 7; // Monday-first column of today's weekday
     const dow = t('statsWeekdaysShort').split(',')
         .map((d, i) => `<span${i === todayCol ? ' class="is-today"' : ''}>${escHtml(d)}</span>`).join('');
+    const rail = statsCalRail(s, now);
     return `
         <div class="stats-chart-title" data-i18n="statsCardHeatmap">Активность</div>
         <div class="stats-card-sub">${t('statsCalendarSub', { month: monthName })}</div>
-        <div class="stats-cal-dow">${dow}</div>
-        ${statsCalendarGrid(s.dayCounts, statsActivityDays)}
+        <div class="stats-cal-row">
+            <div class="stats-cal-main">
+                <div class="stats-cal-dow">${dow}</div>
+                ${statsCalendarGrid(s.dayCounts, statsActivityDays)}
+            </div>
+            <div class="stats-cal-rail">${rail}</div>
+        </div>
         <div class="stats-heat-legend">
             <span class="stats-cal-cell l-visit"></span><span data-i18n="statsHeatVisit">заходили</span>
             <span class="stats-cal-cell l-quote"></span><span data-i18n="statsHeatQuote">+ цитата</span>
+            <span class="stats-cal-cell is-today"></span><span data-i18n="statsHeatToday">сегодня</span>
         </div>
     `;
+}
+
+/**
+ * Side rail beside the month calendar (macket C) — three at-a-glance counts that fill what
+ * was empty space: the current usage streak, how many days this month had any activity, and
+ * how many had a quote added. Streak comes from the achievements payload (0 until loaded, then
+ * patched in); the day counts are derived here from this month's dayCounts + visited-days set.
+ */
+function statsCalRail(s, now) {
+    const year = now.getFullYear(), month = now.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let quoteDays = 0, activeDays = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+        const key = year * 10000 + month * 100 + d;
+        const hasQuote = (s.dayCounts.get(key) || 0) > 0;
+        const visited = statsActivityDays && statsActivityDays.has(key);
+        if (hasQuote) quoteDays++;
+        if (hasQuote || visited) activeDays++;
+    }
+    return statsCalRailTile(s.usageStreak || 0, 'statsRailStreak')
+        + statsCalRailTile(activeDays, 'statsRailActive')
+        + statsCalRailTile(quoteDays, 'statsRailQuotes');
+}
+
+/** One rail tile: a big count over a day-inflected label (e.g. "4 / дня подряд"). */
+function statsCalRailTile(n, labelKey) {
+    return `
+        <div class="stats-cal-rt">
+            <div class="stats-cal-rt-n">${n}</div>
+            <div class="stats-cal-rt-l">${t(labelKey, { word: dayCountWord(n) })}</div>
+        </div>`;
 }
 
 /**
