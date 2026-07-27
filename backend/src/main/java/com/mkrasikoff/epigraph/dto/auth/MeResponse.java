@@ -31,4 +31,12 @@ public class MeResponse {
      * Нужен настройкам, чтобы отрисовать текущий выбор.
      */
     private String quotesVisibility;
+
+    /**
+     * Живая серия подряд идущих активных дней (AchievementService.currentStreak),
+     * посчитанная на каждый /me из user_activity_days — единый источник для всех
+     * мест, где показываются «N дней подряд» (профиль, факт-стрип, рейл статистики),
+     * вместо сохранённого week_streak progress, который мог отставать (TASK-136).
+     */
+    private int currentStreak;
 }

@@ -403,8 +403,9 @@ function renderStats() {
     if (!body) return;
 
     const s = computeStats(quotes);
-    // The usage streak (days in a row using Epigraph) is not derivable from quotes — it lives in
-    // the "week_streak" achievement's uncapped progress, the same source the profile/Settings use.
+    // The activity streak (days in a row) is not derivable from quotes — it's computed server-side
+    // over user_activity_days and delivered live on /me as currentUser.currentStreak, the single
+    // source shared by the facts strip, the activity-card rail, and the Settings profile line.
     s.usageStreak = statsUsageStreak();
     statsCurrent = s; // cached for in-card interactions (e.g. cycling the "collection as a book" title)
 
@@ -540,9 +541,9 @@ function openPlusInfo() {
     );
 }
 
-/** The real "days in a row" usage streak, or 0 when the achievements payload isn't loaded yet. */
+/** The live "days in a row" streak from /me (currentUser.currentStreak), or 0 when unavailable. */
 function statsUsageStreak() {
-    return achievementStatuses?.find(a => a.key === 'week_streak')?.progress || 0;
+    return (typeof currentUser !== 'undefined' && currentUser && currentUser.currentStreak) || 0;
 }
 
 /**
@@ -565,12 +566,6 @@ function statsEnsureUsageStreakLoaded(s) {
         if (mile) {
             mile.innerHTML = statsMilestonesCard(s);
             applyI18n(mile);
-        }
-        // The activity card's rail shows the streak — refresh it once the streak is known.
-        const heat = document.querySelector('#stats-body [data-card-id="heatmap"]');
-        if (heat) {
-            heat.innerHTML = statsHeatmapCard(s);
-            applyI18n(heat);
         }
     }).catch(() => {});
 }
@@ -1321,10 +1316,12 @@ function statsHeatmapCard(s) {
 }
 
 /**
- * Side rail beside the month calendar (macket C) — three at-a-glance counts that fill what
- * was empty space: the current usage streak, how many days this month had any activity, and
- * how many had a quote added. Streak comes from the achievements payload (0 until loaded, then
- * patched in); the day counts are derived here from this month's dayCounts + visited-days set.
+ * Side rail beside the month calendar (macket C) — three at-a-glance counts that fill what was
+ * empty space: the current streak of consecutive active days, how many days this month had any
+ * activity, and how many had a quote added. The streak is the live server value (s.usageStreak
+ * ← currentUser.currentStreak, computed over user_activity_days) so it always matches the Settings
+ * profile and facts strip; the two day counts are derived here from this month's dayCounts +
+ * visited-days set.
  */
 function statsCalRail(s, now) {
     const year = now.getFullYear(), month = now.getMonth();
