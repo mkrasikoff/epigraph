@@ -613,7 +613,14 @@ function showModal(title, body, actions, wide, centered) {
         const btn = document.createElement('button');
         btn.className = a.cls;
         if (a.id) btn.id = a.id;
-        btn.textContent = a.label;
+        // Optional leading icon (trusted SVG string); the label stays a text node so it can't
+        // be used to inject markup. Icon-less callers keep the plain textContent path unchanged.
+        if (a.icon) {
+            btn.insertAdjacentHTML('afterbegin', a.icon);
+            btn.appendChild(document.createTextNode(a.label));
+        } else {
+            btn.textContent = a.label;
+        }
         // Bind the action directly so closeModal() runs without a MouseEvent argument, bypassing the overlay-click guard
         btn.addEventListener('click', a.action);
         actEl.appendChild(btn);
