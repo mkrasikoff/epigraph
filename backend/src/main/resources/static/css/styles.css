@@ -4434,7 +4434,7 @@ body.modal-lock-scroll {
 .stats-dup-clean-title { color: var(--color-text); font-size: var(--text-base); font-weight: 500; }
 .stats-dup-clean-sub { color: var(--color-text-muted); font-size: var(--text-xs); margin-top: 2px; }
 
-.stats-dup-list { display: flex; flex-direction: column; gap: var(--space-3); margin: var(--space-3) 0 auto; }
+.stats-dup-list { display: flex; flex-direction: column; gap: var(--space-3); margin: auto 0; }
 @keyframes statsDupIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: none; }

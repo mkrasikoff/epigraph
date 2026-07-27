@@ -275,6 +275,7 @@ class AuthControllerTest {
         user.setPlusSince(1_700_000_000_000L);
         when(userService.findById(null)).thenReturn(Optional.of(user));
         when(friendshipService.countIncomingRequests(null)).thenReturn(2);
+        when(achievementService.currentStreak(null)).thenReturn(6);
 
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isOk())
@@ -287,7 +288,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.preferredLanguage").value("en"))
                 .andExpect(jsonPath("$.themeStyle").value("forest"))
                 .andExpect(jsonPath("$.equippedBadge").value("chronicler"))
-                .andExpect(jsonPath("$.plus").value(true));
+                .andExpect(jsonPath("$.plus").value(true))
+                .andExpect(jsonPath("$.currentStreak").value(6));
     }
 
     @Test
