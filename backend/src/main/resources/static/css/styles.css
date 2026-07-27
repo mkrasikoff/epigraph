@@ -4317,6 +4317,31 @@ body.modal-lock-scroll {
     box-shadow: 0 0 0 1.5px var(--color-bg);
 }
 
+/* Macket C: month calendar (left) + a stat rail (right) that fills what was empty side space. */
+.stats-cal-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-5);
+    align-items: center;
+    margin-top: var(--space-2);
+}
+.stats-cal-main { min-width: 0; }
+.stats-cal-main .stats-cal-dow { margin-top: 0; }
+.stats-cal-main .stats-cal { margin: var(--space-2) 0 0; }
+
+.stats-cal-rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    border-left: 1px solid var(--color-divider);
+    padding-left: var(--space-5);
+}
+.stats-cal-rt-n { font-size: var(--text-xl); font-weight: 700; color: var(--color-primary); line-height: 1; }
+.stats-cal-rt-l { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+
+/* Shrink the today dot on the small legend swatch so it fits the 12px cell cleanly. */
+.stats-heat-legend .stats-cal-cell.is-today::after { top: 2px; right: 2px; width: 5px; height: 5px; }
+
 .stats-heat-legend {
     display: flex;
     align-items: center;
@@ -4528,10 +4553,24 @@ body.modal-lock-scroll {
     background: var(--color-surface-2);
     border: 1px solid var(--color-divider);
     overflow: hidden;
+    transition: transform var(--transition), opacity var(--transition), box-shadow var(--transition), border-color var(--transition);
 }
 .stats-teaser-mini--back  { transform: rotate(-9deg) translateX(4px);   opacity: 0.45; z-index: 1; }
 .stats-teaser-mini--mid   { transform: rotate(-3deg) translateX(52px);  opacity: 0.7;  z-index: 2; }
 .stats-teaser-mini--front { transform: rotate(4deg)  translateX(100px); z-index: 3; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
+
+/* Hover brings a card upright to the front and dims the rest — each keeps its own X so it
+   lifts in place rather than jumping. Preserves the per-card translateX from the rules above. */
+.stats-plus-fan:hover .stats-teaser-mini { opacity: 0.3; }
+.stats-teaser-mini:hover {
+    opacity: 1 !important;
+    z-index: 10;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+    border-color: var(--color-primary);
+}
+.stats-teaser-mini--back:hover  { transform: rotate(0deg) translateX(4px)   translateY(-8px) scale(1.05); }
+.stats-teaser-mini--mid:hover   { transform: rotate(0deg) translateX(52px)  translateY(-8px) scale(1.05); }
+.stats-teaser-mini--front:hover { transform: rotate(0deg) translateX(100px) translateY(-8px) scale(1.05); }
 .stats-teaser-mini-t { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; margin-bottom: var(--space-3); }
 
 /* Mood spectrum — same accent-ramp + grey as the real card, so it can't clash in any theme. */
@@ -4554,7 +4593,29 @@ body.modal-lock-scroll {
 .stats-plus-count { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
 .stats-plus-count-n { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; color: var(--color-primary); line-height: 1; }
 .stats-plus-count-lbl { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
-.stats-plus-teaser-text { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5; margin: var(--space-2) 0 var(--space-4); max-width: 420px; }
+/* Feature checklist (replaces the single run-on sentence) — a compact 2-column list. */
+.stats-plus-feats {
+    list-style: none;
+    margin: var(--space-4) 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2) var(--space-5);
+}
+.stats-plus-feats li { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-text-muted); }
+.stats-plus-feats i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-primary-highlight);
+    color: var(--color-primary);
+    font-size: 11px;
+    font-style: normal;
+    flex: none;
+}
 .stats-plus-teaser-cta {
     background: var(--color-primary);
     color: var(--color-text-inverse);
@@ -4623,8 +4684,21 @@ body.modal-lock-scroll {
     .stats-metric-card[data-card-id="seasonality"] { grid-column: auto; }
     .stats-facts { grid-template-columns: repeat(2, 1fr); }
     .stats-rank-nm { flex-basis: 90px; }
+    /* Activity card: stack the stat rail under the calendar as a horizontal row. */
+    .stats-cal-row { grid-template-columns: 1fr; justify-items: center; }
+    .stats-cal-rail {
+        flex-direction: row;
+        justify-content: space-around;
+        align-self: stretch;
+        border-left: none;
+        border-top: 1px solid var(--color-divider);
+        padding-left: 0;
+        padding-top: var(--space-4);
+        margin-top: var(--space-2);
+    }
     /* Plus teaser: stack pitch under the fan and shrink the deck so it never overflows. */
     .stats-plus-teaser { flex-direction: column; align-items: flex-start; gap: var(--space-5); padding: var(--space-5); }
+    .stats-plus-feats { grid-template-columns: 1fr; }
     .stats-plus-fan { width: 232px; height: 148px; margin: 0 auto; }
     .stats-teaser-mini { width: 140px; }
     .stats-teaser-mini--mid { transform: rotate(-3deg) translateX(44px); }
