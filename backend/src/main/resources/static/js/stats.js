@@ -529,15 +529,40 @@ function statsHeatRand(x) {
     return n - Math.floor(n);
 }
 
+/** Where the Plus subscription is arranged (same destination as the Settings support link). */
+const PLUS_BOOSTY_URL = 'https://boosty.to/mkrasikoff';
+
+/** Opens the Boosty subscription page in a new tab, then closes the info modal. */
+function openPlusBoosty() {
+    window.open(PLUS_BOOSTY_URL, '_blank', 'noopener,noreferrer');
+    closeModal();
+}
+
 /**
  * Info modal about Epigraph Plus, opened from the teaser CTA. There is no in-app purchase flow —
- * Plus is activated by a redeem code (TASK-131) — so this explains the value rather than checking out.
+ * Plus is activated by a redeem code after subscribing on Boosty (TASK-131) — so this sells the
+ * value (a lead line + a perks list) and links out to Boosty rather than checking out in-app.
  */
 function openPlusInfo() {
+    const perks = ['statsPlusInfoPerkStats', 'statsPlusInfoPerkTheme', 'statsPlusInfoPerkBadge', 'statsPlusInfoPerkLimit']
+        .map(k => `<li>${escHtml(t(k))}</li>`).join('');
+    const body = `
+        <p class="plus-info-lead">${escHtml(t('statsPlusInfoBody'))}</p>
+        <ul class="plus-info-perks">${perks}</ul>
+        <p class="plus-info-note">${escHtml(t('statsPlusInfoHow'))}</p>`;
     showModal(
         t('statsPlusInfoTitle'),
-        `<p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.5">${t('statsPlusInfoBody')}</p>`,
-        [{ label: t('statsPlusInfoClose'), cls: 'btn-primary', action: closeModal }]
+        body,
+        [
+            { label: t('statsPlusInfoClose'), cls: 'btn-secondary', action: closeModal },
+            {
+                label: t('statsPlusInfoSubscribe'),
+                cls: 'btn-primary btn-with-icon',
+                // Same lightning glyph as the Settings "Boosty" support link.
+                icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+                action: openPlusBoosty,
+            },
+        ]
     );
 }
 
