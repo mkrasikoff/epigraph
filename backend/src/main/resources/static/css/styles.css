@@ -3974,7 +3974,7 @@ body.modal-lock-scroll {
 .stats-comm-fill { fill: var(--color-primary); fill-opacity: 0.14; }
 .stats-comm-line { fill: none; stroke: var(--color-primary); stroke-width: 2; }
 .stats-comm-you {
-    stroke: var(--color-gold);
+    stroke: var(--color-primary-active);
     stroke-width: 2;
     stroke-dasharray: 3 3;
 }
@@ -3988,7 +3988,7 @@ body.modal-lock-scroll {
 }
 
 .stats-comm-legend-you {
-    color: var(--color-gold);
+    color: var(--color-primary-active);
     font-weight: 600;
 }
 
@@ -4297,11 +4297,25 @@ body.modal-lock-scroll {
 }
 
 /* Empty = not visited; l-visit = visited that day; l-quote = visited AND added a quote. */
-.stats-cal-cell { width: 28px; height: 28px; border-radius: 7px; background: var(--color-surface-dynamic); }
+.stats-cal-cell { position: relative; width: 28px; height: 28px; border-radius: 7px; background: var(--color-surface-dynamic); }
 .stats-cal-cell.l-visit { background: color-mix(in oklab, var(--color-primary) 45%, var(--color-surface-dynamic)); }
 .stats-cal-cell.l-quote { background: var(--color-primary); }
 .stats-cal-cell.is-blank { background: transparent; }
 .stats-cal-cell.is-future { opacity: 0.4; }
+/* Today: a small dot pinned to the top-right corner in the lightest accent step, with a
+   thin page-coloured ring so it reads on both the muted empty cell and the bright l-quote
+   cell — on-palette and theme-adaptive instead of a fixed gold. */
+.stats-cal-cell.is-today::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-primary-active);
+    box-shadow: 0 0 0 1.5px var(--color-bg);
+}
 
 .stats-heat-legend {
     display: flex;
@@ -4447,8 +4461,8 @@ body.modal-lock-scroll {
 .dup-chip svg { width: 13px; height: 13px; }
 
 /* ── Plus: author scatter ───────────────────────────────────────────────── */
-.stats-scatter-wrap { position: relative; margin-top: auto; }
-.stats-scatter { width: 100%; height: 150px; display: block; }
+.stats-scatter-wrap { position: relative; margin: auto 0; }
+.stats-scatter { width: 100%; height: 185px; display: block; }
 .stats-scatter-axis { stroke: var(--color-divider); }
 .stats-scatter-dot { fill: var(--color-primary); fill-opacity: 0.75; pointer-events: none; }
 .stats-scatter-hit { fill: transparent; cursor: pointer; }

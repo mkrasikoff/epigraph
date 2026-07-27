@@ -1305,7 +1305,7 @@ function statsHeatmapCard(s) {
 /**
  * Builds the current month as a Monday-first calendar: leading blanks pad to the 1st's weekday,
  * then one cell per day. A day is "quote" (brightest) if a quote was added, else "visit" if the
- * user was active, else empty. Today is ringed; future days in this month stay empty placeholders.
+ * user was active, else empty. Today gets a corner dot; future days in this month stay empty placeholders.
  */
 function statsCalendarGrid(dayCounts, activitySet) {
     const now = new Date();
@@ -1320,6 +1320,7 @@ function statsCalendarGrid(dayCounts, activitySet) {
         let cls = 'stats-cal-cell';
         if ((dayCounts.get(key) || 0) > 0) cls += ' l-quote';
         else if (activitySet && activitySet.has(key)) cls += ' l-visit';
+        if (d === todayDate) cls += ' is-today';
         if (d > todayDate) cls += ' is-future';
         cells += `<span class="${cls}"></span>`;
     }
@@ -1799,16 +1800,20 @@ function statsAuthorCloudCard(s) {
 /** Scatter of authors: quote count (x) × favorite rate (y), with quadrant guides. */
 function statsAuthorScatterCard(s) {
     const pts = s.authorScatter;
-    const W = 300, H = 150, padX = 24, padY = 16;
+    const W = 300, H = 185, padX = 18, padY = 20;
     let dots = '', hits = '';
     if (pts.length) {
         const maxCount = Math.max(...pts.map(p => p.count), 1);
         pts.forEach(p => {
-            const x = padX + (p.count / maxCount) * (W - padX * 2);
+            const ratio = p.count / maxCount;
+            const x = padX + ratio * (W - padX * 2);
             const y = H - padY - p.favRate * (H - padY * 2);
-            const rDot = 3 + (p.count / maxCount) * 5;
+            const rDot = 5 + ratio * 9;
+            // Bigger dots (more-quoted authors) are more transparent so they don't hide the small
+            // ones they overlap; a 0.4 floor keeps the biggest from vanishing entirely.
+            const op = (0.85 - ratio * 0.45).toFixed(2);
             const tip = `${p.name} · ${p.count} ${quoteCountWord(p.count)} · ${Math.round(p.favRate * 100)}%`;
-            dots += `<circle class="stats-scatter-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rDot.toFixed(1)}"></circle>`;
+            dots += `<circle class="stats-scatter-dot" style="fill-opacity:${op}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rDot.toFixed(1)}"></circle>`;
             // Larger transparent hit-target on top, so hovering a tiny dot reliably shows the tooltip.
             hits += `<circle class="stats-scatter-hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rDot + 8).toFixed(1)}" data-tip="${escHtml(tip)}"></circle>`;
         });
