@@ -46,6 +46,17 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
             "WHERE q.userId = :userId AND q.manuallyAdded = true AND q.author IS NOT NULL AND q.author <> ''")
     long countDistinctManuallyAddedAuthors(@Param("userId") Long userId);
 
+    /**
+     * Number of distinct calendar days (Europe/Moscow, matching UserActivityDay's zone) on which
+     * the user added any quote — the condition behind the "quote_days_10" achievement (TASK-137).
+     * Counts imported quotes too (they carry an `added` timestamp), so JSON imports move it.
+     * `added` is epoch millis; to_timestamp wants seconds, hence /1000.
+     */
+    @Query(value = "SELECT COUNT(DISTINCT (to_timestamp(added / 1000) AT TIME ZONE 'Europe/Moscow')::date) " +
+            "FROM quotes WHERE user_id = :userId AND added IS NOT NULL",
+            nativeQuery = true)
+    long countDistinctQuoteDays(@Param("userId") Long userId);
+
     boolean existsBySharedQuoteIdAndUserId(Long sharedQuoteId, Long userId);
 
     Optional<Quote> findBySharedQuoteIdAndUserId(Long sharedQuoteId, Long userId);

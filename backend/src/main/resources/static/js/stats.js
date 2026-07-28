@@ -59,6 +59,10 @@ const STATS_CARDS = {
     authorCloud:  { tier: 'plus', titleKey: 'statsCardAuthorCloud', render: statsAuthorCloudCard },
     seasonality:  { tier: 'plus', titleKey: 'statsCardSeasonality', render: statsSeasonalityCard },
     community:    { tier: 'plus', titleKey: 'statsCardCommunity',    render: statsCommunityCard },
+    // Achievement-gated (TASK-137): free cards that stay locked (with a progress teaser) until the
+    // required achievement is unlocked. `requires` is the achievement key; its rewardKey is this id.
+    rhythm:       { tier: 'achievement', requires: 'quote_days_10', titleKey: 'statsCardRhythm',    render: statsRhythmCard },
+    character:    { tier: 'achievement', requires: 'quotes_50',     titleKey: 'statsCardCharacter', render: statsCharacterCard },
 };
 
 /** Last computeStats() result, cached so in-card interactions can re-render without recomputing. */
@@ -116,6 +120,15 @@ function computeStats(list) {
     const langSplit = { ru: 0, en: 0, other: 0 };           // dominant script per quote
     const dayCounts = new Map();                            // y*10000+m*100+d → adds that day
 
+    // "Ваш ритм" (achievement card): Monday-first weekday histogram + 4 six-hour time-of-day buckets
+    // (night/morning/day/evening), over quotes that carry an `added` timestamp.
+    const weekday = new Array(7).fill(0);
+    const timeOfDay = [0, 0, 0, 0]; // [0–6, 6–12, 12–18, 18–24)
+    let datedCount = 0;
+    // "Характер цитат" (achievement card): how many quotes are questions / exclamations / carry an
+    // ellipsis / contain a digit. Independent flags — a quote can match several.
+    let charQuestion = 0, charExclaim = 0, charEllipsis = 0, charNumber = 0, charTextCount = 0;
+
     let favCount = 0;
     let withSource = 0;
     let savedFromFriends = 0;
@@ -155,6 +168,15 @@ function computeStats(list) {
         else if (cyr >= lat) langSplit.ru++;
         else langSplit.en++;
 
+        // Character of the quote — the sentence-final mark is checked past any closing quote/bracket.
+        if (text.length > 0) {
+            charTextCount++;
+            if (/[?]["»”'’)\]]*$/.test(text)) charQuestion++;
+            if (/[!]["»”'’)\]]*$/.test(text)) charExclaim++;
+            if (text.includes('…') || text.includes('...')) charEllipsis++;
+            if (/\d/.test(text)) charNumber++;
+        }
+
         const author = (q.author || '').trim();
         if (author) {
             authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
@@ -187,6 +209,11 @@ function computeStats(list) {
             monthTotals.set(key, (monthTotals.get(key) || 0) + 1);
             const bucket = monthKeyIndex[key];
             if (bucket !== undefined) months[bucket].count++;
+
+            // Rhythm: Monday-first weekday + which 6-hour slice of the day.
+            datedCount++;
+            weekday[(d.getDay() + 6) % 7]++;
+            timeOfDay[Math.floor(d.getHours() / 6)]++;
 
             // Busiest calendar day (for the Hall of Fame).
             const dayKey = d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate();
@@ -330,6 +357,8 @@ function computeStats(list) {
         milestones: statsMilestones(total, earliestAdded, months, now),
         duplicates: statsDuplicates(list, statsDupIgnoreSet()),
         dayCounts,
+        rhythm: { weekday, timeOfDay, dated: datedCount },
+        character: { textCount: charTextCount, question: charQuestion, exclaim: charExclaim, ellipsis: charEllipsis, number: charNumber },
     };
 }
 
@@ -411,7 +440,7 @@ function renderStats() {
 
     body.innerHTML = s.total === 0
         ? statsEmptyMarkup()
-        : statsOverviewMarkup(s) + statsFreeCardsSection(s) + statsFactsSection(s) + statsPlusSection(s);
+        : statsOverviewMarkup(s) + statsFreeCardsSection(s) + statsFactsSection(s) + statsAchievementSection(s) + statsPlusSection(s);
 
     // Re-apply translations so the active language wins over the Russian fallback text
     // baked into the [data-i18n] elements in the templates above.
@@ -437,6 +466,164 @@ function statsFreeCardsSection(s) {
         <div class="stats-metric-grid">
             ${cards.map(c => statsRenderCard(c, s)).join('')}
         </div>
+    `;
+}
+
+// =============================================================================
+// ACHIEVEMENT-GATED SECTION (TASK-137) — "Открываются при росте коллекции"
+// Free cards that unlock as the collection grows: each stays a locked teaser
+// (achievement name + progress) until its required achievement is unlocked,
+// then flips to the real card. Unlock state comes from achievementStatuses,
+// the same lazily-loaded payload the facts strip/milestones use.
+// =============================================================================
+
+/** True when the achievement gating `requires` is unlocked (false until statuses load). */
+function statsAchievementUnlocked(requiresKey) {
+    const a = achievementStatuses?.find(x => x.key === requiresKey);
+    return !!(a && a.unlocked);
+}
+
+/**
+ * Labelled section of achievement-gated cards, placed just before the Plus block. Each card is
+ * wrapped with a stable id + data-requires so it can be patched in place when achievements load
+ * (statsRefreshAchievementCards). Renders nothing until such cards are registered.
+ */
+function statsAchievementSection(s) {
+    const cards = statsCardsByTier('achievement');
+    if (cards.length === 0) return '';
+    return `
+        <div class="stats-section-label" data-i18n="statsSectionAchievement">Открываются при росте коллекции</div>
+        <div class="stats-metric-grid">
+            ${cards.map(c => statsAchievementCardShell(c, s)).join('')}
+        </div>
+    `;
+}
+
+/** Wraps one gated card: the real render when unlocked, else a locked teaser. */
+function statsAchievementCardShell(card, s) {
+    const unlocked = statsAchievementUnlocked(card.requires);
+    const cls = unlocked ? 'stats-card stats-metric-card' : 'stats-card stats-metric-card stats-locked-card';
+    const inner = unlocked ? card.render(s) : statsLockedInner(card);
+    return `<div class="${cls}" data-card-id="${card.id}" data-requires="${card.requires}">${inner}</div>`;
+}
+
+/**
+ * Locked teaser: the card's title (dimmed), the gating achievement's name + condition, and a
+ * progress bar toward its threshold. Progress reads from achievementStatuses; 0/0 (a bare lock)
+ * until that payload loads, then patched in.
+ */
+function statsLockedInner(card) {
+    const st = achievementStatuses?.find(x => x.key === card.requires);
+    // Progress only once the achievements payload has loaded — until then just the lock + name,
+    // never a bare "0 / 0" that would flash before the fetch resolves.
+    const progress = st
+        ? (() => {
+            const pct = st.threshold ? Math.min(100, Math.round((st.progress / st.threshold) * 100)) : 0;
+            return `<div class="stats-locked-track"><span style="width:${pct}%"></span></div>
+                <div class="stats-locked-prog">${st.progress} / ${st.threshold}</div>`;
+        })()
+        : '';
+    return `
+        <div class="stats-locked">
+            <div class="stats-locked-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <div class="stats-locked-title">${escHtml(t(card.titleKey))}</div>
+            <div class="stats-locked-hint">${t('statsLockedHint', { name: escHtml(t(achievementTitleKey(card.requires))) })}</div>
+            ${progress}
+        </div>
+    `;
+}
+
+/**
+ * Re-renders every gated card from the current achievementStatuses — called once the payload loads
+ * so a card that's actually unlocked flips from its locked teaser to the real thing (and locked
+ * ones get their real progress). Replays fill/bar animations on any freshly revealed card.
+ */
+function statsRefreshAchievementCards() {
+    if (!statsCurrent) return;
+    statsCardsByTier('achievement').forEach(card => {
+        const el = document.querySelector(`#stats-body [data-card-id="${card.id}"]`);
+        if (!el) return;
+        const unlocked = statsAchievementUnlocked(card.requires);
+        el.className = unlocked ? 'stats-card stats-metric-card' : 'stats-card stats-metric-card stats-locked-card';
+        el.innerHTML = unlocked ? card.render(statsCurrent) : statsLockedInner(card);
+        applyI18n(el);
+        if (unlocked) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                el.querySelectorAll('.stats-rank-fill').forEach(f => { f.style.width = (f.dataset.w || 0) + '%'; });
+                el.querySelectorAll('.stats-actbar, .stats-dow-bar').forEach(b => { b.style.height = (b.dataset.h || 0) + '%'; });
+            }));
+        }
+    });
+}
+
+/**
+ * "Ваш ритм" (unlocked by quote_days_10) — a Monday-first weekday histogram (peak bar highlighted)
+ * plus the busiest weekday and favourite time of day, from the quotes' `added` timestamps.
+ */
+function statsRhythmCard(s) {
+    const r = s.rhythm;
+    const dows = t('statsWeekdaysShort').split(',');
+    const max = Math.max(...r.weekday, 1);
+    const bars = r.weekday.map((c, i) => {
+        const isPeak = c === max && c > 0;
+        return `<div class="stats-dow-col">
+            <div class="stats-dow-bar ${isPeak ? 'peak' : ''}" style="height:0" data-h="${Math.round((c / max) * 100)}"></div>
+            <span class="stats-dow-m">${escHtml(dows[i])}</span>
+        </div>`;
+    }).join('');
+
+    let peakDay = -1, peakDayCount = 0;
+    r.weekday.forEach((c, i) => { if (c > peakDayCount) { peakDayCount = c; peakDay = i; } });
+    const todKeys = ['statsTodNight', 'statsTodMorning', 'statsTodDay', 'statsTodEvening'];
+    let peakTod = -1, peakTodCount = 0;
+    r.timeOfDay.forEach((c, i) => { if (c > peakTodCount) { peakTodCount = c; peakTod = i; } });
+
+    const facts = r.dated > 0 ? `
+        <div class="stats-rhythm-facts">
+            <div class="stats-rf"><div class="stats-rf-n">${peakDay >= 0 ? escHtml(dows[peakDay]) : '—'}</div><div class="stats-rf-l" data-i18n="statsRhythmPeakDay">активнее всего</div></div>
+            <div class="stats-rf"><div class="stats-rf-n">${peakTod >= 0 ? t(todKeys[peakTod]) : '—'}</div><div class="stats-rf-l" data-i18n="statsRhythmPeakTime">любимое время</div></div>
+        </div>` : '';
+
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardRhythm">Ваш ритм</div>
+        <div class="stats-card-sub" data-i18n="statsCardRhythmSub">Когда вы собираете цитаты</div>
+        <div class="stats-dow-chart">${bars}</div>
+        ${facts}
+    `;
+}
+
+/**
+ * "Характер цитат" (unlocked by quotes_50) — the share of quotes that are questions, exclamations,
+ * carry an ellipsis, or contain a digit. Bars are scaled to the largest share so the card reads
+ * on typically-small percentages; each label shows the true percentage of the collection.
+ */
+function statsCharacterCard(s) {
+    const c = s.character;
+    const total = c.textCount || 1;
+    const rows = [
+        ['statsCharQuestion', c.question],
+        ['statsCharExclaim', c.exclaim],
+        ['statsCharEllipsis', c.ellipsis],
+        ['statsCharNumber', c.number],
+    ];
+    const maxShare = Math.max(...rows.map(([, n]) => n / total), 0.0001);
+    const body = rows.map(([key, n]) => {
+        const share = n / total;
+        return `<div class="stats-char-row">
+            <span class="stats-char-l" data-i18n="${key}"></span>
+            <span class="stats-rank-track"><span class="stats-rank-fill" style="width:0" data-w="${Math.round((share / maxShare) * 100)}"></span></span>
+            <span class="stats-char-v">${Math.round(share * 100)}%</span>
+        </div>`;
+    }).join('');
+
+    return `
+        <div class="stats-chart-title" data-i18n="statsCardCharacter">Характер цитат</div>
+        <div class="stats-card-sub" data-i18n="statsCardCharacterSub">Вопросы, восклицания и другие знаки</div>
+        <div class="stats-char-rows">${body}</div>
     `;
 }
 
@@ -572,10 +759,12 @@ function statsUsageStreak() {
 }
 
 /**
- * The achievements payload (which carries the usage streak) is only fetched when Settings opens
- * or after an achievement check — so opening Stats directly can find it unloaded, hiding the
- * streak fact. When that's the case, fetch it once and patch just the facts strip back in, so
- * the rest of the already-rendered screen (and its entrance animations) stays put.
+ * The achievements payload is only fetched when Settings opens or after an achievement check — so
+ * opening Stats directly can find it unloaded. When that's the case, fetch it once and patch the
+ * pieces that depend on it — the milestones card's achievement line and the achievement-gated
+ * cards' locked/unlocked state — in place, so the rest of the already-rendered screen (and its
+ * entrance animations) stays put. (The streak fact itself no longer needs this — it reads the live
+ * currentUser.currentStreak — but re-rendering the strip with the same value is harmless.)
  */
 function statsEnsureUsageStreakLoaded(s) {
     if (achievementStatuses !== null || (typeof isGuest !== 'undefined' && isGuest)) return;
@@ -592,6 +781,8 @@ function statsEnsureUsageStreakLoaded(s) {
             mile.innerHTML = statsMilestonesCard(s);
             applyI18n(mile);
         }
+        // Flip achievement-gated cards to their real state now that unlock status is known.
+        statsRefreshAchievementCards();
     }).catch(() => {});
 }
 
@@ -1945,6 +2136,9 @@ function animateStatsVisuals() {
         });
         document.querySelectorAll('#stats-body .stats-rank-fill').forEach(fill => {
             fill.style.width = (fill.dataset.w || 0) + '%';
+        });
+        document.querySelectorAll('#stats-body .stats-dow-bar').forEach(bar => {
+            bar.style.height = (bar.dataset.h || 0) + '%';
         });
     }));
 }

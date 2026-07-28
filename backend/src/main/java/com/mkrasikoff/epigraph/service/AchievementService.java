@@ -135,6 +135,12 @@ public class AchievementService {
         upsertProgress(userId, "authors_10", manualAuthors, achievementDef("authors_10").threshold());
         upsertProgress(userId, "week_streak", currentStreak(userId), achievementDef("week_streak").threshold());
 
+        // Stat-card unlocks (TASK-137) — unlike the badge ladder, these count the WHOLE collection,
+        // imported quotes included, so a JSON import moves them too.
+        long totalQuotes = quoteRepo.countByUserId(userId);
+        upsertProgress(userId, "quotes_50", totalQuotes, achievementDef("quotes_50").threshold());
+        upsertProgress(userId, "quote_days_10", quoteRepo.countDistinctQuoteDays(userId), achievementDef("quote_days_10").threshold());
+
         upsertProgress(userId, AchievementCatalog.BADGE_NOVICE, manualQuotes, achievementDef(AchievementCatalog.BADGE_NOVICE).threshold());
         for (AchievementDefinition badge : AchievementCatalog.BADGE_ACHIEVEMENTS) {
             if (badge.key().equals(AchievementCatalog.BADGE_NOVICE)) continue;
