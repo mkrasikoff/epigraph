@@ -22,8 +22,24 @@
 const ACHIEVEMENT_KEYS = [
     'favorites_25', 'authors_10', 'explorer', 'week_streak',
     'badge_novice', 'badge_chronicler', 'badge_collector', 'badge_bibliophile',
-    'badge_keeper', 'badge_interpreter', 'badge_archivist', 'badge_mentor', 'badge_sage'
+    'badge_keeper', 'badge_interpreter', 'badge_archivist', 'badge_mentor', 'badge_sage',
+    'quotes_50', 'quote_days_10'
 ];
+
+/**
+ * Stat-unlock reward key -> the i18n key for the statistics card it opens (TASK-137).
+ * Mirrors THEME_REWARD_ACHIEVEMENT's role for themes; used to name the reward on the
+ * achievement row and in the unlock toast.
+ */
+const STAT_REWARD_CARD_TITLE = {
+    character: 'statsCardCharacter',
+    rhythm: 'statsCardRhythm'
+};
+
+/** i18n key for a stat achievement's rewarded card name (e.g. 'rhythm' -> 'statsCardRhythm'). */
+function statCardTitleKey(rewardKey) {
+    return STAT_REWARD_CARD_TITLE[rewardKey] || rewardKey;
+}
 
 const BADGE_REWARD_ORDER = [
     'novice', 'chronicler', 'collector', 'bibliophile',
@@ -117,6 +133,18 @@ const ACHIEVEMENT_META = {
         titleKey: 'badgeSageTitle',
         descKey: 'badgeSageDesc',
         icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 17.5c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.45"/><path d="M4.5 18.7c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.37"/><path d="M4.5 19.9c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.29"/><path d="M4.5 21.1c2.2-.8 4.8-1 7.5-.4 2.7-.6 5.3-.4 7.5.4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.21"/><path d="M12 6.4c-2.3-1.5-5.6-2-8-1.4v13c2.4-.6 5.7-.1 8 1.4z"/><path d="M12 6.4c2.3-1.5 5.6-2 8-1.4v13c-2.4-.6-5.7-.1-8 1.4z"/><path d="M12 6.4v13.4" stroke="#000" stroke-opacity="0.3" stroke-width="0.7"/><path d="M6 8.5c1.2-.6 2.6-.7 3.8-.3M13.5 8.2c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 10.6c1.2-.6 2.6-.7 3.8-.3M13.5 10.3c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 12.8c1.2-.6 2.6-.7 3.8-.3M13.5 12.5c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/><path d="M6 14.9c1.2-.6 2.6-.7 3.8-.3M13.5 14.6c1.2-.4 2.6-.3 3.8.3" stroke="#000" stroke-opacity="0.45" stroke-width="0.85" fill="none" stroke-linecap="round"/></svg>'
+    },
+    // Stat-unlock achievements (TASK-137) — icons hint at "opens a statistic": a
+    // bar chart for the quote-count milestone, a calendar for the distinct-days one.
+    quotes_50: {
+        titleKey: 'achievementQuotes50Title',
+        descKey: 'achievementQuotes50Desc',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
+    },
+    quote_days_10: {
+        titleKey: 'achievementQuoteDays10Title',
+        descKey: 'achievementQuoteDays10Desc',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
     }
 };
 
@@ -347,6 +375,9 @@ function showAchievementUnlockModal(status) {
     } else if (status.rewardType === 'badge') {
         const badgeName = t(badgeLabelKey(status.rewardKey));
         rewardText = t('achievementUnlockedRewardBadge', {badge: badgeName});
+    } else if (status.rewardType === 'stat') {
+        const cardName = t(statCardTitleKey(status.rewardKey));
+        rewardText = t('achievementUnlockedRewardStat', {stat: cardName});
     }
 
     const rewardIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
@@ -391,9 +422,9 @@ async function showAchievementsModal() {
 
 /**
  * Default achievements view — only the current/next badge and the 2 locked
- * theme achievements closest to completion, not the full 13-item catalog.
+ * theme achievements closest to completion, not the whole catalog.
  * "Показать все" swaps to renderAllAchievementsModal() for anyone who wants
- * to browse the whole thing.
+ * to browse the full list (themes, badges, and stat unlocks).
  */
 function renderFocusedAchievementsModal() {
     const statuses = achievementStatuses || [];
@@ -462,9 +493,9 @@ function renderFocusedAchievementsModal() {
  */
 function achievementConditionWithReward(a) {
     const desc = t(achievementDescKey(a.key));
-    if (a.rewardType !== 'theme') return desc;
-
-    return `${desc} · ${t(themeStyleLabelKey(a.rewardKey))}`;
+    if (a.rewardType === 'theme') return `${desc} · ${t(themeStyleLabelKey(a.rewardKey))}`;
+    if (a.rewardType === 'stat') return `${desc} · «${t(statCardTitleKey(a.rewardKey))}»`;
+    return desc;
 }
 
 function renderNearestThemeRow(a) {
@@ -483,8 +514,8 @@ function renderNearestThemeRow(a) {
 }
 
 /**
- * Full catalog view (all 13), grouped by reward type — themes and badges
- * are two distinct reward tracks (see AchievementCatalog), and the badge
+ * Full catalog view, grouped by reward type — themes, badges, and stat unlocks
+ * are three distinct reward tracks (see AchievementCatalog), and the badge
  * group is a literal prestige ladder, so it reads better as one ordered
  * list than split across unlocked/in-progress sections.
  */
@@ -495,6 +526,7 @@ function renderAllAchievementsModal() {
 
     const themes = statuses.filter(a => a.rewardType === 'theme');
     const badges = statuses.filter(a => a.rewardType === 'badge');
+    const stats = statuses.filter(a => a.rewardType === 'stat');
 
     const renderRow = (a) => {
         const meta = ACHIEVEMENT_META[a.key] || {};
@@ -502,14 +534,15 @@ function renderAllAchievementsModal() {
         const desc = achievementConditionWithReward(a);
         const iconTier = a.rewardType === 'badge' ? badgeIconTierClass(a.rewardKey) : '';
 
-        // Only "Начитанность" (distinct-authors count) is gated on manuallyAdded quotes —
-        // imported-via-link quotes don't move it, unlike favorites. That's non-obvious enough
-        // to call out right on the row rather than as a general disclaimer nobody reads.
-        const infoHtml = a.key === 'authors_10' ? `
+        // "Начитанность" and "Новичок" are gated on manuallyAdded quotes — imported quotes don't
+        // move them, unlike favorites or the two stat unlocks. That's non-obvious enough to call
+        // out right on the row (per-achievement hint) rather than as a general disclaimer nobody reads.
+        const importHintKey = { authors_10: 'achievementsImportHint', badge_novice: 'achievementsImportHintNovice' }[a.key];
+        const infoHtml = importHintKey ? `
             <button type="button" class="achievement-info-btn" data-achievement-info-toggle aria-label="${t('ariaAchievementInfo')}" aria-expanded="false">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </button>
-            <div class="achievement-info-tooltip" role="tooltip">${t('achievementsImportHint')}</div>
+            <div class="achievement-info-tooltip" role="tooltip">${t(importHintKey)}</div>
         ` : '';
 
         let statusHtml;
@@ -547,6 +580,8 @@ function renderAllAchievementsModal() {
         <div class="achievements-list">${themes.map(renderRow).join('')}</div>
         <div class="settings-group-title">${t('achievementsBadgesSection')}</div>
         <div class="achievements-list">${badges.map(renderRow).join('')}</div>
+        ${stats.length ? `<div class="settings-group-title">${t('achievementsStatsSection')}</div>
+        <div class="achievements-list">${stats.map(renderRow).join('')}</div>` : ''}
         <button type="button" class="achievements-expand-btn" onclick="renderFocusedAchievementsModal()">${t('achievementsBackBtn')}</button>
     `;
 
