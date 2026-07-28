@@ -64,11 +64,26 @@ public final class AchievementCatalog {
             new AchievementDefinition(BADGE_SAGE, "active_days", 1000, "badge", "sage")
     );
 
+    /**
+     * A third reward track (TASK-137): each unlocks a stat card on the statistics
+     * screen's "Открываются при росте коллекции" section instead of a theme or badge.
+     * rewardType "stat" is inert to reequipBadge()/isRewardUnlocked() (those filter by
+     * "badge"/"theme"), so a stat reward is never auto-equipped or applied — the card
+     * just reads the achievement's unlockedAt. Both count manually-added content only,
+     * matching the anti-import-gaming rule the count/distinct badges already follow.
+     * rewardKey is the STATS_CARDS id the achievement gates.
+     */
+    public static final List<AchievementDefinition> STAT_ACHIEVEMENTS = List.of(
+            new AchievementDefinition("quotes_50", "count", 50, "stat", "character"),
+            new AchievementDefinition("quote_days_10", "quote_days", 10, "stat", "rhythm")
+    );
+
     public static final List<AchievementDefinition> ALL = List.of(
             THEME_ACHIEVEMENTS.get(0), THEME_ACHIEVEMENTS.get(1), THEME_ACHIEVEMENTS.get(2), THEME_ACHIEVEMENTS.get(3),
             BADGE_ACHIEVEMENTS.get(0), BADGE_ACHIEVEMENTS.get(1), BADGE_ACHIEVEMENTS.get(2), BADGE_ACHIEVEMENTS.get(3),
             BADGE_ACHIEVEMENTS.get(4), BADGE_ACHIEVEMENTS.get(5), BADGE_ACHIEVEMENTS.get(6), BADGE_ACHIEVEMENTS.get(7),
-            BADGE_ACHIEVEMENTS.get(8)
+            BADGE_ACHIEVEMENTS.get(8),
+            STAT_ACHIEVEMENTS.get(0), STAT_ACHIEVEMENTS.get(1)
     );
 
     private AchievementCatalog() {

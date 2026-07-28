@@ -148,6 +148,62 @@ class AchievementServiceTest {
     }
 
     @Test
+    @DisplayName("evaluate: unlocks quotes_50 once the collection reaches 50 quotes (TASK-137)")
+    void evaluate_unlocksQuotes50() {
+        when(quoteRepo.countByUserId(USER_ID)).thenReturn(50L);
+        when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
+        when(progressRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        achievementService.evaluate(USER_ID);
+
+        ArgumentCaptor<AchievementProgress> captor = ArgumentCaptor.forClass(AchievementProgress.class);
+        verify(progressRepo, org.mockito.Mockito.atLeastOnce()).save(captor.capture());
+        AchievementProgress quotes = captor.getAllValues().stream()
+                .filter(p -> p.getAchievementKey().equals("quotes_50"))
+                .findFirst().orElseThrow();
+        assertThat(quotes.getProgress()).isEqualTo(50);
+        assertThat(quotes.getUnlockedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("evaluate: quotes_50 counts the whole collection, so imported quotes unlock it too (TASK-137)")
+    void evaluate_quotes50CountsImports() {
+        // 50 quotes in the collection but none hand-added — all came in via a JSON import.
+        when(quoteRepo.countByUserId(USER_ID)).thenReturn(50L);
+        when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
+        when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
+        when(progressRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        achievementService.evaluate(USER_ID);
+
+        ArgumentCaptor<AchievementProgress> captor = ArgumentCaptor.forClass(AchievementProgress.class);
+        verify(progressRepo, org.mockito.Mockito.atLeastOnce()).save(captor.capture());
+        AchievementProgress quotes = captor.getAllValues().stream()
+                .filter(p -> p.getAchievementKey().equals("quotes_50"))
+                .findFirst().orElseThrow();
+        assertThat(quotes.getProgress()).isEqualTo(50);
+        assertThat(quotes.getUnlockedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("evaluate: quote_days_10 progress is the distinct add-day count and unlocks at 10 (TASK-137)")
+    void evaluate_unlocksQuoteDays10() {
+        when(quoteRepo.countDistinctQuoteDays(USER_ID)).thenReturn(10L);
+        when(progressRepo.findByUserIdAndAchievementKey(any(), any())).thenReturn(Optional.empty());
+        when(progressRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        achievementService.evaluate(USER_ID);
+
+        ArgumentCaptor<AchievementProgress> captor = ArgumentCaptor.forClass(AchievementProgress.class);
+        verify(progressRepo, org.mockito.Mockito.atLeastOnce()).save(captor.capture());
+        AchievementProgress days = captor.getAllValues().stream()
+                .filter(p -> p.getAchievementKey().equals("quote_days_10"))
+                .findFirst().orElseThrow();
+        assertThat(days.getProgress()).isEqualTo(10);
+        assertThat(days.getUnlockedAt()).isNotNull();
+    }
+
+    @Test
     @DisplayName("evaluate: week_streak progress is the consecutive run, not the total active-day count")
     void evaluate_weekStreakUsesConsecutiveRun_notTotalDays() {
         when(quoteRepo.countByUserIdAndManuallyAddedTrue(USER_ID)).thenReturn(0L);
@@ -322,7 +378,7 @@ class AchievementServiceTest {
 
         List<AchievementStatusResponse> statuses = achievementService.getStatusForUser(USER_ID);
 
-        assertThat(statuses).hasSize(13);
+        assertThat(statuses).hasSize(15); // 4 theme + 9 badge + 2 stat (TASK-137)
         AchievementStatusResponse authors = statuses.stream()
                 .filter(s -> s.getKey().equals("authors_10"))
                 .findFirst().orElseThrow();
@@ -330,5 +386,12 @@ class AchievementServiceTest {
         assertThat(authors.isUnlocked()).isFalse();
         assertThat(authors.getRewardType()).isEqualTo("theme");
         assertThat(authors.getRewardKey()).isEqualTo("forest");
+
+        // The new stat-unlock achievements are in the catalog with rewardType "stat".
+        AchievementStatusResponse rhythm = statuses.stream()
+                .filter(s -> s.getKey().equals("quote_days_10"))
+                .findFirst().orElseThrow();
+        assertThat(rhythm.getRewardType()).isEqualTo("stat");
+        assertThat(rhythm.getRewardKey()).isEqualTo("rhythm");
     }
 }
