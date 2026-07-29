@@ -5168,6 +5168,21 @@ body.friend-immersive header {
     margin-top: var(--space-6);
 }
 
+/* Softens the beat between the profile header (painted instantly) and the
+   quotes block, which is filled only after an async fetch — without this the
+   list (or the "no quotes yet" notice) pops in abruptly a moment later.
+   Applied via fadeInFriendQuotes() only on the async-settled content, not on
+   "show more" pagination or the instant not-friends/hidden states. */
+#friend-profile-quotes.friend-quotes-enter {
+    animation: viewFadeIn 0.28s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #friend-profile-quotes.friend-quotes-enter {
+        animation: none;
+    }
+}
+
 .friend-profile-locked {
     display: flex;
     flex-direction: column;

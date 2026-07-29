@@ -419,6 +419,15 @@ const FRIEND_QUOTES_PAGE_SIZE = 20;
 let friendQuotes = [];
 let friendQuotesVisibleCount = 0;
 
+/** Restarts the fade-in on the quotes box after its content settles from the
+ *  async fetch. Removing the class + forcing a reflow lets the animation replay
+ *  even though the element already carries it from a previous render. */
+function fadeInFriendQuotes(box) {
+    box.classList.remove('friend-quotes-enter');
+    void box.offsetWidth;
+    box.classList.add('friend-quotes-enter');
+}
+
 function friendQuotesNoticeMarkup(text) {
     return `
         <div class="friend-profile-locked">
@@ -450,24 +459,27 @@ async function renderFriendQuotesSection(profile, name) {
         if (!res.ok) {
             // Only reachable if the friendship changed under us mid-view.
             box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesNotFriends'));
+            fadeInFriendQuotes(box);
             return;
         }
 
         friendQuotes = await res.json();
         friendQuotesVisibleCount = Math.min(FRIEND_QUOTES_PAGE_SIZE, friendQuotes.length);
-        renderFriendQuotesList();
+        renderFriendQuotesList(true);
     } catch (e) {
         console.error('Friend quotes error:', e);
         box.innerHTML = friendQuotesNoticeMarkup(t('toastError'));
+        fadeInFriendQuotes(box);
     }
 }
 
-function renderFriendQuotesList() {
+function renderFriendQuotesList(animate) {
     const box = document.getElementById('friend-profile-quotes');
     if (!box) return;
 
     if (!friendQuotes.length) {
         box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesEmpty'));
+        if (animate) fadeInFriendQuotes(box);
         return;
     }
 
@@ -485,6 +497,10 @@ function renderFriendQuotesList() {
     // grid to bind (both live in quotes-list.js).
     markClippedCards();
     initExpandableCards(document.getElementById('friend-quotes-grid'));
+
+    // Only on the first render (async settle), not on "show more" pagination —
+    // re-fading the whole list every time you reveal a page would feel wrong.
+    if (animate) fadeInFriendQuotes(box);
 }
 
 /** Reveals the next page. A friend can have thousands of quotes — rendering
@@ -667,7 +683,7 @@ function friendProfileAchievementsMarkup(unlockedAchievements) {
                     <button type="button" class="friend-profile-ach" aria-label="${escHtml(title)}">${ACHIEVEMENT_META[key].icon}</button>
                     <span class="achievement-info-tooltip" role="tooltip">
                         <span class="friend-profile-ach-name">${escHtml(title)}</span>
-                        <span class="friend-profile-ach-desc">${escHtml(description)}</span>
+                        <span class="friend-profile-ach-desc">${description}</span>
                     </span>
                 </span>`;
         })
