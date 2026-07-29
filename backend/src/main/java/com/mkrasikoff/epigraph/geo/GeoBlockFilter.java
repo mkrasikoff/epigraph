@@ -14,7 +14,7 @@ import java.util.List;
 @Component
 public class GeoBlockFilter extends OncePerRequestFilter {
 
-    private final GeoIpService geoIpService;
+    private final RequestCountryResolver countryResolver;
 
     @Value("${app.geo.enabled}")
     private boolean enabled;
@@ -22,8 +22,8 @@ public class GeoBlockFilter extends OncePerRequestFilter {
     @Value("${app.geo.blocked-countries}")
     private List<String> blockedCountries;
 
-    public GeoBlockFilter(GeoIpService geoIpService) {
-        this.geoIpService = geoIpService;
+    public GeoBlockFilter(RequestCountryResolver countryResolver) {
+        this.countryResolver = countryResolver;
     }
 
     @Override
@@ -42,8 +42,7 @@ public class GeoBlockFilter extends OncePerRequestFilter {
             // a synchronous call to ip-api.com here regardless of the URI, which is the
             // likely cause of intermittent slow page loads.
             if (isGoogleOAuth || isYandexOAuth) {
-                String ip = request.getRemoteAddr();
-                String country = geoIpService.getCountryCode(ip);
+                String country = countryResolver.resolveCountry(request);
 
                 // Google — block for RU
                 if (isGoogleOAuth && country != null && blockedCountries.contains(country)) {
