@@ -144,6 +144,17 @@ async function syncPreferredTheme() {
 function logout() {
     clearToken();
     currentUser = null;
+    // Drop this session's persisted theme/language so the next account to log in
+    // isn't treated as a "guest with an explicit choice" — otherwise the previous
+    // user's stored preference (written to localStorage by syncPreferredTheme /
+    // syncPreferredLanguage) would win over the next user's account settings and,
+    // worse, get pushed up onto their account. The "guest choice wins" pattern is
+    // only meant for a genuine pre-login guest, not for leftovers of a prior session.
+    try {
+        localStorage.removeItem('themeStyle');
+        localStorage.removeItem('epigraph_lang');
+    } catch (e) {
+    }
     showGuestMode();
     switchView('qod');
 }

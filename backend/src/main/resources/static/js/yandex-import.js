@@ -1,7 +1,27 @@
 // Pure data + a couple of DOM-light helpers for the "Import from Yandex Books" flow.
 // The console script itself is generated client-side and copied to the clipboard —
 // Epigraph never talks to books.yandex.ru or sees the user's Yandex session.
-const YANDEX_IMPORT_SCRIPT = `(async () => {
+//
+// The script is built per-call so the messages the user reads in the browser console are
+// localized to the active UI language (TASK-134): the labels are resolved via t() and
+// injected into the generated script as a plain `L` object, and the script references
+// L.* instead of hardcoded Russian. Runtime values (book counts, names) are still
+// interpolated inside the copied script at run time — see the escaped \${...} below.
+function buildYandexImportScript() {
+  const L = {
+    promptLogin: t('yandexScriptPromptLogin'),
+    noLogin: t('yandexScriptNoLogin'),
+    libraryError: t('yandexScriptLibraryError'),
+    collecting: t('yandexScriptCollecting'),
+    foundBooks: t('yandexScriptFoundBooks'),
+    bookError: t('yandexScriptBookError'),
+    processed: t('yandexScriptProcessed'),
+    quotesCollected: t('yandexScriptQuotesCollected'),
+    done: t('yandexScriptDone')
+  };
+
+  return `(async () => {
+  const L = ${JSON.stringify(L)};
   const LIBRARY_QUERY = \`
     query GetUserLibrary($userLogin: String!, $params: UserLibraryBooksParamsInput!) {
   user(login: $userLogin) {
@@ -177,8 +197,8 @@ const YANDEX_IMPORT_SCRIPT = `(async () => {
     \`;
 
   const loginMatch = location.pathname.match(/^\\/@([^/]+)/);
-  const login = loginMatch ? loginMatch[1] : prompt('Введи свой логин на books.yandex.ru (из адреса профиля /@login):');
-  if (!login) { console.error('Логин не указан, прерываю.'); return; }
+  const login = loginMatch ? loginMatch[1] : prompt(L.promptLogin);
+  if (!login) { console.error(L.noLogin); return; }
 
   async function fetchAllBooks() {
     let cursor = '';
@@ -196,7 +216,7 @@ const YANDEX_IMPORT_SCRIPT = `(async () => {
         })
       });
       const json = await res.json();
-      if (json.errors) { console.error('Library error:', json.errors); break; }
+      if (json.errors) { console.error(L.libraryError, json.errors); break; }
       const lib = json.data?.user?.library?.books;
       const page = lib?.page ?? [];
       if (!page.length) break;
@@ -241,9 +261,9 @@ const YANDEX_IMPORT_SCRIPT = `(async () => {
     return new Date(\`\${m[1]}T\${m[2]}\${m[3]}:\${m[4]}\`).getTime();
   }
 
-  console.log('Собираю список книг...');
+  console.log(L.collecting);
   const books = await fetchAllBooks();
-  console.log(\`Найдено книг: \${books.length}\`);
+  console.log(\`\${L.foundBooks} \${books.length}\`);
 
   const quotes = [];
   let processed = 0;
@@ -266,14 +286,14 @@ const YANDEX_IMPORT_SCRIPT = `(async () => {
         }
       }
     } catch (e) {
-      console.error(\`Ошибка для книги "\${book.name}":\`, e);
+      console.error(\`\${L.bookError} "\${book.name}":\`, e);
     }
     processed++;
-    if (processed % 20 === 0) console.log(\`Обработано: \${processed}/\${books.length}, цитат собрано: \${quotes.length}\`);
+    if (processed % 20 === 0) console.log(\`\${L.processed} \${processed}/\${books.length}, \${L.quotesCollected} \${quotes.length}\`);
     await new Promise(r => setTimeout(r, 150));
   }
 
-  console.log(\`ГОТОВО. Всего цитат: \${quotes.length}\`);
+  console.log(\`\${L.done} \${quotes.length}\`);
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -281,6 +301,7 @@ const YANDEX_IMPORT_SCRIPT = `(async () => {
   a.click();
 })();
 `;
+}
 
 /**
  * Copies the Yandex Books export script to the clipboard for pasting into the browser console.
@@ -288,7 +309,7 @@ const YANDEX_IMPORT_SCRIPT = `(async () => {
  */
 async function copyYandexImportScript() {
     try {
-        await navigator.clipboard.writeText(YANDEX_IMPORT_SCRIPT);
+        await navigator.clipboard.writeText(buildYandexImportScript());
         toast(t('toastCopied'));
     } catch (e) {
         toast(t('toastCopyError'), 'error');

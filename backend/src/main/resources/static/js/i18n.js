@@ -309,6 +309,17 @@ const TRANSLATIONS = {
         importYandexFaqQ5:              'Сколько это занимает?',
         importYandexFaqA5:              'Если книг в библиотеке много (сотни), скрипт может выполняться минуту-две — он обращается к каждой книге по отдельности с небольшой паузой между запросами, чтобы не перегружать сервер Яндекса. Дождись сообщения «ГОТОВО» в консоли, прежде чем загружать скачанный файл.',
 
+        // ── Yandex Books console script (messages the user reads in the browser console) ──
+        yandexScriptPromptLogin:        'Введи свой логин на books.yandex.ru (из адреса профиля /@login):',
+        yandexScriptNoLogin:            'Логин не указан, прерываю.',
+        yandexScriptLibraryError:       'Ошибка библиотеки:',
+        yandexScriptCollecting:         'Собираю список книг...',
+        yandexScriptFoundBooks:         'Найдено книг:',
+        yandexScriptBookError:          'Ошибка для книги',
+        yandexScriptProcessed:          'Обработано:',
+        yandexScriptQuotesCollected:    'цитат собрано:',
+        yandexScriptDone:               'ГОТОВО. Всего цитат:',
+
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Настройки',
         settingsAccountTitle:           'Аккаунт',
@@ -1051,7 +1062,18 @@ const TRANSLATIONS = {
         importYandexFaqQ4:              "F12 doesn't open the panel — what do I do?",
         importYandexFaqA4:              'Right-click anywhere on the page and choose "Inspect". On Mac you can also press Cmd+Option+I, on Windows Ctrl+Shift+I. In Safari, first enable the "Develop" menu in the browser settings.',
         importYandexFaqQ5:              'How long does this take?',
-        importYandexFaqA5:              'If your library has a lot of books (hundreds), the script can take a minute or two — it queries each book individually with a small pause between requests so it doesn\'t overload Yandex\'s server. Wait for the "ГОТОВО" message in the console before uploading the downloaded file.',
+        importYandexFaqA5:              'If your library has a lot of books (hundreds), the script can take a minute or two — it queries each book individually with a small pause between requests so it doesn\'t overload Yandex\'s server. Wait for the "DONE" message in the console before uploading the downloaded file.',
+
+        // ── Yandex Books console script (messages the user reads in the browser console) ──
+        yandexScriptPromptLogin:        'Enter your books.yandex.ru login (from your profile URL /@login):',
+        yandexScriptNoLogin:            'No login provided, aborting.',
+        yandexScriptLibraryError:       'Library error:',
+        yandexScriptCollecting:         'Collecting the list of books...',
+        yandexScriptFoundBooks:         'Books found:',
+        yandexScriptBookError:          'Error for book',
+        yandexScriptProcessed:          'Processed:',
+        yandexScriptQuotesCollected:    'quotes collected:',
+        yandexScriptDone:               'DONE. Total quotes:',
 
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Settings',
