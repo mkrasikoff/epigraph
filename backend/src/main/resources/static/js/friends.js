@@ -210,6 +210,10 @@ async function runFriendsSearch(query) {
         box.innerHTML = results.length
             ? results.map(friendRowMarkup).join('')
             : `<div class="friends-empty">${t('friendsSearchEmpty')}</div>`;
+        // Eases the results in after the debounced fetch, matching the friend
+        // profile's quotes block. Not on the sub-min-length hint above — that
+        // renders per keystroke and would flicker.
+        fadeInRise(box);
     } catch (e) {
         console.error('Friends search error:', e);
         toast(t('toastError'), 'error');
@@ -419,13 +423,14 @@ const FRIEND_QUOTES_PAGE_SIZE = 20;
 let friendQuotes = [];
 let friendQuotesVisibleCount = 0;
 
-/** Restarts the fade-in on the quotes box after its content settles from the
- *  async fetch. Removing the class + forcing a reflow lets the animation replay
- *  even though the element already carries it from a previous render. */
-function fadeInFriendQuotes(box) {
-    box.classList.remove('friend-quotes-enter');
-    void box.offsetWidth;
-    box.classList.add('friend-quotes-enter');
+/** Plays a soft fade-in-rise on a container whose contents were just populated
+ *  from an async fetch (friend quotes list, friend search results), so they ease
+ *  in instead of popping a beat after the rest of the view. Removing the class +
+ *  forcing a reflow restarts the animation even on a re-render. */
+function fadeInRise(el) {
+    el.classList.remove('fade-in-rise');
+    void el.offsetWidth;
+    el.classList.add('fade-in-rise');
 }
 
 function friendQuotesNoticeMarkup(text) {
@@ -459,7 +464,7 @@ async function renderFriendQuotesSection(profile, name) {
         if (!res.ok) {
             // Only reachable if the friendship changed under us mid-view.
             box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesNotFriends'));
-            fadeInFriendQuotes(box);
+            fadeInRise(box);
             return;
         }
 
@@ -469,7 +474,7 @@ async function renderFriendQuotesSection(profile, name) {
     } catch (e) {
         console.error('Friend quotes error:', e);
         box.innerHTML = friendQuotesNoticeMarkup(t('toastError'));
-        fadeInFriendQuotes(box);
+        fadeInRise(box);
     }
 }
 
@@ -479,7 +484,7 @@ function renderFriendQuotesList(animate) {
 
     if (!friendQuotes.length) {
         box.innerHTML = friendQuotesNoticeMarkup(t('friendProfileQuotesEmpty'));
-        if (animate) fadeInFriendQuotes(box);
+        if (animate) fadeInRise(box);
         return;
     }
 
@@ -500,7 +505,7 @@ function renderFriendQuotesList(animate) {
 
     // Only on the first render (async settle), not on "show more" pagination —
     // re-fading the whole list every time you reveal a page would feel wrong.
-    if (animate) fadeInFriendQuotes(box);
+    if (animate) fadeInRise(box);
 }
 
 /** Reveals the next page. A friend can have thousands of quotes — rendering
