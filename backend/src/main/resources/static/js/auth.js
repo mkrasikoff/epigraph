@@ -32,6 +32,10 @@ function showAuthModal() {
     document.getElementById('auth-screen').classList.add('visible');
     document.getElementById('app-blur-overlay').classList.add('visible');
     document.body.classList.add('modal-lock-scroll');
+    // Re-apply OAuth button visibility on every open. A user who was logged in at
+    // page load (so bootstrap skipped initAuthButtons) would otherwise see the
+    // buttons stuck hidden after logout until a refresh. Cached region → no refetch.
+    initAuthButtons();
 }
 
 function hideAuthModal() {
@@ -277,7 +281,20 @@ function applyAuthButtonVisibility(isRussia) {
     });
 }
 
+// Region gate for the OAuth buttons, resolved once per session from /api/geo and
+// reused on every subsequent auth-modal open. null = not resolved yet.
+let authButtonsIsRussia = null;
+
 async function initAuthButtons() {
+    // Already resolved this session (e.g. reopening login after a logout) — re-apply
+    // instantly from cache, no refetch and no locale-guess flash. This is what makes
+    // the buttons appear on a logout→login cycle without a page refresh: initAuthButtons()
+    // otherwise only runs once at bootstrap, and only when the visitor arrives token-less.
+    if (authButtonsIsRussia !== null) {
+        applyAuthButtonVisibility(authButtonsIsRussia);
+        return;
+    }
+
     // Both buttons start hidden in the HTML — apply an instant, zero-latency best guess
     // from the browser locale first so they don't flash empty while /api/geo (an external
     // IP lookup) resolves, then correct it below once the accurate answer is in. The actual
@@ -288,9 +305,11 @@ async function initAuthButtons() {
     try {
         const res = await fetch('/api/geo');
         const data = await res.json();
-        applyAuthButtonVisibility(data.country === 'RU');
+        authButtonsIsRussia = data.country === 'RU';
+        applyAuthButtonVisibility(authButtonsIsRussia);
     } catch (e) {
-        // On error — show all OAuth buttons
+        // On error — show all OAuth buttons, and leave the region unresolved so the
+        // next modal open retries the lookup instead of caching the failure.
         document.querySelectorAll('.btn-google, .btn-yandex').forEach(btn => {
             btn.style.display = '';
         });

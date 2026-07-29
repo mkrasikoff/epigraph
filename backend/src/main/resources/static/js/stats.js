@@ -567,6 +567,9 @@ function statsRefreshAchievementCards() {
 function statsRhythmCard(s) {
     const r = s.rhythm;
     const dows = t('statsWeekdaysShort').split(',');
+    // Full weekday names for the "most active" fact — the histogram axis stays
+    // abbreviated (7 labels in a row), but the single peak-day fact has room to spell it out.
+    const dowsFull = t('statsWeekdaysFull').split(',');
     const max = Math.max(...r.weekday, 1);
     const bars = r.weekday.map((c, i) => {
         const isPeak = c === max && c > 0;
@@ -584,7 +587,7 @@ function statsRhythmCard(s) {
 
     const facts = r.dated > 0 ? `
         <div class="stats-rhythm-facts">
-            <div class="stats-rf"><div class="stats-rf-n">${peakDay >= 0 ? escHtml(dows[peakDay]) : '—'}</div><div class="stats-rf-l" data-i18n="statsRhythmPeakDay">активнее всего</div></div>
+            <div class="stats-rf"><div class="stats-rf-n">${peakDay >= 0 ? escHtml(dowsFull[peakDay]) : '—'}</div><div class="stats-rf-l" data-i18n="statsRhythmPeakDay">активнее всего</div></div>
             <div class="stats-rf"><div class="stats-rf-n">${peakTod >= 0 ? t(todKeys[peakTod]) : '—'}</div><div class="stats-rf-l" data-i18n="statsRhythmPeakTime">любимое время</div></div>
         </div>` : '';
 
