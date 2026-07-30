@@ -19,6 +19,7 @@ public final class ApiCodes {
     // Errors
     public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+    public static final String EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
     public static final String EMAIL_ALREADY_REGISTERED = "EMAIL_ALREADY_REGISTERED";
     public static final String INVALID_OR_EXPIRED_CODE = "INVALID_OR_EXPIRED_CODE";
     public static final String THEME_LOCKED = "THEME_LOCKED";

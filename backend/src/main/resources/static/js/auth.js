@@ -179,6 +179,15 @@ async function authSubmit() {
                 return;
             }
 
+            // Correct password but the account was never verified — route into the
+            // verification flow (resend a fresh code, enter it) instead of a dead-end
+            // "wrong credentials". Only reachable from a login attempt; register has its
+            // own verify step.
+            if ((data.message || data.error) === 'EMAIL_NOT_VERIFIED') {
+                startVerificationFromLogin(email);
+                return;
+            }
+
             errorEl.textContent = apiErrorMessage(data, 'authErrorWrongCredentials');
 
             return;
@@ -324,7 +333,20 @@ function handleAuthOverlayClick(e) {
  * Shows the email verification screen after successful registration request.
  * @param {string} email - The email address the code was sent to.
  */
-function showVerifyScreen(email) {
+/**
+ * Routes a login attempt that failed with EMAIL_NOT_VERIFIED into the verification flow:
+ * switches to the register-column layout (which hosts the verify screen), shows it with a
+ * login-specific explanation, and resends a fresh code so the account can recover. Correct
+ * credentials are a prerequisite (the backend only signals this after the password matches).
+ * @param {string} email
+ */
+function startVerificationFromLogin(email) {
+    if (authMode === 'login') toggleAuthMode();
+    showVerifyScreen(email, 'verifyFromLoginNotice');
+    resendVerifyCode(email);
+}
+
+function showVerifyScreen(email, subtitleKey = 'verifySubtitle') {
     const container = document.getElementById('auth-register-form-col');
     if (!container) return;
 
@@ -337,7 +359,7 @@ function showVerifyScreen(email) {
         </button>
         <div class="auth-register-top">
             <h2 class="auth-register-heading">${t('verifyTitle')}</h2>
-            <p class="auth-register-sub">${t('verifySubtitle', { email })}</p>
+            <p class="auth-register-sub">${t(subtitleKey, { email })}</p>
         </div>
         <div class="auth-field">
             <label for="verify-code-input">${t('verifyCodeLabel')}</label>

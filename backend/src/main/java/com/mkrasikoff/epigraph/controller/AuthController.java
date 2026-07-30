@@ -7,6 +7,7 @@ import com.mkrasikoff.epigraph.dto.auth.MeResponse;
 import com.mkrasikoff.epigraph.dto.auth.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.auth.VerifyRequest;
 import com.mkrasikoff.epigraph.exception.ApiCodes;
+import com.mkrasikoff.epigraph.exception.EmailNotVerifiedException;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.service.AchievementService;
 import com.mkrasikoff.epigraph.service.AuthService;
@@ -123,7 +124,14 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
-        String token = authService.login(request.getEmail(), request.getPassword());
+        String token;
+        try {
+            token = authService.login(request.getEmail(), request.getPassword());
+        } catch (EmailNotVerifiedException e) {
+            log.info("Login blocked — email not verified — email = {}", request.getEmail());
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ApiCodes.EMAIL_NOT_VERIFIED));
+        }
 
         if (token == null) {
             log.info("Login failed — email = {}", request.getEmail());

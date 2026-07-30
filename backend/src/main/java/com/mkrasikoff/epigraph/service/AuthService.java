@@ -1,6 +1,7 @@
 package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.exception.ApiCodes;
+import com.mkrasikoff.epigraph.exception.EmailNotVerifiedException;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -131,13 +132,28 @@ public class AuthService {
                 .ifPresent(u -> emailVerificationService.sendCode(email, language));
     }
 
+    /**
+     * Authenticates a local (email + password) login.
+     *
+     * @return a JWT on success, or {@code null} when the email is unknown or the password is wrong
+     *         (a single indistinguishable failure — no user enumeration).
+     * @throws com.mkrasikoff.epigraph.exception.EmailNotVerifiedException when the credentials are
+     *         correct but the account's email was never verified. Checked only after the password
+     *         matches, so it never leaks that an email is registered. In the normal flow this can't
+     *         happen (verify() is the only way a local account gets a usable session), but it lets a
+     *         legacy/manually-created unverified account recover via the resend+verify flow instead
+     *         of being stuck on a generic "wrong credentials".
+     */
     @Transactional(readOnly = true)
     public String login(String email, String rawPassword) {
-        return userRepository.findByEmail(email)
-                .filter(User::isEmailVerified)
-                .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
-                .map(user -> jwtService.generateToken(user.getId(), user.getEmail()))
-                .orElse(null);
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
+            return null;
+        }
+        if (!user.isEmailVerified()) {
+            throw new EmailNotVerifiedException(email);
+        }
+        return jwtService.generateToken(user.getId(), user.getEmail());
     }
 
     /**

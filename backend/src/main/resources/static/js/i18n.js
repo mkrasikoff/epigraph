@@ -51,6 +51,7 @@ const TRANSLATIONS = {
         authErrorPasswordNoDigit:       'Пароль должен содержать минимум одну цифру',
         authErrorPasswordPattern:       'Минимум 8 символов, буква и цифра.',
         authErrorWrongCredentials:      'Неверный email или пароль',
+        authErrorEmailNotVerified:      'Email не подтверждён. Подтвердите его, чтобы войти.',
         authErrorEmailAlreadyRegistered:'Этот email уже зарегистрирован',
         authErrorUserNotFound:          'Пользователь не найден',
         resetLinkInvalid:               'Ссылка недействительна или истекла',
@@ -65,6 +66,7 @@ const TRANSLATIONS = {
         // Auth Email Verification ────────────────────────────────────────────────────────
         verifyTitle:            'Подтвердите email',
         verifySubtitle:         'Мы отправили 6-значный код на {email}',
+        verifyFromLoginNotice:  'Этот аккаунт ещё не подтверждён. Мы отправили код на {email} — введите его, чтобы войти.',
         verifyCodeLabel:        'Код из письма',
         verifySubmit:           'Подтвердить',
         verifyErrorInvalidCode: 'Неверный или истёкший код',
@@ -807,6 +809,7 @@ const TRANSLATIONS = {
         authErrorPasswordNoDigit:       'Password must contain at least one digit',
         authErrorPasswordPattern:       'At least 8 characters, with a letter and a digit.',
         authErrorWrongCredentials:      'Incorrect email or password',
+        authErrorEmailNotVerified:      'Email not verified. Confirm it to sign in.',
         authErrorEmailAlreadyRegistered:'This email is already registered',
         authErrorUserNotFound:          'User not found',
         resetLinkInvalid:               'The link is invalid or has expired',
@@ -821,6 +824,7 @@ const TRANSLATIONS = {
         // Auth Email Verification ────────────────────────────────────────────────────────
         verifyTitle:            'Confirm your email',
         verifySubtitle:         'We sent a 6-digit code to {email}',
+        verifyFromLoginNotice:  'This account isn\'t verified yet. We sent a code to {email} — enter it to sign in.',
         verifyCodeLabel:        'Code from the email',
         verifySubmit:           'Confirm',
         verifyErrorInvalidCode: 'Invalid or expired code',
@@ -1728,6 +1732,7 @@ function t(key, variables) {
  */
 const ERROR_CODE_KEYS = {
     INVALID_CREDENTIALS:      'authErrorWrongCredentials',
+    EMAIL_NOT_VERIFIED:       'authErrorEmailNotVerified',
     EMAIL_ALREADY_REGISTERED: 'authErrorEmailAlreadyRegistered',
     USER_NOT_FOUND:           'authErrorUserNotFound',
     INVALID_OR_EXPIRED_CODE:  'verifyErrorInvalidCode',
