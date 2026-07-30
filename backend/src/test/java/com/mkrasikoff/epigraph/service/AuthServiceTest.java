@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.exception.EmailNotVerifiedException;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -187,15 +188,27 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("login: returns null when user is not verified")
-    void login_returnsNull_whenNotVerified() {
+    @DisplayName("login: throws EmailNotVerifiedException when password is correct but email unverified")
+    void login_throwsEmailNotVerified_whenUnverifiedButPasswordCorrect() {
         User user = buildUser(1L, "test@mail.com", false);
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("pass123", "encoded")).thenReturn(true);
 
-        String token = authService.login("test@mail.com", "pass123");
+        assertThatThrownBy(() -> authService.login("test@mail.com", "pass123"))
+                .isInstanceOf(EmailNotVerifiedException.class);
+        verify(jwtService, never()).generateToken(any(), any());
+    }
+
+    @Test
+    @DisplayName("login: returns null (not the not-verified signal) when unverified AND password wrong")
+    void login_returnsNull_whenUnverifiedAndWrongPassword() {
+        User user = buildUser(1L, "test@mail.com", false);
+        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongpass", "encoded")).thenReturn(false);
+
+        String token = authService.login("test@mail.com", "wrongpass");
 
         assertThat(token).isNull();
-        verify(passwordEncoder, never()).matches(any(), any());
     }
 
     @Test
