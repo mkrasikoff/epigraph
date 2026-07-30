@@ -1,6 +1,7 @@
 package com.mkrasikoff.epigraph.controller;
 
 import com.mkrasikoff.epigraph.dto.auth.AuthRequest;
+import com.mkrasikoff.epigraph.exception.EmailNotVerifiedException;
 import com.mkrasikoff.epigraph.dto.auth.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.auth.VerifyRequest;
 import com.mkrasikoff.epigraph.model.User;
@@ -224,6 +225,26 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("INVALID_CREDENTIALS"));
 
         verify(authService).login("user@example.com", "wrongpass1");
+    }
+
+    @Test
+    @DisplayName("POST /api/auth/login: returns 403 EMAIL_NOT_VERIFIED when the account isn't verified")
+    void login_returnsForbidden_whenEmailNotVerified() throws Exception {
+        AuthRequest request = new AuthRequest();
+        request.setEmail("user@example.com");
+        request.setPassword("password1");
+
+        when(authService.login("user@example.com", "password1"))
+                .thenThrow(new EmailNotVerifiedException("user@example.com"));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("EMAIL_NOT_VERIFIED"));
+
+        verify(authService).login("user@example.com", "password1");
     }
 
     @Test
