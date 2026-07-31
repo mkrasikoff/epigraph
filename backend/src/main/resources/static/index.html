@@ -670,6 +670,9 @@
                     <button type="button" id="import-tab-yandex" class="import-source-tab" onclick="switchImportSource('yandex')" data-i18n="addImportTabYandex">
                         Яндекс.Книги
                     </button>
+                    <button type="button" id="import-tab-goodreads" class="import-source-tab" onclick="switchImportSource('goodreads')" data-i18n="addImportTabGoodreads">
+                        Goodreads
+                    </button>
                 </div>
 
                 <div id="import-panel-json">
@@ -793,6 +796,99 @@
                             <div class="import-faq-item">
                                 <p class="import-faq-q" data-i18n="importYandexFaqQ5">Сколько это занимает?</p>
                                 <p class="import-faq-a" data-i18n="importYandexFaqA5">Если книг в библиотеке много (сотни), скрипт может выполняться минуту-две — он обращается к каждой книге по отдельности с небольшой паузой между запросами, чтобы не перегружать сервер Яндекса. Дождись сообщения «ГОТОВО» в консоли, прежде чем загружать скачанный файл.</p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div id="import-panel-goodreads" class="is-hidden">
+                    <div class="import-benefit-banner">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M9 18h6"/>
+                            <path d="M10 22h4"/>
+                            <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>
+                        </svg>
+                        <p data-i18n="importGoodreadsBenefit">
+                            Переносит цитаты, которые ты отметил лайком на Goodreads (раздел «My Quotes» в профиле). Стоит использовать, если их набралось много — по одной переносить долго.
+                        </p>
+                    </div>
+
+                    <div class="import-step">
+                        <span class="import-step-num">1</span>
+                        <p>
+                            <span data-i18n="importGoodreadsStep1Prefix">Открой </span><a href="https://www.goodreads.com/quotes/list" target="_blank" rel="noopener" class="import-highlight">goodreads.com/quotes/list</a><span data-i18n="importGoodreadsStep1Suffix">, залогинившись — это твой список избранных цитат.</span>
+                        </p>
+                    </div>
+                    <div class="import-step">
+                        <span class="import-step-num">2</span>
+                        <div class="import-step-body">
+                            <p data-i18n="importGoodreadsStep2">
+                                Открой консоль браузера (F12 → Console), вставь скрипт и нажми Enter.
+                            </p>
+                            <button type="button" class="btn-secondary import-copy-btn" onclick="copyGoodreadsImportScript()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                                <span data-i18n="importGoodreadsCopyBtn">Скопировать скрипт</span>
+                            </button>
+                            <p class="import-step-hint" data-i18n="importGoodreadsDesktopOnly">
+                                Доступно только в браузере на компьютере — на телефоне нет инструментов разработчика, которые нужны для этого способа.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="import-step">
+                        <span class="import-step-num">3</span>
+                        <p>
+                            <span data-i18n="importGoodreadsStep3Prefix">Скрипт скачает файл </span><code class="inline-code">goodreads-quotes.json</code><span data-i18n="importGoodreadsStep3Suffix"> — загрузи его ниже, как обычный JSON.</span>
+                        </p>
+                    </div>
+
+                    <label class="import-area" for="import-file-goodreads">
+                        <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <strong data-i18n="importGoodreadsUploadLabel">
+                            Загрузить скачанный файл
+                        </strong>
+                        <input type="file" id="import-file-goodreads" accept=".json" class="import-file-input" onchange="importJSON(event)">
+                    </label>
+
+                    <details class="import-faq">
+                        <summary class="import-faq-summary">
+                            <span class="import-faq-summary-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                                <span data-i18n="importYandexFaqSummary">Это безопасно? Что такое консоль?</span>
+                            </span>
+                            <svg class="import-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </summary>
+                        <div class="import-faq-body">
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ1">Что такое консоль браузера?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA1">Панель разработчика, встроенная в каждый браузер. Она умеет выполнять код прямо на открытой странице — но не имеет доступа к твоим файлам, паролям или другим сайтам.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ2">Безопасно ли вставлять туда код?</p>
+                                <p class="import-faq-a" data-i18n="importGoodreadsFaqA2">Скрипт работает только в твоём браузере и обращается только к goodreads.com под твоей же сессией. Epigraph не получает и не хранит ни пароль, ни куки твоего аккаунта Goodreads — только файл с цитатами, который ты сам сюда загружаешь.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ3">Браузер показал предупреждение при вставке — это нормально?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA3">Да, это стандартная защита от случайной вставки чужого вредоносного кода. Раз ты скопировал скрипт именно с этой страницы, всё в порядке — просто подтверди вставку. Но не вставляй в консоль код из источников, которым не доверяешь.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importYandexFaqQ4">F12 не открывает панель — что делать?</p>
+                                <p class="import-faq-a" data-i18n="importYandexFaqA4">Кликни правой кнопкой мыши на странице и выбери «Просмотреть код» / «Inspect». На Mac можно также нажать Cmd+Option+I, на Windows — Ctrl+Shift+I. В Safari сначала включи меню «Разработка» в настройках браузера.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importGoodreadsFaqQ5">Что именно переносится?</p>
+                                <p class="import-faq-a" data-i18n="importGoodreadsFaqA5">Цитаты из твоего списка «My Quotes» на Goodreads — те, что ты отметил лайком. Дата добавления на Goodreads не сохраняется, поэтому у импортированных цитат ставится текущая дата. Дождись сообщения «ГОТОВО» в консоли, прежде чем загружать файл.</p>
                             </div>
                         </div>
                     </details>
@@ -1289,6 +1385,7 @@
 <script src="/js/themes.js"></script>
 <script src="/js/achievements.js"></script>
 <script src="/js/yandex-import.js"></script>
+<script src="/js/goodreads-import.js"></script>
 <script src="/js/api.js"></script>
 <script src="/js/session.js"></script>
 <script src="/js/auth.js"></script>

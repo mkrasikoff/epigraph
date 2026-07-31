@@ -209,6 +209,7 @@ const TRANSLATIONS = {
         addImportTitle:                 'Импорт цитат',
         addImportTabJson:               'Файл JSON',
         addImportTabYandex:             'Яндекс.Книги',
+        addImportTabGoodreads:          'Goodreads',
         addImportDropLabel:             'Выберите файл или перетащите сюда',
         importJsonHint:                 'Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.',
         importJsonFieldsHint:           'Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code>',
@@ -321,6 +322,27 @@ const TRANSLATIONS = {
         yandexScriptProcessed:          'Обработано:',
         yandexScriptQuotesCollected:    'цитат собрано:',
         yandexScriptDone:               'ГОТОВО. Всего цитат:',
+
+        // ── Import from Goodreads (TASK-138) ──────────────────────────────────
+        importGoodreadsBenefit:         'Переносит цитаты, которые ты отметил лайком на Goodreads (раздел «My Quotes» в профиле). Стоит использовать, если их набралось много — по одной переносить долго.',
+        importGoodreadsStep1Prefix:     'Открой ',
+        importGoodreadsStep1Suffix:     ', залогинившись — это твой список избранных цитат.',
+        importGoodreadsStep2:           'Открой консоль браузера (F12 → Console), вставь скрипт и нажми Enter.',
+        importGoodreadsCopyBtn:         'Скопировать скрипт',
+        importGoodreadsDesktopOnly:     'Доступно только в браузере на компьютере — на телефоне нет инструментов разработчика, которые нужны для этого способа.',
+        importGoodreadsStep3Prefix:     'Скрипт скачает файл ',
+        importGoodreadsStep3Suffix:     ' — загрузи его ниже, как обычный JSON.',
+        importGoodreadsUploadLabel:     'Загрузить скачанный файл',
+        importGoodreadsFaqA2:           'Скрипт работает только в твоём браузере и обращается только к goodreads.com под твоей же сессией. Epigraph не получает и не хранит ни пароль, ни куки твоего аккаунта Goodreads — только файл с цитатами, который ты сам сюда загружаешь.',
+        importGoodreadsFaqQ5:           'Что именно переносится?',
+        importGoodreadsFaqA5:           'Цитаты из твоего списка «My Quotes» на Goodreads — те, что ты отметил лайком. Дата добавления на Goodreads не сохраняется, поэтому у импортированных цитат ставится текущая дата. Дождись сообщения «ГОТОВО» в консоли, прежде чем загружать файл.',
+
+        // ── Goodreads console script (messages the user reads in the browser console) ──
+        goodreadsScriptCollecting:      'Собираю цитаты с Goodreads...',
+        goodreadsScriptPage:            'Страница',
+        goodreadsScriptQuotesCollected: 'цитат собрано:',
+        goodreadsScriptDone:            'ГОТОВО. Всего цитат:',
+        goodreadsScriptNoQuotes:        'Цитаты не найдены. Убедись, что ты залогинен на goodreads.com и в списке «My Quotes» есть отмеченные цитаты.',
 
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Настройки',
@@ -967,6 +989,7 @@ const TRANSLATIONS = {
         addImportTitle:                 'Import quotes',
         addImportTabJson:               'JSON file',
         addImportTabYandex:             'Yandex Books',
+        addImportTabGoodreads:          'Goodreads',
         addImportDropLabel:             'Choose a file or drop it here',
         importJsonHint:                 'Upload a <code class="inline-code">.json</code> file with your quotes.',
         importJsonFieldsHint:           'Format: an array of objects with the fields <code>text</code>, <code>author</code>, <code>source</code>',
@@ -1079,6 +1102,27 @@ const TRANSLATIONS = {
         yandexScriptProcessed:          'Processed:',
         yandexScriptQuotesCollected:    'quotes collected:',
         yandexScriptDone:               'DONE. Total quotes:',
+
+        // ── Import from Goodreads (TASK-138) ──────────────────────────────────
+        importGoodreadsBenefit:         'Imports the quotes you liked on Goodreads (the "My Quotes" section of your profile). Worth it once you have a lot — moving them one by one takes ages.',
+        importGoodreadsStep1Prefix:     'Open ',
+        importGoodreadsStep1Suffix:     ' while logged in — that\'s your list of favorited quotes.',
+        importGoodreadsStep2:           'Open the browser console (F12 → Console), paste the script and press Enter.',
+        importGoodreadsCopyBtn:         'Copy script',
+        importGoodreadsDesktopOnly:     'Desktop browser only — phones don\'t have the developer tools this method needs.',
+        importGoodreadsStep3Prefix:     'The script downloads a ',
+        importGoodreadsStep3Suffix:     ' file — upload it below like a regular JSON.',
+        importGoodreadsUploadLabel:     'Upload the downloaded file',
+        importGoodreadsFaqA2:           'The script runs only in your browser and only talks to goodreads.com under your own session. Epigraph never receives or stores your Goodreads password or cookies — only the quotes file you upload here yourself.',
+        importGoodreadsFaqQ5:           'What exactly gets imported?',
+        importGoodreadsFaqA5:           'The quotes from your "My Quotes" list on Goodreads — the ones you liked. Goodreads doesn\'t expose when you liked them, so imported quotes get the current date. Wait for the "DONE" message in the console before uploading the file.',
+
+        // ── Goodreads console script (messages the user reads in the browser console) ──
+        goodreadsScriptCollecting:      'Collecting quotes from Goodreads...',
+        goodreadsScriptPage:            'Page',
+        goodreadsScriptQuotesCollected: 'quotes collected:',
+        goodreadsScriptDone:            'DONE. Total quotes:',
+        goodreadsScriptNoQuotes:        'No quotes found. Make sure you are logged in to goodreads.com and your "My Quotes" list has liked quotes.',
 
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Settings',

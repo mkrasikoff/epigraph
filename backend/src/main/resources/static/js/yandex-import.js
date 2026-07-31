@@ -316,14 +316,18 @@ async function copyYandexImportScript() {
     }
 }
 
+/** The import-source tabs, in display order. Each has a matching #import-tab-<id> button and
+ *  #import-panel-<id> panel in index.html. */
+const IMPORT_SOURCES = ['json', 'yandex', 'goodreads'];
+
 /**
- * Switches the visible import source panel ('json' or 'yandex') and updates the toggle buttons.
- * @param {'json'|'yandex'} source
+ * Switches the visible import source panel and updates the toggle buttons.
+ * @param {'json'|'yandex'|'goodreads'} source
  */
 function switchImportSource(source) {
-    document.getElementById('import-panel-json').classList.toggle('is-hidden', source !== 'json');
-    document.getElementById('import-panel-yandex').classList.toggle('is-hidden', source !== 'yandex');
-    document.getElementById('import-tab-json').classList.toggle('is-active', source === 'json');
-    document.getElementById('import-tab-yandex').classList.toggle('is-active', source === 'yandex');
+    IMPORT_SOURCES.forEach(s => {
+        document.getElementById('import-panel-' + s)?.classList.toggle('is-hidden', s !== source);
+        document.getElementById('import-tab-' + s)?.classList.toggle('is-active', s === source);
+    });
     moveToggleIndicator(document.getElementById('import-tab-json').closest('.import-source-toggle'));
 }
