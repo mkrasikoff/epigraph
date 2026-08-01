@@ -673,6 +673,9 @@
                     <button type="button" id="import-tab-goodreads" class="import-source-tab" onclick="switchImportSource('goodreads')" data-i18n="addImportTabGoodreads">
                         Goodreads
                     </button>
+                    <button type="button" id="import-tab-kindle" class="import-source-tab" onclick="switchImportSource('kindle')" data-i18n="addImportTabKindle">
+                        Kindle
+                    </button>
                 </div>
 
                 <div id="import-panel-json">
@@ -889,6 +892,79 @@
                             <div class="import-faq-item">
                                 <p class="import-faq-q" data-i18n="importGoodreadsFaqQ5">Что именно переносится?</p>
                                 <p class="import-faq-a" data-i18n="importGoodreadsFaqA5">Цитаты из твоего списка «My Quotes» на Goodreads — те, что ты отметил лайком. Дата добавления на Goodreads не сохраняется, поэтому у импортированных цитат ставится текущая дата. Дождись сообщения «ГОТОВО» в консоли, прежде чем загружать файл.</p>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div id="import-panel-kindle" class="is-hidden">
+                    <div class="import-benefit-banner">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M9 18h6"/>
+                            <path d="M10 22h4"/>
+                            <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>
+                        </svg>
+                        <p data-i18n="importKindleBenefit">
+                            Переносит выделения (highlights) и заметки из твоей читалки Kindle. Никакого скрипта и интернета — всё берётся из файла на самом устройстве.
+                        </p>
+                    </div>
+
+                    <div class="import-step">
+                        <span class="import-step-num">1</span>
+                        <p data-i18n="importKindleStep1">
+                            Подключи Kindle к компьютеру кабелем USB — устройство появится как обычный диск.
+                        </p>
+                    </div>
+                    <div class="import-step">
+                        <span class="import-step-num">2</span>
+                        <p data-i18n-html="importKindleStep2">
+                            Открой на устройстве папку <code class="inline-code">documents</code> и найди в ней файл <code class="inline-code">My Clippings.txt</code>.
+                        </p>
+                    </div>
+                    <div class="import-step">
+                        <span class="import-step-num">3</span>
+                        <p data-i18n="importKindleStep3">
+                            Загрузи этот файл ниже — выделения разберутся автоматически.
+                        </p>
+                    </div>
+
+                    <label class="import-area" for="import-file-kindle">
+                        <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <strong data-i18n="importKindleUploadLabel">
+                            Загрузить My Clippings.txt
+                        </strong>
+                        <input type="file" id="import-file-kindle" accept=".txt,text/plain" class="import-file-input" onchange="importKindleClippings(event)">
+                    </label>
+
+                    <details class="import-faq">
+                        <summary class="import-faq-summary">
+                            <span class="import-faq-summary-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                                <span data-i18n="importKindleFaqSummary">А это безопасно? Где найти файл?</span>
+                            </span>
+                            <svg class="import-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </summary>
+                        <div class="import-faq-body">
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importKindleFaqQ1">Это безопасно?</p>
+                                <p class="import-faq-a" data-i18n="importKindleFaqA1">Да. Файл разбирается прямо в твоём браузере — он никуда не отправляется, кроме сохранения выбранных цитат в твой аккаунт Epigraph. Ни аккаунт Amazon, ни пароли при этом не задействованы.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importKindleFaqQ2">Не вижу файл My Clippings.txt — почему?</p>
+                                <p class="import-faq-a" data-i18n="importKindleFaqA2">Файл появляется только после того, как ты сделал хотя бы одно выделение или заметку в книге. Он лежит в папке documents в памяти устройства. Этот способ работает с физической читалкой Kindle, подключённой по USB, — не с приложением на телефоне.</p>
+                            </div>
+                            <div class="import-faq-item">
+                                <p class="import-faq-q" data-i18n="importKindleFaqQ3">Что именно переносится?</p>
+                                <p class="import-faq-a" data-i18n="importKindleFaqA3">Все выделения и заметки с текстом. Закладки без текста пропускаются. Дата добавления берётся из файла, когда её удаётся распознать, иначе ставится текущая.</p>
                             </div>
                         </div>
                     </details>
@@ -1386,6 +1462,7 @@
 <script src="/js/achievements.js"></script>
 <script src="/js/yandex-import.js"></script>
 <script src="/js/goodreads-import.js"></script>
+<script src="/js/kindle-import.js"></script>
 <script src="/js/api.js"></script>
 <script src="/js/session.js"></script>
 <script src="/js/auth.js"></script>
