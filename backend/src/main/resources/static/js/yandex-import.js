@@ -318,7 +318,7 @@ async function copyYandexImportScript() {
 
 /** The import-source tabs, in display order. Each has a matching #import-tab-<id> button and
  *  #import-panel-<id> panel in index.html. */
-const IMPORT_SOURCES = ['json', 'yandex', 'goodreads'];
+const IMPORT_SOURCES = ['json', 'yandex', 'goodreads', 'kindle'];
 
 /**
  * Switches the visible import source panel and updates the toggle buttons.
