@@ -210,6 +210,7 @@ const TRANSLATIONS = {
         addImportTabJson:               'Файл JSON',
         addImportTabYandex:             'Яндекс.Книги',
         addImportTabGoodreads:          'Goodreads',
+        addImportTabKindle:             'Kindle',
         addImportDropLabel:             'Выберите файл или перетащите сюда',
         importJsonHint:                 'Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.',
         importJsonFieldsHint:           'Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code>',
@@ -343,6 +344,21 @@ const TRANSLATIONS = {
         goodreadsScriptQuotesCollected: 'цитат собрано:',
         goodreadsScriptDone:            'ГОТОВО. Всего цитат:',
         goodreadsScriptNoQuotes:        'Цитаты не найдены. Убедись, что ты залогинен на goodreads.com и в списке «My Quotes» есть отмеченные цитаты.',
+
+        // ── Import from Kindle (My Clippings.txt) (TASK-138) ──────────────────
+        importKindleBenefit:            'Переносит выделения (highlights) и заметки из твоей читалки Kindle. Никакого скрипта и интернета — всё берётся из файла на самом устройстве.',
+        importKindleStep1:              'Подключи Kindle к компьютеру кабелем USB — устройство появится как обычный диск.',
+        importKindleStep2:              'Открой на устройстве папку <code class="inline-code">documents</code> и найди в ней файл <code class="inline-code">My Clippings.txt</code>.',
+        importKindleStep3:              'Загрузи этот файл ниже — выделения разберутся автоматически.',
+        importKindleUploadLabel:        'Загрузить My Clippings.txt',
+        importKindleFaqSummary:         'А это безопасно? Где найти файл?',
+        importKindleFaqQ1:              'Это безопасно?',
+        importKindleFaqA1:              'Да. Файл разбирается прямо в твоём браузере — он никуда не отправляется, кроме сохранения выбранных цитат в твой аккаунт Epigraph. Ни аккаунт Amazon, ни пароли при этом не задействованы.',
+        importKindleFaqQ2:              'Не вижу файл My Clippings.txt — почему?',
+        importKindleFaqA2:              'Файл появляется только после того, как ты сделал хотя бы одно выделение или заметку в книге. Он лежит в папке documents в памяти устройства. Этот способ работает с физической читалкой Kindle, подключённой по USB, — не с приложением на телефоне.',
+        importKindleFaqQ3:              'Что именно переносится?',
+        importKindleFaqA3:              'Все выделения и заметки с текстом. Закладки без текста пропускаются. Дата добавления берётся из файла, когда её удаётся распознать, иначе ставится текущая.',
+        importKindleNoQuotes:           'В файле не найдено ни одного выделения. Убедись, что это My Clippings.txt с твоего Kindle и в нём есть выделения с текстом.',
 
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Настройки',
@@ -990,6 +1006,7 @@ const TRANSLATIONS = {
         addImportTabJson:               'JSON file',
         addImportTabYandex:             'Yandex Books',
         addImportTabGoodreads:          'Goodreads',
+        addImportTabKindle:             'Kindle',
         addImportDropLabel:             'Choose a file or drop it here',
         importJsonHint:                 'Upload a <code class="inline-code">.json</code> file with your quotes.',
         importJsonFieldsHint:           'Format: an array of objects with the fields <code>text</code>, <code>author</code>, <code>source</code>',
@@ -1123,6 +1140,21 @@ const TRANSLATIONS = {
         goodreadsScriptQuotesCollected: 'quotes collected:',
         goodreadsScriptDone:            'DONE. Total quotes:',
         goodreadsScriptNoQuotes:        'No quotes found. Make sure you are logged in to goodreads.com and your "My Quotes" list has liked quotes.',
+
+        // ── Import from Kindle (My Clippings.txt) (TASK-138) ──────────────────
+        importKindleBenefit:            'Imports the highlights and notes from your Kindle e-reader. No script, no internet — it all comes from a file on the device itself.',
+        importKindleStep1:              'Connect your Kindle to the computer with a USB cable — it shows up as an ordinary drive.',
+        importKindleStep2:              'Open the <code class="inline-code">documents</code> folder on the device and find the <code class="inline-code">My Clippings.txt</code> file in it.',
+        importKindleStep3:              'Upload that file below — the highlights are parsed automatically.',
+        importKindleUploadLabel:        'Upload My Clippings.txt',
+        importKindleFaqSummary:         'Is this safe? Where do I find the file?',
+        importKindleFaqQ1:              'Is this safe?',
+        importKindleFaqA1:              'Yes. The file is parsed right in your browser — nothing is sent anywhere except saving the quotes you pick to your Epigraph account. Your Amazon account and passwords are never involved.',
+        importKindleFaqQ2:              'I don\'t see a My Clippings.txt file — why?',
+        importKindleFaqA2:              'The file only appears after you\'ve made at least one highlight or note in a book. It lives in the documents folder of the device storage. This method works with a physical Kindle e-reader connected over USB — not with the phone app.',
+        importKindleFaqQ3:              'What exactly gets imported?',
+        importKindleFaqA3:              'All highlights and notes that have text. Bookmarks without text are skipped. The added date is taken from the file when it can be recognized, otherwise the current date is used.',
+        importKindleNoQuotes:           'No highlights found in the file. Make sure it\'s the My Clippings.txt from your Kindle and that it has highlights with text.',
 
         // ── Settings page (static markup) ───────────────────────────────────
         settingsTitle:                  'Settings',

@@ -2013,12 +2013,24 @@ body.modal-lock-scroll {
 
 .import-source-toggle {
     position: relative;
-    display: inline-flex;
+    display: flex;
+    /* Hug the tabs when they fit (like the old inline-flex), but cap at the container width and
+       scroll horizontally when they don't — the import source picker now has up to 4 tabs, which
+       overflow a phone screen. Same scroll pattern as .nav-tabs on mobile; the absolutely-
+       positioned indicator lives in the scroll content, so it stays aligned under the active tab. */
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
     background: var(--color-surface-offset);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
     padding: 3px;
     margin-bottom: var(--space-6);
+}
+
+.import-source-toggle::-webkit-scrollbar {
+    display: none;
 }
 
 /* Slides under whichever tab is active — same measure-and-transform approach as
@@ -2042,6 +2054,8 @@ body.modal-lock-scroll {
 .import-source-tab {
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
+    white-space: nowrap;
     padding: var(--space-2) var(--space-5);
     border: none;
     border-radius: var(--radius-full);
