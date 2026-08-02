@@ -1,0 +1,11 @@
+# robots.txt for epigraph.me (TASK-135)
+User-agent: *
+Allow: /$
+Allow: /icon.png
+Allow: /og-image.png
+Allow: /manifest.json
+# App data and authenticated API surface — nothing useful to index there.
+Disallow: /api/
+Disallow: /error/
+
+Sitemap: https://epigraph.me/sitemap.xml

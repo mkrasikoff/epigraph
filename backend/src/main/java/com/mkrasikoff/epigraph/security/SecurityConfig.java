@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/banner").permitAll()
                         .requestMatchers("/api/geo").permitAll()
                         .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/*.js", "/*.css", "/*.png", "/*.ico").permitAll()
+                        .requestMatchers("/robots.txt", "/sitemap.xml").permitAll()
                         .requestMatchers("/manifest.json", "/api/push/vapid-public-key").permitAll()
                         .requestMatchers("/s/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/shared/*").permitAll()
