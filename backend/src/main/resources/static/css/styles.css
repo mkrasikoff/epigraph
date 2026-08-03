@@ -1208,39 +1208,41 @@ body:not(.is-authed) .guest-features {
 }
 
 .guest-features {
-    max-width: 640px;
+    max-width: 760px;
     margin: 0 auto;
     padding: var(--space-4) var(--space-6) var(--space-16);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
 }
 
-.guest-feature-row {
+/* Editorial two-column list — no card boxes, just icon + title + description with a
+   thin hairline between rows, to echo the hero's airy, typographic feel (TASK-135). */
+.guest-feature-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
+    /* Fixed rows + column flow so the two columns share row tracks: each row is as tall
+       as its taller item, which keeps the hairline dividers aligned across columns. */
+    grid-template-rows: repeat(5, auto);
+    grid-auto-flow: column;
+    column-gap: var(--space-10);
 }
 
-.guest-feature {
-    background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: 14px;
-    padding: var(--space-5);
-    text-align: left;
-}
-
-.guest-feature-head {
+.guest-feature-item {
     display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-2);
+    gap: var(--space-3);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--color-divider);
+}
+
+/* Drop the hairline on the bottom row of each column (5th and 10th items). */
+.guest-feature-item:nth-child(5),
+.guest-feature-item:last-child {
+    border-bottom: none;
 }
 
 .guest-feature-icon {
     display: inline-flex;
     flex-shrink: 0;
     color: var(--color-accent);
+    margin-top: 2px;
 }
 
 .guest-feature-icon svg {
@@ -1250,93 +1252,18 @@ body:not(.is-authed) .guest-features {
 
 .guest-feature-title {
     font-family: var(--font-body);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--color-text);
-    margin: 0;
+    margin: 0 0 2px;
 }
 
 .guest-feature-desc {
     font-family: var(--font-body);
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.85rem;
+    line-height: 1.45;
     color: var(--color-text-muted);
     margin: 0;
-}
-
-.guest-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: var(--space-3);
-}
-
-.guest-tag {
-    font-family: var(--font-body);
-    font-size: 0.78rem;
-    color: var(--color-primary);
-    background: var(--color-primary-highlight);
-    border-radius: 999px;
-    padding: 3px 12px;
-}
-
-.guest-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 5px;
-    height: 40px;
-    margin-top: var(--space-3);
-}
-
-.guest-bars span {
-    flex: 1;
-    background: var(--color-accent);
-    border-radius: 3px;
-}
-
-.guest-badges {
-    display: flex;
-    gap: var(--space-2);
-    margin-top: var(--space-3);
-}
-
-.guest-badge {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: var(--color-primary-highlight);
-    color: var(--color-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.guest-badge svg {
-    width: 19px;
-    height: 19px;
-}
-
-.guest-avatars {
-    display: flex;
-    margin-top: var(--space-3);
-}
-
-.guest-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    color: var(--color-text-inverse);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--color-surface);
-    margin-right: -8px;
-}
-
-.guest-avatar svg {
-    width: 18px;
-    height: 18px;
 }
 
 /* Guest QoD demo card — compact and tamed (not the authed full-height hero). Fixed
@@ -1411,9 +1338,16 @@ body:not(.is-authed) .qod-guest-dots {
     width: 16px;
 }
 
-@media (max-width: 520px) {
-    .guest-feature-row {
+@media (max-width: 640px) {
+    .guest-feature-list {
         grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-auto-flow: row;
+    }
+
+    /* Single column: the 5th item is no longer a column end — restore its hairline. */
+    .guest-feature-item:nth-child(5) {
+        border-bottom: 1px solid var(--color-divider);
     }
 }
 
