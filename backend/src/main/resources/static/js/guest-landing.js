@@ -199,3 +199,11 @@ function stopGuestQodCycle() {
     clearTimeout(guestIdleTimer);
     pauseGuestQodCycle();
 }
+
+// Keep the guest footer's copyright year current (HTML carries a static fallback so
+// no-JS crawlers still see a year). Runs once at load — this script tag sits at the
+// end of <body>, so the element is already parsed.
+(function () {
+    const yearEl = document.getElementById('guest-footer-year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+})();
