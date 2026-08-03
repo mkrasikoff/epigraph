@@ -1046,6 +1046,377 @@ body.no-scroll {
     height: 100dvh;
 }
 
+/* =============================================================================
+// GUEST LANDING (TASK-135)
+// Real, crawlable content for unauthenticated visitors and search crawlers.
+// Visible by default (so no-JS crawlers see it); hidden once signed in via
+// body.is-authed. Colors come only from --color-* tokens, so all themes adapt.
+// ============================================================================= */
+.guest-landing {
+    display: block;
+}
+
+body.is-authed .guest-landing {
+    display: none;
+}
+
+/* Guests have nothing to navigate to (every other tab is locked), so hide the whole
+   nav in the landing — it returns for authenticated users. */
+body:not(.is-authed) .nav-tabs {
+    display: none;
+}
+
+/* For guests the QoD card flows within the landing instead of filling the viewport
+   (its authed full-height centering is kept by the more specific rule below). */
+body:not(.is-authed) .qod-section {
+    min-height: 0;
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-8);
+}
+
+/* Two-column guest hero: pitch (left) + live QoD demo (right), features full-width
+   below. The grid lives on #view-qod for guests only; authenticated users keep the
+   plain full-height QoD view untouched. Collapses to one column on narrow screens. */
+body:not(.is-authed) #view-qod {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-10);
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: var(--space-12) var(--space-6) var(--space-8);
+}
+
+.guest-hero-col {
+    text-align: left;
+}
+
+.guest-hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+    line-height: 1.12;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 var(--space-3);
+    text-wrap: balance;
+}
+
+.guest-hero-sub {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    max-width: 46ch;
+    margin: 0 0 var(--space-5);
+    text-wrap: balance;
+}
+
+.guest-hero-cta {
+    display: inline-flex;
+}
+
+.guest-hero-bullets {
+    list-style: none;
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.guest-hero-bullets li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.guest-bullet-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--color-primary);
+}
+
+/* Right column wrapper — flex only for guests, so the authed QoD section keeps its
+   own full-width block layout and fullscreen centering. */
+body:not(.is-authed) .guest-hero-demo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.guest-eyebrow {
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.7rem;
+    font-family: var(--font-body);
+    color: var(--color-text-faint);
+    margin-bottom: var(--space-2);
+}
+
+/* No dead/locked controls in the guest demo — the auth-only favorite action is hidden. */
+body:not(.is-authed) #btn-fav-qod {
+    display: none;
+}
+
+body:not(.is-authed) .guest-features {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--color-divider);
+    margin-top: var(--space-6);
+    padding-top: var(--space-12);
+}
+
+.guest-features-heading {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-align: center;
+    margin: 0 0 var(--space-4);
+}
+
+@media (max-width: 760px) {
+    body:not(.is-authed) #view-qod {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+        padding-top: var(--space-8);
+    }
+
+    .guest-hero-col {
+        text-align: center;
+    }
+
+    .guest-hero-sub {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .guest-hero-bullets {
+        align-items: center;
+    }
+
+    .guest-hero-cta {
+        display: block;
+        width: max-content;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+.guest-features {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-6) var(--space-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.guest-feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+}
+
+.guest-feature {
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: 14px;
+    padding: var(--space-5);
+    text-align: left;
+}
+
+.guest-feature-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.guest-feature-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--color-accent);
+}
+
+.guest-feature-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.guest-feature-title {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.guest-feature-desc {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.guest-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.guest-tag {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--color-primary);
+    background: var(--color-primary-highlight);
+    border-radius: 999px;
+    padding: 3px 12px;
+}
+
+.guest-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 40px;
+    margin-top: var(--space-3);
+}
+
+.guest-bars span {
+    flex: 1;
+    background: var(--color-accent);
+    border-radius: 3px;
+}
+
+.guest-badges {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.guest-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--color-primary-highlight);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guest-badge svg {
+    width: 19px;
+    height: 19px;
+}
+
+.guest-avatars {
+    display: flex;
+    margin-top: var(--space-3);
+}
+
+.guest-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-surface);
+    margin-right: -8px;
+}
+
+.guest-avatar svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Guest QoD demo card — compact and tamed (not the authed full-height hero). Fixed
+   footprint (capped width + min-height, content vertically centered) so cycling quotes
+   only change the FONT, never the card size — the rest of the page can't jump. Width
+   cap wins over the .qod-size-* classes. */
+body:not(.is-authed) .qod-card {
+    width: min(92vw, 400px);
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-6) var(--space-8);
+    box-shadow: none;
+    overflow: hidden;
+    transition: opacity 450ms ease;
+}
+
+body:not(.is-authed) .qod-card::before {
+    display: none;
+}
+
+/* The cycling demo isn't really "today's quote" — drop the date for guests. */
+body:not(.is-authed) .qod-date {
+    display: none;
+}
+
+/* Tags on the guest demo card — fill out otherwise-bare short quotes. Only shown when
+   the quote actually has tags (random pool quotes have none, so the row collapses). */
+.qod-guest-tags {
+    display: none;
+}
+
+body:not(.is-authed) .qod-guest-tags:not(:empty) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+
+.qod-guest-tags .qod-tag {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    color: var(--color-primary);
+    background: var(--color-primary-highlight);
+    border-radius: 999px;
+    padding: 2px 10px;
+}
+
+.qod-guest-dots {
+    display: none;
+}
+
+body:not(.is-authed) .qod-guest-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: var(--space-4);
+}
+
+.qod-guest-dots .qod-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-border);
+    transition: background 300ms ease, width 300ms ease;
+}
+
+.qod-guest-dots .qod-dot.active {
+    background: var(--color-primary);
+    width: 16px;
+}
+
+@media (max-width: 520px) {
+    .guest-feature-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Locks background scroll while the shared modal is open. Pins the body with position:fixed
    (the inline top:-scrollY offset is set by lockBackgroundScroll() in ui.js) so the page keeps
    its scroll position visually under the blur instead of collapsing to the top. Kept separate
@@ -5778,31 +6149,42 @@ body.friend-immersive header {
 // Login / register screen shown when click Login the main app.
 // ============================================================================= */
 .app-blur-overlay {
-    display: none;
     position: fixed;
     inset: 0;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     background: rgba(0, 0, 0, 0.25);
     z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 200ms ease, visibility 200ms ease;
 }
 
 .app-blur-overlay.visible {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .auth-screen {
-    display: none;
+    display: flex;
     position: fixed;
     inset: 0;
     z-index: 1000;
     align-items: center;
     justify-content: center;
     padding: var(--space-6);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 220ms ease, visibility 220ms ease;
 }
 
 .auth-screen.visible {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .auth-card {
@@ -5818,6 +6200,12 @@ body.friend-immersive header {
     position: relative;
     z-index: 1001;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(10px) scale(0.985);
+    transition: transform 220ms ease;
+}
+
+.auth-screen.visible .auth-card {
+    transform: none;
 }
 
 .auth-title {
