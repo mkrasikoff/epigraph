@@ -51,6 +51,8 @@ function hideLoadingOverlay() {
 
 function showGuestMode() {
     isGuest = true;
+    // Reveal the crawlable guest landing (hidden for signed-in users). See styles.css.
+    document.body.classList.remove('is-authed');
     quotes = getGuestQuotes();
     qodAnchorId = quotes[0]?.id ?? null;
 
@@ -70,10 +72,14 @@ function showGuestMode() {
 
     renderQod();
     hideLoadingOverlay();
+    startGuestQodCycle();
 }
 
 function hideGuestMode() {
     isGuest = false;
+    // Hide the guest landing for authenticated users and stop the demo auto-cycle.
+    document.body.classList.add('is-authed');
+    stopGuestQodCycle();
 
     document.getElementById('account-menu').style.display = '';
     document.getElementById('login-btn').style.display = 'none';

@@ -21,7 +21,7 @@ const GUEST_QUOTES = {
             author: 'Аристотель',
             source: 'Никомахова этика',
             fav: false,
-            tags: []
+            tags: ['философия', 'счастье']
         },
         {
             id: -2,
@@ -29,7 +29,7 @@ const GUEST_QUOTES = {
             author: 'Конфуций',
             source: '',
             fav: false,
-            tags: []
+            tags: ['мотивация', 'упорство']
         },
         {
             id: -3,
@@ -37,7 +37,7 @@ const GUEST_QUOTES = {
             author: 'Марк Аврелий',
             source: 'Размышления',
             fav: false,
-            tags: []
+            tags: ['стоицизм', 'перемены']
         },
         {
             id: -4,
@@ -45,7 +45,7 @@ const GUEST_QUOTES = {
             author: 'Сократ',
             source: '',
             fav: false,
-            tags: []
+            tags: ['философия', 'мудрость']
         },
         {
             id: -5,
@@ -53,7 +53,7 @@ const GUEST_QUOTES = {
             author: 'Диоген Лаэртский',
             source: '',
             fav: false,
-            tags: []
+            tags: ['знание', 'философия']
         },
         {
             id: -6,
@@ -224,7 +224,7 @@ const GUEST_QUOTES = {
             author: 'Aristotle',
             source: 'Nicomachean Ethics',
             fav: false,
-            tags: []
+            tags: ['philosophy', 'happiness']
         },
         {
             id: -2,
@@ -232,7 +232,7 @@ const GUEST_QUOTES = {
             author: 'Confucius',
             source: '',
             fav: false,
-            tags: []
+            tags: ['motivation', 'perseverance']
         },
         {
             id: -3,
@@ -240,7 +240,7 @@ const GUEST_QUOTES = {
             author: 'Marcus Aurelius',
             source: 'Meditations',
             fav: false,
-            tags: []
+            tags: ['stoicism', 'change']
         },
         {
             id: -4,
@@ -248,7 +248,7 @@ const GUEST_QUOTES = {
             author: 'Socrates',
             source: '',
             fav: false,
-            tags: []
+            tags: ['philosophy', 'wisdom']
         },
         {
             id: -5,
@@ -256,7 +256,7 @@ const GUEST_QUOTES = {
             author: 'Diogenes Laërtius',
             source: '',
             fav: false,
-            tags: []
+            tags: ['knowledge', 'philosophy']
         },
         {
             id: -6,
