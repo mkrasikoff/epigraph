@@ -1079,7 +1079,7 @@ body:not(.is-authed) .qod-section {
    plain full-height QoD view untouched. Collapses to one column on narrow screens. */
 body:not(.is-authed) #view-qod {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: var(--space-10);
     max-width: 1040px;
@@ -1230,11 +1230,13 @@ body:not(.is-authed) .guest-footer {
 
 @media (max-width: 760px) {
     body:not(.is-authed) #view-qod {
-        grid-template-columns: 1fr;
-        gap: var(--space-6);
-        padding-top: var(--space-8);
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-10);
+        padding-top: var(--space-10);
     }
 
+    /* Centered hero on mobile — balances the full-width demo card below. Bullets are a
+       LEFT-aligned block centered as a group (not each item centered), so they stay tidy. */
     .guest-hero-col {
         text-align: center;
     }
@@ -1242,17 +1244,20 @@ body:not(.is-authed) .guest-footer {
     .guest-hero-sub {
         margin-left: auto;
         margin-right: auto;
+        margin-bottom: var(--space-6);
     }
 
     .guest-hero-bullets {
-        align-items: center;
+        width: fit-content;
+        max-width: 100%;
+        margin: var(--space-6) auto 0;
+        align-items: flex-start;
+        text-align: left;
+        gap: var(--space-3);
     }
 
-    .guest-hero-cta {
-        display: block;
-        width: max-content;
-        margin-left: auto;
-        margin-right: auto;
+    body:not(.is-authed) .qod-card {
+        height: 300px;
     }
 }
 
@@ -1266,7 +1271,7 @@ body:not(.is-authed) .guest-footer {
    thin hairline between rows, to echo the hero's airy, typographic feel (TASK-135). */
 .guest-feature-list {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     /* Fixed rows + column flow so the two columns share row tracks: each row is as tall
        as its taller item, which keeps the hairline dividers aligned across columns. */
     grid-template-rows: repeat(5, auto);
@@ -1320,7 +1325,7 @@ body:not(.is-authed) .guest-footer {
    only change the FONT, never the card size — the rest of the page can't jump. Width
    cap wins over the .qod-size-* classes. */
 body:not(.is-authed) .qod-card {
-    width: min(92vw, 400px);
+    width: min(100%, 400px);
     height: 260px;
     display: flex;
     flex-direction: column;
@@ -1389,7 +1394,7 @@ body:not(.is-authed) .qod-guest-dots {
 
 @media (max-width: 640px) {
     .guest-feature-list {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto;
         grid-auto-flow: row;
     }

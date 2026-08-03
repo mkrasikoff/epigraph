@@ -29,14 +29,17 @@
 function applyGuestQodSize(text) {
     const el = document.getElementById('qod-text');
     if (!el) return;
+    // clamp(min, vw-term, max): the max keeps the desktop size unchanged (wide viewport
+    // hits it), while the vw term shrinks the font on narrow screens so longer quotes wrap
+    // to fewer lines and still fit the fixed-size card — with tags — on mobile.
     const len = (text || '').length;
-    let rem;
-    if (len <= 45) rem = 1.9;
-    else if (len <= 75) rem = 1.6;
-    else if (len <= 115) rem = 1.35;
-    else if (len <= 170) rem = 1.15;
-    else rem = 0.95;
-    el.style.fontSize = rem + 'rem';
+    let fs;
+    if (len <= 45) fs = 'clamp(1.4rem, 5vw, 1.9rem)';
+    else if (len <= 75) fs = 'clamp(1.2rem, 4.4vw, 1.6rem)';
+    else if (len <= 115) fs = 'clamp(1.05rem, 3.8vw, 1.35rem)';
+    else if (len <= 170) fs = 'clamp(0.95rem, 3.2vw, 1.15rem)';
+    else fs = 'clamp(0.85rem, 2.8vw, 0.95rem)';
+    el.style.fontSize = fs;
 }
 
 // Render a quote's tags as chips under the author on the guest demo card. Quotes with
