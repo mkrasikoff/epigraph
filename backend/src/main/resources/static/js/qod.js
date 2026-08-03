@@ -86,7 +86,17 @@ function renderQod(qodOrIdx) {
     document.getElementById('qod-source').textContent = q.source || '';
     updateFavQodButton();
 
+    // Guests see tags on the demo card (see guest-landing.js); authed QoD hides them.
+    if (isGuest) renderGuestQodTags(q);
+
     document.fonts.ready.then(() => {
+        // Guests see the QoD card as one section of a taller, scrollable landing — never
+        // lock scroll for them, even though the card alone would fit the viewport. The
+        // fullscreen-fit lock stays exactly as-is for the authenticated QoD screen.
+        if (isGuest) {
+            document.body.classList.remove('no-scroll');
+            return;
+        }
         const section = document.querySelector('.qod-section');
         const fits = section.getBoundingClientRect().height <= (window.innerHeight - 57) + 2;
         document.body.classList.toggle('no-scroll', fits);
@@ -102,6 +112,14 @@ function renderQod(qodOrIdx) {
 function applyQodAdaptiveSize(text) {
     const card = document.querySelector('.qod-card');
     const el = document.getElementById('qod-text');
+
+    // Guests see a compact, fixed-size demo card (see guest-landing.js) instead of the
+    // full adaptive/fullscreen sizing used on the authenticated QoD hero (TASK-135).
+    if (isGuest) {
+        card.classList.remove('qod-size-short', 'qod-size-medium', 'qod-size-long', 'qod-size-very-long');
+        applyGuestQodSize(text);
+        return;
+    }
 
     const len = text.length;
 
@@ -178,6 +196,13 @@ function setQodActionsDisabled(disabled) {
  */
 function randomQuote() {
     if (!quotes.length) return;
+
+    // Guests get a plain cross-fade (no QoD collapse/expand animation, which fights the
+    // fixed-size guest card) plus the dim-dots + idle-resume behaviour — see guest-landing.js.
+    if (isGuest) {
+        guestRandomQuote();
+        return;
+    }
 
     let idx;
     do {
