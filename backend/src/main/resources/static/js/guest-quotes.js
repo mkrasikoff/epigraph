@@ -17,19 +17,19 @@ const GUEST_QUOTES = {
     ru: [
         {
             id: -1,
-            text: 'Счастье зависит от нас самих.',
-            author: 'Аристотель',
-            source: 'Никомахова этика',
+            text: 'Мы чаще страдаем в воображении, чем наяву.',
+            author: 'Сенека',
+            source: 'Нравственные письма к Луцилию',
             fav: false,
-            tags: ['философия', 'счастье']
+            tags: []
         },
         {
             id: -2,
-            text: 'Не важно, как медленно ты идёшь, главное — не останавливаться.',
-            author: 'Конфуций',
-            source: '',
+            text: 'Людей мучают не вещи, а представления о них.',
+            author: 'Эпиктет',
+            source: 'Энхиридион',
             fav: false,
-            tags: ['мотивация', 'упорство']
+            tags: []
         },
         {
             id: -3,
@@ -41,33 +41,33 @@ const GUEST_QUOTES = {
         },
         {
             id: -4,
-            text: 'Познай самого себя.',
-            author: 'Сократ',
-            source: '',
-            fav: false,
-            tags: ['философия', 'мудрость']
-        },
-        {
-            id: -5,
-            text: 'Единственное благо — знание, единственное зло — невежество.',
-            author: 'Диоген Лаэртский',
-            source: '',
-            fav: false,
-            tags: ['знание', 'философия']
-        },
-        {
-            id: -6,
-            text: 'Жизнь — это то, что происходит, пока ты строишь другие планы.',
-            author: 'Джон Леннон',
+            text: 'В одну и ту же реку нельзя войти дважды.',
+            author: 'Гераклит',
             source: '',
             fav: false,
             tags: []
         },
         {
-            id: -7,
-            text: 'В конце концов, важны не годы жизни, а жизнь в годах.',
-            author: 'Авраам Линкольн',
+            id: -5,
+            text: 'Единственное благо — знание, единственное зло — невежество.',
+            author: 'Сократ',
             source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -6,
+            text: 'Красота спасёт мир.',
+            author: 'Фёдор Достоевский',
+            source: '«Идиот»',
+            fav: false,
+            tags: ['красота', 'надежда']
+        },
+        {
+            id: -7,
+            text: 'Не порти того, что имеешь, желанием того, чего не имеешь.',
+            author: 'Эпикур',
+            source: 'Ватиканское собрание',
             fav: false,
             tags: []
         },
@@ -85,7 +85,7 @@ const GUEST_QUOTES = {
             author: 'Марк Твен',
             source: '«По экватору»',
             fav: false,
-            tags: []
+            tags: ['юмор', 'жизнь']
         },
         {
             id: -10,
@@ -97,9 +97,9 @@ const GUEST_QUOTES = {
         },
         {
             id: -11,
-            text: 'Всё, что я знаю — это то, что я ничего не знаю.',
-            author: 'Сократ',
-            source: '',
+            text: 'Две вещи наполняют душу всё новым удивлением — звёздное небо надо мной и нравственный закон во мне.',
+            author: 'Иммануил Кант',
+            source: 'Критика практического разума',
             fav: false,
             tags: []
         },
@@ -109,7 +109,7 @@ const GUEST_QUOTES = {
             author: 'Протагор',
             source: '',
             fav: false,
-            tags: []
+            tags: ['философия', 'человек']
         },
         {
             id: -13,
@@ -133,13 +133,13 @@ const GUEST_QUOTES = {
             author: 'Эсхил',
             source: '',
             fav: false,
-            tags: []
+            tags: ['мудрость', 'знание']
         },
         {
             id: -16,
-            text: 'Начало — половина всего.',
-            author: 'Аристотель',
-            source: '',
+            text: 'У сердца свои законы, которых разум не знает.',
+            author: 'Блез Паскаль',
+            source: '«Мысли»',
             fav: false,
             tags: []
         },
@@ -157,7 +157,7 @@ const GUEST_QUOTES = {
             author: 'Русская пословица',
             source: '',
             fav: false,
-            tags: []
+            tags: ['труд', 'пословица']
         },
         {
             id: -19,
@@ -169,19 +169,19 @@ const GUEST_QUOTES = {
         },
         {
             id: -20,
-            text: 'Когда дует ветер перемен, одни строят стены, другие — ветряные мельницы.',
-            author: 'Китайская пословица',
-            source: '',
+            text: 'Все счастливые семьи похожи друг на друга, каждая несчастливая семья несчастлива по-своему.',
+            author: 'Лев Толстой',
+            source: '«Анна Каренина»',
             fav: false,
             tags: []
         },
         {
             id: -21,
-            text: 'Лучше зажечь одну свечу, чем проклинать темноту.',
-            author: 'Китайская пословица',
-            source: '',
+            text: 'Величайшее в мире — уметь принадлежать себе.',
+            author: 'Мишель Монтень',
+            source: '«Опыты»',
             fav: false,
-            tags: []
+            tags: ['свобода', 'мудрость']
         },
         {
             id: -22,
@@ -205,7 +205,7 @@ const GUEST_QUOTES = {
             author: 'Стив Джобс',
             source: 'Речь в Стэнфорде',
             fav: false,
-            tags: []
+            tags: ['время', 'жизнь']
         },
         {
             id: -25,
@@ -220,19 +220,19 @@ const GUEST_QUOTES = {
     en: [
         {
             id: -1,
-            text: 'Happiness depends upon ourselves.',
-            author: 'Aristotle',
-            source: 'Nicomachean Ethics',
+            text: 'We suffer more often in imagination than in reality.',
+            author: 'Seneca',
+            source: 'Letters to Lucilius',
             fav: false,
-            tags: ['philosophy', 'happiness']
+            tags: []
         },
         {
             id: -2,
-            text: 'It does not matter how slowly you go as long as you do not stop.',
-            author: 'Confucius',
-            source: '',
+            text: 'Men are disturbed not by things, but by their opinions about them.',
+            author: 'Epictetus',
+            source: 'Enchiridion',
             fav: false,
-            tags: ['motivation', 'perseverance']
+            tags: []
         },
         {
             id: -3,
@@ -244,33 +244,33 @@ const GUEST_QUOTES = {
         },
         {
             id: -4,
-            text: 'Know thyself.',
-            author: 'Socrates',
-            source: '',
-            fav: false,
-            tags: ['philosophy', 'wisdom']
-        },
-        {
-            id: -5,
-            text: 'The only good is knowledge, and the only evil is ignorance.',
-            author: 'Diogenes Laërtius',
-            source: '',
-            fav: false,
-            tags: ['knowledge', 'philosophy']
-        },
-        {
-            id: -6,
-            text: "Life is what happens to you while you're busy making other plans.",
-            author: 'John Lennon',
+            text: 'You cannot step into the same river twice.',
+            author: 'Heraclitus',
             source: '',
             fav: false,
             tags: []
         },
         {
-            id: -7,
-            text: "In the end, it's not the years in your life that count. It's the life in your years.",
-            author: 'Abraham Lincoln',
+            id: -5,
+            text: 'The only good is knowledge, and the only evil is ignorance.',
+            author: 'Socrates',
             source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -6,
+            text: 'Beauty will save the world.',
+            author: 'Fyodor Dostoevsky',
+            source: 'The Idiot',
+            fav: false,
+            tags: ['beauty', 'hope']
+        },
+        {
+            id: -7,
+            text: 'Do not spoil what you have by desiring what you have not.',
+            author: 'Epicurus',
+            source: 'Vatican Sayings',
             fav: false,
             tags: []
         },
@@ -288,7 +288,7 @@ const GUEST_QUOTES = {
             author: 'Mark Twain',
             source: 'Following the Equator',
             fav: false,
-            tags: []
+            tags: ['humor', 'life']
         },
         {
             id: -10,
@@ -300,9 +300,9 @@ const GUEST_QUOTES = {
         },
         {
             id: -11,
-            text: 'I know that I know nothing.',
-            author: 'Socrates',
-            source: '',
+            text: 'Two things fill the mind with ever new wonder — the starry heavens above me and the moral law within me.',
+            author: 'Immanuel Kant',
+            source: 'Critique of Practical Reason',
             fav: false,
             tags: []
         },
@@ -312,7 +312,7 @@ const GUEST_QUOTES = {
             author: 'Protagoras',
             source: '',
             fav: false,
-            tags: []
+            tags: ['philosophy', 'man']
         },
         {
             id: -13,
@@ -336,13 +336,13 @@ const GUEST_QUOTES = {
             author: 'Aeschylus',
             source: '',
             fav: false,
-            tags: []
+            tags: ['wisdom', 'knowledge']
         },
         {
             id: -16,
-            text: 'Well begun is half done.',
-            author: 'Aristotle',
-            source: '',
+            text: 'The heart has its reasons which reason knows nothing of.',
+            author: 'Blaise Pascal',
+            source: 'Pensées',
             fav: false,
             tags: []
         },
@@ -360,7 +360,7 @@ const GUEST_QUOTES = {
             author: 'Russian proverb',
             source: '',
             fav: false,
-            tags: []
+            tags: ['work', 'proverb']
         },
         {
             id: -19,
@@ -372,19 +372,19 @@ const GUEST_QUOTES = {
         },
         {
             id: -20,
-            text: 'When the winds of change blow, some people build walls and others build windmills.',
-            author: 'Chinese proverb',
-            source: '',
+            text: 'All happy families are alike; each unhappy family is unhappy in its own way.',
+            author: 'Leo Tolstoy',
+            source: 'Anna Karenina',
             fav: false,
             tags: []
         },
         {
             id: -21,
-            text: 'Better to light a candle than to curse the darkness.',
-            author: 'Chinese proverb',
-            source: '',
+            text: 'The greatest thing in the world is to know how to belong to oneself.',
+            author: 'Michel de Montaigne',
+            source: 'Essays',
             fav: false,
-            tags: []
+            tags: ['freedom', 'wisdom']
         },
         {
             id: -22,
@@ -408,7 +408,7 @@ const GUEST_QUOTES = {
             author: 'Steve Jobs',
             source: 'Stanford Commencement Speech',
             fav: false,
-            tags: []
+            tags: ['time', 'life']
         },
         {
             id: -25,
