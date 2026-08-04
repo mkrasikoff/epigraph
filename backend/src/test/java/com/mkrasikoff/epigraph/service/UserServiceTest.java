@@ -252,7 +252,7 @@ class UserServiceTest {
     @DisplayName("updateAvatarIcon: Plus user can set a Plus-exclusive icon")
     void updateAvatarIcon_allowsPlusIcon_forPlusUser() {
         User user = buildUser(USER_ID, "user@mail.com", true);
-        user.setPlusSince(1700000000000L);
+        user.setPlusUntil(4_102_444_800_000L);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
         userService.updateAvatarIcon(USER_ID, "frog");
@@ -370,7 +370,7 @@ class UserServiceTest {
     @DisplayName("updateThemeStyle: allows a Plus theme when the account has Plus, without checking achievements")
     void updateThemeStyle_allowsPlusTheme_whenUserHasPlus() {
         User user = buildUser(USER_ID, "user@mail.com", true);
-        user.setPlusSince(1_700_000_000_000L);
+        user.setPlusUntil(4_102_444_800_000L);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
         userService.updateThemeStyle(USER_ID, "noir");

@@ -18,8 +18,9 @@ import java.util.List;
  * Epigraph Plus redeem codes (TASK-131): activation and pool upkeep.
  *
  * Codes are pre-generated into a pool and handed out to supporters. Redeeming one is single-use
- * (atomic claim) and grants the account Plus permanently. The pool self-refills: whenever it runs
- * low it mints a fresh batch, both on startup and right after a redemption.
+ * (atomic claim) and extends the account's Plus entitlement by a year (TASK-141). The pool
+ * self-refills: whenever it runs low it mints a fresh batch, both on startup and right after a
+ * redemption.
  */
 @Service
 public class RedeemService {
@@ -28,6 +29,9 @@ public class RedeemService {
     private static final int POOL_MIN = 10;
     /** How many codes to mint per refill. */
     private static final int POOL_BATCH = 100;
+
+    /** How long one redeemed code grants Plus. Package-private so the test asserts against it. */
+    static final long PLUS_DURATION_MILLIS = 365L * 24 * 60 * 60 * 1000;
 
     private static final String CODE_PREFIX = "PLUS-";
     private static final String CODE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"; // RFC 4648 base32
@@ -43,8 +47,10 @@ public class RedeemService {
     }
 
     /**
-     * Activates a redeem code for a user: claims it single-use and grants Plus (permanently — the
-     * grant timestamp is kept if the user already had Plus). Refills the pool if it's now low.
+     * Activates a redeem code for a user: claims it single-use and extends Plus by a year
+     * (TASK-141). Extensions stack — if the account already has Plus running into the future, the
+     * year is added on top of the remaining time; otherwise it runs a year from now. Refills the
+     * pool if it's now low.
      *
      * @throws IllegalArgumentException {@code INVALID_OR_USED_CODE} if the code is unknown or already
      *                                  redeemed; {@code USER_NOT_FOUND} if the account is missing.
@@ -60,10 +66,10 @@ public class RedeemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
-        if (user.getPlusSince() == null) {
-            user.setPlusSince(now);
-            userRepository.save(user);
-        }
+        Long current = user.getPlusUntil();
+        long base = (current != null && current > now) ? current : now;
+        user.setPlusUntil(base + PLUS_DURATION_MILLIS);
+        userRepository.save(user);
 
         ensurePool();
     }
