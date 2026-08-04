@@ -1,3 +1,3 @@
-# Adds a "Sponsor" button to the GitHub repo. Boosty isn't a built-in platform,
-# so it goes under `custom` as a URL.
-custom: ["https://boosty.to/mkrasikoff"]
+# Adds a "Sponsor" button to the GitHub repo. Boosty and Patreon aren't both
+# built-in, so they go under `custom` as URLs.
+custom: ["https://boosty.to/mkrasikoff", "https://patreon.com/mkrasikoff"]
