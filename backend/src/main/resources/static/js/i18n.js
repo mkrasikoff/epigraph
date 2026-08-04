@@ -1608,8 +1608,8 @@ const TRANSLATIONS = {
         statsPlusInfoPerkTheme:         'Exclusive Noir theme & avatars',
         statsPlusInfoPerkBadge:         'Plus badge',
         statsPlusInfoPerkLimit:         'Higher collection limit: 1000 → 5000 quotes',
-        statsPlusInfoHow:               'Core Epigraph stays free and ad-free. The subscription is arranged on Boosty — after payment you get a redeem code to activate.',
-        statsPlusInfoSubscribe:         'Subscribe on Boosty',
+        statsPlusInfoHow:               'Core Epigraph stays free and ad-free. The subscription is arranged on Patreon — after payment you get a redeem code to activate.',
+        statsPlusInfoSubscribe:         'Subscribe on Patreon',
         statsPlusInfoClose:             'Got it',
         statsFactStreakLabel:           'in a row in Epigraph',
         statsFactAvgLenLabel:           'characters — average quote length',
@@ -1861,6 +1861,36 @@ function t(key, variables) {
 }
 
 /**
+ * The sponsorship platform the Plus subscription is arranged on, chosen by the active UI language
+ * (TASK-140): Boosty for the Russian audience, Patreon for the English one. Both flows end the same
+ * way — a redeem code activates Plus in-app — so only the destination URL and its display name
+ * differ. The name is a brand, not a translatable string, so it lives here rather than in
+ * TRANSLATIONS; because the platform is picked by currentLanguage, it always matches the language
+ * of the surrounding "subscribe on ..." copy.
+ *
+ * Each platform carries its own inline icon (matching the app's line-icon style, sized 15×15 to
+ * sit inline with button/link text): a lightning bolt for Boosty, the Patreon logomark (offset
+ * circle + vertical bar) for Patreon. Used by both the Settings support link and the Stats
+ * Plus-info modal button.
+ */
+const SPONSOR_PLATFORMS = {
+    ru: {
+        name: 'Boosty',
+        url: 'https://boosty.to/mkrasikoff',
+        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    },
+    en: {
+        name: 'Patreon',
+        url: 'https://patreon.com/mkrasikoff',
+        icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="3" x2="5" y2="21"/><circle cx="14.5" cy="9" r="6.5"/></svg>',
+    },
+};
+
+function sponsorPlatform() {
+    return SPONSOR_PLATFORMS[currentLanguage] || SPONSOR_PLATFORMS.ru;
+}
+
+/**
  * Maps a backend error code (returned as the `message`/`error` value of an error response) to a
  * translation key. The backend is language-agnostic — it sends stable codes (see ApiCodes.java)
  * and the frontend localizes them here. Keep the code strings in sync with ApiCodes.java.
@@ -1958,6 +1988,19 @@ function applyI18n(root = document) {
     const sortLabelEl = document.getElementById('sort-btn-label');
     if (sortLabelEl && typeof currentSort !== 'undefined' && typeof SORT_LABEL_KEYS !== 'undefined') {
         sortLabelEl.textContent = t(SORT_LABEL_KEYS[currentSort] || SORT_LABEL_KEYS.date_desc);
+    }
+
+    // Settings "support the project" link points at the sponsorship platform for the active
+    // language (Boosty for ru, Patreon for en — TASK-140). Its href and name aren't static i18n
+    // (the name is a brand, the href a URL), so they're synced here alongside every language switch.
+    const supportLink = document.getElementById('settings-support-link');
+    if (supportLink) {
+        const platform = sponsorPlatform();
+        supportLink.href = platform.url;
+        const iconEl = supportLink.querySelector('.settings-support-link-icon');
+        if (iconEl) iconEl.innerHTML = platform.icon;
+        const nameEl = supportLink.querySelector('.settings-support-link-name');
+        if (nameEl) nameEl.textContent = platform.name;
     }
 
     // Nav-tab and segmented-toggle labels just changed width (these are the only i18n
