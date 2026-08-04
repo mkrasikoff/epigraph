@@ -122,7 +122,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
-        if (PLUS_AVATARS.contains(avatarIcon) && user.getPlusSince() == null) {
+        if (PLUS_AVATARS.contains(avatarIcon) && !user.isPlusActive()) {
             throw new IllegalArgumentException(ApiCodes.AVATAR_LOCKED);
         }
 
@@ -172,7 +172,7 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
         boolean unlocked = themeStyle.equals("classic")
-                || (PLUS_THEMES.contains(themeStyle) && user.getPlusSince() != null)
+                || (PLUS_THEMES.contains(themeStyle) && user.isPlusActive())
                 || achievementService.isRewardUnlocked(userId, "theme", themeStyle);
         if (!unlocked) {
             throw new IllegalArgumentException(ApiCodes.THEME_LOCKED);

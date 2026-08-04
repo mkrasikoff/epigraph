@@ -293,7 +293,7 @@ class AuthControllerTest {
         user.setPreferredLanguage("en");
         user.setThemeStyle("forest");
         user.setEquippedBadge("chronicler");
-        user.setPlusSince(1_700_000_000_000L);
+        user.setPlusUntil(4_102_444_800_000L);
         when(userService.findById(null)).thenReturn(Optional.of(user));
         when(friendshipService.countIncomingRequests(null)).thenReturn(2);
         when(achievementService.currentStreak(null)).thenReturn(6);

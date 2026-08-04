@@ -99,11 +99,17 @@ public class User {
     private String equippedBadge;
 
     /**
-     * Epoch millis of when the account was granted Epigraph Plus by redeeming a code
-     * (see RedeemCode / TASK-131). Null until redeemed; permanent once set. A non-null
-     * value is the single source of truth for "has Plus".
+     * Epoch millis of when Epigraph Plus lapses for this account (TASK-141). Null (never had Plus)
+     * or a past value means no Plus; a future value means Plus is active. Redeeming a code extends
+     * this by a year (see RedeemService). Use {@link #isPlusActive()} rather than reading this
+     * directly — the entitlement is the time comparison, not merely "non-null".
      */
-    private Long plusSince;
+    private Long plusUntil;
+
+    /** Whether Epigraph Plus is currently active — i.e. plusUntil is set and still in the future. */
+    public boolean isPlusActive() {
+        return plusUntil != null && plusUntil > System.currentTimeMillis();
+    }
 
     /**
      * How much of this user's collection an ACCEPTED friend may see (TASK-129) —

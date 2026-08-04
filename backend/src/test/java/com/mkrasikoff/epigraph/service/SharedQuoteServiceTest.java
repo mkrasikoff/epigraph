@@ -224,7 +224,7 @@ class SharedQuoteServiceTest {
     void importToCollection_allowsBeyondFreeLimit_forPlusImporter() {
         SharedQuote shared = buildSharedQuote(5L);
         User plus = new User();
-        plus.setPlusSince(1700000000000L);
+        plus.setPlusUntil(4_102_444_800_000L);
 
         when(sharedQuoteRepo.findByToken("tok123")).thenReturn(Optional.of(shared));
         when(quoteRepo.findBySharedQuoteIdAndUserId(5L, IMPORTER_ID)).thenReturn(Optional.empty());
