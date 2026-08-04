@@ -719,19 +719,20 @@ function statsHeatRand(x) {
     return n - Math.floor(n);
 }
 
-/** Where the Plus subscription is arranged (same destination as the Settings support link). */
-const PLUS_BOOSTY_URL = 'https://boosty.to/mkrasikoff';
-
-/** Opens the Boosty subscription page in a new tab, then closes the info modal. */
-function openPlusBoosty() {
-    window.open(PLUS_BOOSTY_URL, '_blank', 'noopener,noreferrer');
+/**
+ * Opens the sponsorship page in a new tab, then closes the info modal. The destination follows the
+ * active language (Boosty for ru, Patreon for en — see sponsorPlatform()/TASK-140), same as the
+ * Settings support link.
+ */
+function openPlusSubscribe() {
+    window.open(sponsorPlatform().url, '_blank', 'noopener,noreferrer');
     closeModal();
 }
 
 /**
  * Info modal about Epigraph Plus, opened from the teaser CTA. There is no in-app purchase flow —
- * Plus is activated by a redeem code after subscribing on Boosty (TASK-131) — so this sells the
- * value (a lead line + a perks list) and links out to Boosty rather than checking out in-app.
+ * Plus is activated by a redeem code after subscribing on the sponsorship platform (TASK-131) — so
+ * this sells the value (a lead line + a perks list) and links out rather than checking out in-app.
  */
 function openPlusInfo() {
     const perks = ['statsPlusInfoPerkStats', 'statsPlusInfoPerkTheme', 'statsPlusInfoPerkBadge', 'statsPlusInfoPerkLimit']
@@ -748,9 +749,10 @@ function openPlusInfo() {
             {
                 label: t('statsPlusInfoSubscribe'),
                 cls: 'btn-primary btn-with-icon',
-                // Same lightning glyph as the Settings "Boosty" support link.
-                icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-                action: openPlusBoosty,
+                // Platform icon (lightning for Boosty, logomark for Patreon), same as the Settings
+                // support link — see SPONSOR_PLATFORMS in i18n.js.
+                icon: sponsorPlatform().icon,
+                action: openPlusSubscribe,
             },
         ]
     );
