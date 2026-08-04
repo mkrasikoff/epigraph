@@ -396,7 +396,7 @@ class FriendshipServiceTest {
         target.setAvatarIcon("cat");
         target.setEquippedBadge("collector");
         target.setThemeStyle("cosmos");
-        target.setPlusSince(1700000000000L);
+        target.setPlusUntil(4_102_444_800_000L);
         target.setCreatedAt(1600000000000L);
 
         when(userRepository.findById(OTHER)).thenReturn(Optional.of(target));
@@ -425,7 +425,7 @@ class FriendshipServiceTest {
 
     @Test
     @DisplayName("getProfile: plus is false when the account never redeemed a code")
-    void getProfile_plusFalseWithoutPlusSince() {
+    void getProfile_plusFalseWithoutPlus() {
         User target = user(OTHER, "anna");
         when(userRepository.findById(OTHER)).thenReturn(Optional.of(target));
         when(achievementService.getStatusForUser(OTHER)).thenReturn(List.of());

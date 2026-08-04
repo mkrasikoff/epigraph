@@ -36,17 +36,19 @@ class RedeemServiceTest {
     private static final String CODE = "PLUS-ABCDEFGHIJKLMNOPQRST";
 
     @Test
-    @DisplayName("redeem: claims the code and grants Plus for an account without it")
+    @DisplayName("redeem: claims the code and grants a year of Plus for an account without it")
     void redeem_grantsPlus() {
         User user = new User();
         user.setId(USER_ID);
+        long before = System.currentTimeMillis();
         when(redeemCodeRepository.claim(eq(CODE), eq(USER_ID), anyLong())).thenReturn(1);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(redeemCodeRepository.countByRedeemedAtIsNull()).thenReturn(100L);
 
         redeemService.redeem(USER_ID, CODE);
 
-        assertThat(user.getPlusSince()).isNotNull();
+        assertThat(user.getPlusUntil())
+                .isGreaterThanOrEqualTo(before + RedeemService.PLUS_DURATION_MILLIS);
         verify(userRepository).save(user);
         verify(redeemCodeRepository, never()).saveAll(org.mockito.ArgumentMatchers.anyList());
     }
@@ -76,19 +78,20 @@ class RedeemServiceTest {
     }
 
     @Test
-    @DisplayName("redeem: keeps the original grant when the account already has Plus")
-    void redeem_keepsExistingGrant_whenAlreadyPlus() {
+    @DisplayName("redeem: stacks a year on top of the remaining time when the account already has Plus")
+    void redeem_extendsGrant_whenAlreadyPlus() {
+        long existingUntil = System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000; // ~30 days left
         User user = new User();
         user.setId(USER_ID);
-        user.setPlusSince(1_700_000_000_000L);
+        user.setPlusUntil(existingUntil);
         when(redeemCodeRepository.claim(eq(CODE), eq(USER_ID), anyLong())).thenReturn(1);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(redeemCodeRepository.countByRedeemedAtIsNull()).thenReturn(100L);
 
         redeemService.redeem(USER_ID, CODE);
 
-        assertThat(user.getPlusSince()).isEqualTo(1_700_000_000_000L);
-        verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any());
+        assertThat(user.getPlusUntil()).isEqualTo(existingUntil + RedeemService.PLUS_DURATION_MILLIS);
+        verify(userRepository).save(user);
     }
 
     @Test

@@ -81,7 +81,7 @@ public class AuthController {
                 .<ResponseEntity<?>>map(user -> {
                     boolean isNewActivityDay = achievementService.markActiveToday(userId);
                     if (!isNewActivityDay) {
-                        return ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon(), user.getPreferredLanguage(), user.getThemeStyle(), user.getEquippedBadge(), user.getPlusSince() != null, friendshipService.countIncomingRequests(userId), user.getQuotesVisibility(), achievementService.currentStreak(userId)));
+                        return ResponseEntity.ok(new MeResponse(user.getId(), user.getEmail(), user.getUsername(), user.getAvatarIcon(), user.getPreferredLanguage(), user.getThemeStyle(), user.getEquippedBadge(), user.isPlusActive(), friendshipService.countIncomingRequests(userId), user.getQuotesVisibility(), achievementService.currentStreak(userId)));
                     }
 
                     achievementService.evaluate(userId);
@@ -90,7 +90,7 @@ public class AuthController {
                     // detached snapshot from before that ran, so it would still
                     // report the old badge.
                     User refreshed = userService.findById(userId).orElse(user);
-                    return ResponseEntity.ok(new MeResponse(refreshed.getId(), refreshed.getEmail(), refreshed.getUsername(), refreshed.getAvatarIcon(), refreshed.getPreferredLanguage(), refreshed.getThemeStyle(), refreshed.getEquippedBadge(), refreshed.getPlusSince() != null, friendshipService.countIncomingRequests(userId), refreshed.getQuotesVisibility(), achievementService.currentStreak(userId)));
+                    return ResponseEntity.ok(new MeResponse(refreshed.getId(), refreshed.getEmail(), refreshed.getUsername(), refreshed.getAvatarIcon(), refreshed.getPreferredLanguage(), refreshed.getThemeStyle(), refreshed.getEquippedBadge(), refreshed.isPlusActive(), friendshipService.countIncomingRequests(userId), refreshed.getQuotesVisibility(), achievementService.currentStreak(userId)));
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ErrorResponse(ApiCodes.USER_NOT_FOUND)));

@@ -41,7 +41,7 @@ public class SharedQuoteService {
      * 1000 otherwise. Mirrors QuoteService#maxQuotesFor.
      */
     private int maxQuotesFor(Long userId) {
-        boolean plus = userRepo.findById(userId).map(u -> u.getPlusSince() != null).orElse(false);
+        boolean plus = userRepo.findById(userId).map(u -> u.isPlusActive()).orElse(false);
         return plus ? PLUS_MAX_QUOTES_PER_USER : FREE_MAX_QUOTES_PER_USER;
     }
 

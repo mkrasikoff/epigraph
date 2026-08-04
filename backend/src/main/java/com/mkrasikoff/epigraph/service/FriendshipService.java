@@ -229,7 +229,7 @@ public class FriendshipService {
                 target.getAvatarIcon(),
                 target.getEquippedBadge(),
                 target.getThemeStyle(),
-                target.getPlusSince() != null,
+                target.isPlusActive(),
                 target.getCreatedAt(),
                 achievementService.currentStreak(targetId),
                 quoteRepository.countByUserId(targetId),
@@ -347,7 +347,7 @@ public class FriendshipService {
      * otherwise. Mirrors SharedQuoteService/QuoteService.
      */
     private int maxQuotesFor(Long userId) {
-        boolean plus = userRepository.findById(userId).map(u -> u.getPlusSince() != null).orElse(false);
+        boolean plus = userRepository.findById(userId).map(u -> u.isPlusActive()).orElse(false);
         return plus ? PLUS_MAX_QUOTES_PER_USER : FREE_MAX_QUOTES_PER_USER;
     }
 

@@ -61,7 +61,7 @@ class QuoteServiceTest {
     /** A user whose Epigraph Plus is active (raises the quote cap to 5000). */
     private User plusUser() {
         User u = new User();
-        u.setPlusSince(1700000000000L);
+        u.setPlusUntil(4_102_444_800_000L);
         return u;
     }
 
