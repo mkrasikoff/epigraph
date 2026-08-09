@@ -55,11 +55,12 @@ class PatreonWebhookControllerTest {
                     "id": "%s",
                     "attributes": {
                       "patron_status": "active_patron",
-                      "next_charge_date": "2026-09-01T00:00:00.000+00:00"
+                      "next_charge_date": "2026-09-01T00:00:00.000+00:00",
+                      "email": "%s"
                     }
                   },
                   "included": [
-                    { "type": "user", "attributes": { "email": "%s" } }
+                    { "type": "user", "attributes": { "full_name": "Test Patron" } }
                   ]
                 }""".formatted(MEMBER_ID, EMAIL);
         return json.getBytes(StandardCharsets.UTF_8);
@@ -131,11 +132,8 @@ class PatreonWebhookControllerTest {
                 {
                   "data": {
                     "id": "%s",
-                    "attributes": { "patron_status": "former_patron" }
-                  },
-                  "included": [
-                    { "type": "user", "attributes": { "email": "%s" } }
-                  ]
+                    "attributes": { "patron_status": "former_patron", "email": "%s" }
+                  }
                 }""".formatted(MEMBER_ID, EMAIL);
         byte[] body = json.getBytes(StandardCharsets.UTF_8);
         User user = new User();
