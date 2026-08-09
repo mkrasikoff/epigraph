@@ -68,6 +68,10 @@ public class PatreonWebhookController {
             return ResponseEntity.status(401).build();
         }
 
+        // TEMP (TASK-141): dump the raw payload once to confirm the email / next_charge_date field
+        // locations against a real event, then remove. Test events carry obfuscated data, not real PII.
+        log.info("Patreon webhook raw body (event={}): {}", event, new String(body, StandardCharsets.UTF_8));
+
         JsonNode root;
         try {
             root = objectMapper.readTree(body);
