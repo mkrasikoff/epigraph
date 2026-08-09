@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/banner").permitAll()
                         .requestMatchers("/api/geo").permitAll()
+                        // Server-to-server webhooks authenticate by signature in the controller, not by JWT.
+                        .requestMatchers(HttpMethod.POST, "/api/webhooks/**").permitAll()
                         .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/*.js", "/*.css", "/*.png", "/*.ico").permitAll()
                         .requestMatchers("/robots.txt", "/sitemap.xml").permitAll()
                         .requestMatchers("/manifest.json", "/api/push/vapid-public-key").permitAll()
