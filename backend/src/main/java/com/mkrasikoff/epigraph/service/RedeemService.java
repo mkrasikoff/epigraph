@@ -1,6 +1,7 @@
 package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.exception.ApiCodes;
+import com.mkrasikoff.epigraph.model.PlusSubscription;
 import com.mkrasikoff.epigraph.model.RedeemCode;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.RedeemCodeRepository;
@@ -40,10 +41,13 @@ public class RedeemService {
 
     private final RedeemCodeRepository redeemCodeRepository;
     private final UserRepository userRepository;
+    private final PlusSubscriptionService plusSubscriptionService;
 
-    public RedeemService(RedeemCodeRepository redeemCodeRepository, UserRepository userRepository) {
+    public RedeemService(RedeemCodeRepository redeemCodeRepository, UserRepository userRepository,
+                         PlusSubscriptionService plusSubscriptionService) {
         this.redeemCodeRepository = redeemCodeRepository;
         this.userRepository = userRepository;
+        this.plusSubscriptionService = plusSubscriptionService;
     }
 
     /**
@@ -66,10 +70,8 @@ public class RedeemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(ApiCodes.USER_NOT_FOUND));
 
-        Long current = user.getPlusUntil();
-        long base = (current != null && current > now) ? current : now;
-        user.setPlusUntil(base + PLUS_DURATION_MILLIS);
-        userRepository.save(user);
+        plusSubscriptionService.addStackingGrant(
+                user, PlusSubscription.SOURCE_BOOSTY_CODE, code, PLUS_DURATION_MILLIS);
 
         ensurePool();
     }

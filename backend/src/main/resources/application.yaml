@@ -19,6 +19,10 @@ app:
     public-key: ${VAPID_PUBLIC_KEY:}
     private-key: ${VAPID_PRIVATE_KEY:}
     subject: ${VAPID_SUBJECT:mailto:epigraph.support@icloud.com}
+  patreon:
+    # Secret of the Patreon webhook (developer portal → your webhook → secret). Blank locally,
+    # which makes the webhook endpoint reject every request (signatures can't be verified).
+    webhook-secret: ${PATREON_WEBHOOK_SECRET:}
 
 logging:
   pattern:

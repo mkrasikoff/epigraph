@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.model.PlusSubscription;
 import com.mkrasikoff.epigraph.model.RedeemCode;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.RedeemCodeRepository;
@@ -14,9 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -28,6 +30,7 @@ class RedeemServiceTest {
 
     @Mock private RedeemCodeRepository redeemCodeRepository;
     @Mock private UserRepository userRepository;
+    @Mock private PlusSubscriptionService plusSubscriptionService;
 
     @InjectMocks
     private RedeemService redeemService;
@@ -36,25 +39,23 @@ class RedeemServiceTest {
     private static final String CODE = "PLUS-ABCDEFGHIJKLMNOPQRST";
 
     @Test
-    @DisplayName("redeem: claims the code and grants a year of Plus for an account without it")
-    void redeem_grantsPlus() {
+    @DisplayName("redeem: claims the code and delegates a year-long Plus grant for the account")
+    void redeem_claimsAndDelegatesGrant() {
         User user = new User();
         user.setId(USER_ID);
-        long before = System.currentTimeMillis();
         when(redeemCodeRepository.claim(eq(CODE), eq(USER_ID), anyLong())).thenReturn(1);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(redeemCodeRepository.countByRedeemedAtIsNull()).thenReturn(100L);
 
         redeemService.redeem(USER_ID, CODE);
 
-        assertThat(user.getPlusUntil())
-                .isGreaterThanOrEqualTo(before + RedeemService.PLUS_DURATION_MILLIS);
-        verify(userRepository).save(user);
+        verify(plusSubscriptionService).addStackingGrant(
+                user, PlusSubscription.SOURCE_BOOSTY_CODE, CODE, RedeemService.PLUS_DURATION_MILLIS);
         verify(redeemCodeRepository, never()).saveAll(org.mockito.ArgumentMatchers.anyList());
     }
 
     @Test
-    @DisplayName("redeem: throws INVALID_OR_USED_CODE when the code can't be claimed")
+    @DisplayName("redeem: throws INVALID_OR_USED_CODE and grants nothing when the code can't be claimed")
     void redeem_throws_whenCodeInvalidOrUsed() {
         when(redeemCodeRepository.claim(eq(CODE), eq(USER_ID), anyLong())).thenReturn(0);
 
@@ -63,11 +64,11 @@ class RedeemServiceTest {
                 .hasMessageContaining("INVALID_OR_USED_CODE");
 
         verify(userRepository, never()).findById(anyLong());
-        verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(plusSubscriptionService, never()).addStackingGrant(any(), anyString(), anyString(), anyLong());
     }
 
     @Test
-    @DisplayName("redeem: throws USER_NOT_FOUND when the account is missing after claiming")
+    @DisplayName("redeem: throws USER_NOT_FOUND and grants nothing when the account is missing after claiming")
     void redeem_throws_whenUserMissing() {
         when(redeemCodeRepository.claim(eq(CODE), eq(USER_ID), anyLong())).thenReturn(1);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
@@ -75,23 +76,8 @@ class RedeemServiceTest {
         assertThatThrownBy(() -> redeemService.redeem(USER_ID, CODE))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("USER_NOT_FOUND");
-    }
 
-    @Test
-    @DisplayName("redeem: stacks a year on top of the remaining time when the account already has Plus")
-    void redeem_extendsGrant_whenAlreadyPlus() {
-        long existingUntil = System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000; // ~30 days left
-        User user = new User();
-        user.setId(USER_ID);
-        user.setPlusUntil(existingUntil);
-        when(redeemCodeRepository.claim(eq(CODE), eq(USER_ID), anyLong())).thenReturn(1);
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        when(redeemCodeRepository.countByRedeemedAtIsNull()).thenReturn(100L);
-
-        redeemService.redeem(USER_ID, CODE);
-
-        assertThat(user.getPlusUntil()).isEqualTo(existingUntil + RedeemService.PLUS_DURATION_MILLIS);
-        verify(userRepository).save(user);
+        verify(plusSubscriptionService, never()).addStackingGrant(any(), anyString(), anyString(), anyLong());
     }
 
     @Test
