@@ -32,12 +32,12 @@ import java.util.Optional;
  * {@link PlusSubscriptionService}. If the patron can't be matched (email doesn't line up) we simply
  * acknowledge and do nothing — the manual redeem-code path remains the fallback.
  *
- * <p><b>Payload fields to confirm against a real test event:</b> Patreon's webhook JSON is only
- * loosely documented; this reads the member id from {@code data.id}, the state from
- * {@code data.attributes.patron_status}, the paid-through date from
- * {@code data.attributes.next_charge_date}, and the email from the {@code included} user resource
- * (falling back to {@code data.attributes.email}). Trigger a test event from the developer portal
- * and verify these before relying on automation. A wrong guess degrades safely to "no auto-grant".
+ * <p><b>Payload mapping (confirmed against a real test event):</b> member id from {@code data.id},
+ * state from {@code data.attributes.patron_status}, paid-through date from
+ * {@code data.attributes.next_charge_date}, and the patron email from {@code data.attributes.email}
+ * (with the {@code included} user resource as a fallback — it carries no email by default). When a
+ * patron can't be matched to an account the webhook degrades safely to "no auto-grant" and the
+ * manual redeem code stays available.
  */
 @RestController
 public class PatreonWebhookController {
@@ -67,10 +67,6 @@ public class PatreonWebhookController {
             log.warn("Rejected Patreon webhook: bad or missing signature (event={})", event);
             return ResponseEntity.status(401).build();
         }
-
-        // TEMP (TASK-141): dump the raw payload once to confirm the email / next_charge_date field
-        // locations against a real event, then remove. Test events carry obfuscated data, not real PII.
-        log.info("Patreon webhook raw body (event={}): {}", event, new String(body, StandardCharsets.UTF_8));
 
         JsonNode root;
         try {
@@ -123,8 +119,17 @@ public class PatreonWebhookController {
         return PlusSubscription.STATUS_CANCELED;
     }
 
-    /** Email from the {@code included} user resource, falling back to the member's own attributes. */
+    /**
+     * The patron's email — carried on the member's own attributes ({@code data.attributes.email},
+     * where a real event puts it), with the {@code included} user resource as a fallback in case a
+     * future payload shape only exposes it there.
+     */
     private String patronEmail(JsonNode root, JsonNode attributes) {
+        String memberEmail = text(attributes.get("email"));
+        if (memberEmail != null) {
+            return memberEmail;
+        }
+
         for (JsonNode included : root.path("included")) {
             if ("user".equals(text(included.get("type")))) {
                 String email = text(included.path("attributes").get("email"));
@@ -133,7 +138,8 @@ public class PatreonWebhookController {
                 }
             }
         }
-        return text(attributes.get("email"));
+
+        return null;
     }
 
     private boolean signatureValid(byte[] body, String signatureHeader) {
