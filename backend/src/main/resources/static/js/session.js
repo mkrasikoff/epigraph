@@ -107,13 +107,21 @@ async function syncPreferredLanguage() {
     }
 }
 
+/** Max time to wait for /api/geo before the first guest render, so a slow lookup can't hold the
+ * loading screen (see applyGuestGeoLanguage). On prod (Cloudflare header) the answer is near-instant. */
+const GEO_LANG_TIMEOUT_MS = 700;
+
 /**
- * Region-based default language for a guest (TASK-142). The synchronous startup default is a guess
- * from the browser locale (guestDefaultLang() in i18n.js); once /api/geo resolves we correct it to
- * the region's default — 'ru' for the RU region, 'en' for any other known region. Guests only, and
- * only when there's no explicit choice yet (localStorage empty) — an explicit toggle or a logged-in
- * account's preference always wins. Applied WITHOUT persisting (setLanguage's persist=false), so it
- * stays a soft default: never counted as the user's own choice, never pushed onto an account at login.
+ * Region-based default language for a guest (TASK-142). Awaited by bootstrap.js BEFORE the first
+ * render and before the loading overlay is lifted, so the browser-locale→region correction happens
+ * behind the loading screen — the visitor never sees a language flip. Sets 'ru' for the RU region,
+ * 'en' for any other known region. Guests only, and only when there's no explicit choice yet
+ * (localStorage empty) — an explicit toggle or a logged-in account preference always wins. Applied
+ * WITHOUT persisting (persist=false), so it stays a soft default: never counted as the user's own
+ * choice, never pushed onto an account at login.
+ *
+ * The /api/geo wait is capped: if the lookup is slow or fails, we keep the browser-locale guess
+ * already in place rather than hold the loading screen open.
  */
 async function applyGuestGeoLanguage() {
     if (currentUser) return;
@@ -123,17 +131,17 @@ async function applyGuestGeoLanguage() {
         return;
     }
 
-    const country = await resolveCountry();
-    if (!country) return;                     // region unknown — keep the locale-based guess
+    const country = await Promise.race([
+        resolveCountry(),
+        new Promise(resolve => setTimeout(() => resolve(null), GEO_LANG_TIMEOUT_MS)),
+    ]);
+    if (!country) return;                     // unknown / too slow — keep the locale-based guess
 
     const want = country === 'RU' ? 'ru' : 'en';
-    if (want === currentLanguage) return;     // the locale guess already matched the region
-
-    setLanguage(want, false);
-    // Guest sample quotes (GUEST_QUOTES) are language-specific — refresh them and re-render the card.
-    if (isGuest && typeof getGuestQuotes === 'function') {
-        quotes = getGuestQuotes();
-        renderQod(currentQodIndex);
+    if (want !== currentLanguage) {
+        // Runs before the first guest render, so just set the language — showGuestMode() then
+        // renders the QoD (and its language-specific sample quotes) in the corrected language.
+        setLanguage(want, false);
     }
 }
 
