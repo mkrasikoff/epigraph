@@ -106,6 +106,10 @@
 
     if (!token) {
         showGuestMode();
+        // Correct the guest's language to the region default once /api/geo resolves (TASK-142).
+        // Fire-and-forget: the locale-based guess already rendered above; this only re-renders if
+        // the region disagrees. Reuses the same /api/geo lookup initAuthButtons() kicked off.
+        applyGuestGeoLanguage();
         // Guests can only see QoD — clear any hash that would open a locked section
         window.history.replaceState(null, '', '#today');
         // A guest arriving via a /?redeem link is prompted to sign in; the stashed code
