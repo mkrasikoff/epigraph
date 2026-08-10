@@ -108,6 +108,36 @@ async function syncPreferredLanguage() {
 }
 
 /**
+ * Region-based default language for a guest (TASK-142). The synchronous startup default is a guess
+ * from the browser locale (guestDefaultLang() in i18n.js); once /api/geo resolves we correct it to
+ * the region's default — 'ru' for the RU region, 'en' for any other known region. Guests only, and
+ * only when there's no explicit choice yet (localStorage empty) — an explicit toggle or a logged-in
+ * account's preference always wins. Applied WITHOUT persisting (setLanguage's persist=false), so it
+ * stays a soft default: never counted as the user's own choice, never pushed onto an account at login.
+ */
+async function applyGuestGeoLanguage() {
+    if (currentUser) return;
+    try {
+        if (localStorage.getItem('epigraph_lang')) return;
+    } catch (e) {
+        return;
+    }
+
+    const country = await resolveCountry();
+    if (!country) return;                     // region unknown — keep the locale-based guess
+
+    const want = country === 'RU' ? 'ru' : 'en';
+    if (want === currentLanguage) return;     // the locale guess already matched the region
+
+    setLanguage(want, false);
+    // Guest sample quotes (GUEST_QUOTES) are language-specific — refresh them and re-render the card.
+    if (isGuest && typeof getGuestQuotes === 'function') {
+        quotes = getGuestQuotes();
+        renderQod(currentQodIndex);
+    }
+}
+
+/**
  * Reconciles the app's active theme style with the authenticated user's
  * account right after login/register/reset — same "guest choice wins" shape
  * as syncPreferredLanguage() above, applied to the theme-style picker

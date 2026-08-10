@@ -1678,10 +1678,25 @@ function writeLangCookie(lang) {
     }
 }
 
+/**
+ * The language a guest with no stored choice starts in — a synchronous, zero-latency guess from
+ * the browser locale (ru → 'ru', anything else → 'en'), so the first paint isn't a Russian flash
+ * for non-Russian visitors. This is only the pre-render default; the authoritative region-based
+ * default (TASK-142) is applied a moment later from /api/geo — see applyGuestGeoLanguage() in
+ * session.js — which can correct this guess for a region that disagrees with the browser locale.
+ */
+function guestDefaultLang() {
+    try {
+        return /^ru\b/i.test(navigator.language || '') ? 'ru' : 'en';
+    } catch (e) {
+        return 'ru';
+    }
+}
+
 /** Currently active language code. */
-let currentLanguage = localStorage.getItem('epigraph_lang') || 'ru';
+let currentLanguage = localStorage.getItem('epigraph_lang') || guestDefaultLang();
 document.documentElement.lang = currentLanguage;
-// Keep the cookie in step with a language chosen in an earlier session (localStorage already set).
+// Keep the cookie in step with the active language (an earlier explicit choice, or the guess above).
 writeLangCookie(currentLanguage);
 
 /**
@@ -1817,14 +1832,20 @@ function monthYearGenitive(timestamp) {
  * callers that need those updated should reload the page instead (see the
  * language toggle button handler in ui.js).
  * @param {string} lang - 'ru' or 'en'.
+ * @param {boolean} [persist=true] - Whether to store the choice in localStorage (an explicit user
+ *   choice). Pass false for a soft default (the geo-based guest default) that shouldn't stick.
  */
-function setLanguage(lang) {
+function setLanguage(lang, persist = true) {
     if (!TRANSLATIONS[lang] || lang === currentLanguage) return;
 
     currentLanguage = lang;
-    try {
-        localStorage.setItem('epigraph_lang', lang);
-    } catch (e) {
+    // persist=false marks this as a soft default (e.g. the geo-based guest default, TASK-142) that
+    // must NOT count as the user's explicit choice — so it isn't pushed onto their account at login.
+    if (persist) {
+        try {
+            localStorage.setItem('epigraph_lang', lang);
+        } catch (e) {
+        }
     }
     writeLangCookie(lang);
     document.documentElement.lang = lang;

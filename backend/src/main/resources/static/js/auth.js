@@ -296,6 +296,28 @@ function applyAuthButtonVisibility(isRussia) {
     });
 }
 
+/**
+ * Visitor country (ISO-3166 alpha-2), resolved once per session from /api/geo and shared by every
+ * consumer — the OAuth-button region gate below and the guest language default (applyGuestGeoLanguage,
+ * TASK-142). The promise is memoized so the two callers trigger a single lookup; a failed/unknown
+ * lookup is NOT cached, so the next caller retries instead of being stuck on the failure.
+ * Resolves to the country code, or null on error / unknown region.
+ */
+let _countryPromise = null;
+function resolveCountry() {
+    if (!_countryPromise) {
+        _countryPromise = fetch('/api/geo')
+            .then(res => res.json())
+            .then(data => (data && data.country) ? data.country : null)
+            .catch(() => null)
+            .then(country => {
+                if (country === null) _countryPromise = null; // don't cache a failure — allow retry
+                return country;
+            });
+    }
+    return _countryPromise;
+}
+
 // Region gate for the OAuth buttons, resolved once per session from /api/geo and
 // reused on every subsequent auth-modal open. null = not resolved yet.
 let authButtonsIsRussia = null;
@@ -317,18 +339,17 @@ async function initAuthButtons() {
     // regardless of which button was visible, so a brief mismatch here is only cosmetic.
     applyAuthButtonVisibility(/^ru\b/i.test(navigator.language || ''));
 
-    try {
-        const res = await fetch('/api/geo');
-        const data = await res.json();
-        authButtonsIsRussia = data.country === 'RU';
-        applyAuthButtonVisibility(authButtonsIsRussia);
-    } catch (e) {
-        // On error — show all OAuth buttons, and leave the region unresolved so the
-        // next modal open retries the lookup instead of caching the failure.
+    const country = await resolveCountry();
+    if (country === null) {
+        // Lookup failed / unknown — show all OAuth buttons, and leave the region unresolved
+        // (authButtonsIsRussia stays null) so the next modal open retries the lookup.
         document.querySelectorAll('.btn-google, .btn-yandex').forEach(btn => {
             btn.style.display = '';
         });
+        return;
     }
+    authButtonsIsRussia = country === 'RU';
+    applyAuthButtonVisibility(authButtonsIsRussia);
 }
 
 function handleAuthOverlayClick(e) {
