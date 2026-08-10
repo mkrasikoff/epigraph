@@ -59,7 +59,7 @@ function showGuestMode() {
     document.getElementById('account-menu').style.display = 'none';
     closeAccountMenu();
     document.getElementById('login-btn').style.display = '';
-    document.querySelector('[data-lang-toggle]')?.style.removeProperty('display');
+    document.getElementById('lang-menu')?.style.removeProperty('display');
 
     ['list', 'add', 'settings'].forEach(id => {
         document.getElementById('tab-' + id)?.classList.add('guest-locked');
@@ -83,7 +83,7 @@ function hideGuestMode() {
 
     document.getElementById('account-menu').style.display = '';
     document.getElementById('login-btn').style.display = 'none';
-    document.querySelector('[data-lang-toggle]')?.style.setProperty('display', 'none');
+    document.getElementById('lang-menu')?.style.setProperty('display', 'none');
     updateHeaderAccount();
 
     ['list', 'add', 'settings'].forEach(id => {

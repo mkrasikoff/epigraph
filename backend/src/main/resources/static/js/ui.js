@@ -303,13 +303,15 @@ function flipLogoIcon() {
 
 // =============================================================================
 // LANGUAGE
-// Two toggle controls, shown in different states:
-// - [data-lang-toggle] in the header — guests only (hidden once signed in,
-//   see showGuestMode()/hideGuestMode() in auth.js). No network call, since
-//   guests only ever see the QoD view. Briefly shows the same full-screen
-//   loading overlay used at startup (#app-loading-overlay) before applying
-//   the switch — otherwise the reflow (English text is more compact than
-//   Russian) reads as a jarring flicker rather than a deliberate change.
+// Two language controls, shown in different states:
+// - #lang-menu in the header — a globe icon opening a dropdown of languages
+//   (English first, TASK-142), guests only (hidden once signed in, see
+//   showGuestMode()/hideGuestMode() in auth.js). No network call, since
+//   guests only ever see the QoD view. Picking a language briefly shows the
+//   same full-screen loading overlay used at startup (#app-loading-overlay)
+//   before applying the switch — otherwise the reflow (English text is more
+//   compact than Russian) reads as a jarring flicker rather than a deliberate
+//   change.
 // - [data-lang-toggle-settings] in Settings — signed-in users only. A
 //   segmented RU/EN control (same pattern as the JSON/Yandex import source
 //   toggle). Persists the choice to the account and reloads, since a
@@ -318,27 +320,44 @@ function flipLogoIcon() {
 //   i18n.js.
 // =============================================================================
 (function () {
-    const headerBtn = document.querySelector('[data-lang-toggle]');
-    if (!headerBtn) return;
+    const wrap = document.getElementById('lang-menu');
+    if (!wrap) return;
+    const btn = wrap.querySelector('[data-lang-toggle]');
 
     const SWITCH_DELAY_MS = 700;
 
-    headerBtn.addEventListener('click', () => {
-        if (headerBtn.disabled) return;
+    // Globe button opens/closes the language dropdown (TASK-142).
+    btn.addEventListener('click', () => {
+        const open = wrap.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+    });
 
-        const newLang = currentLanguage === 'ru' ? 'en' : 'ru';
-        headerBtn.disabled = true;
+    // Picking a language closes the menu and switches, masked by the loading overlay so the
+    // text reflow isn't a visible jump (same beat the switch has always used).
+    wrap.querySelectorAll('.lang-menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const newLang = item.dataset.langOption;
+            wrap.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+            if (newLang === currentLanguage) return;
 
-        const overlay = document.getElementById('app-loading-overlay');
-        overlay?.classList.remove('hidden');
+            const overlay = document.getElementById('app-loading-overlay');
+            overlay?.classList.remove('hidden');
+            setTimeout(() => {
+                setLanguage(newLang);
+                if (isGuest) quotes = getGuestQuotes();
+                renderQod(currentQodIndex);
+                overlay?.classList.add('hidden');
+            }, SWITCH_DELAY_MS);
+        });
+    });
 
-        setTimeout(() => {
-            setLanguage(newLang);
-            if (isGuest) quotes = getGuestQuotes();
-            renderQod(currentQodIndex);
-            headerBtn.disabled = false;
-            overlay?.classList.add('hidden');
-        }, SWITCH_DELAY_MS);
+    // Close on outside click (same pattern as the account/sort menus).
+    document.addEventListener('click', e => {
+        if (!wrap.contains(e.target)) {
+            wrap.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        }
     });
 })();
 
@@ -369,15 +388,13 @@ function flipLogoIcon() {
 updateLangToggleLabel();
 
 /**
- * Updates the header toggle's label to the language a click would switch to
- * (e.g. shows "EN" while the app is in Russian), and marks the matching
- * option active in the Settings segmented toggle.
+ * Marks the active language in both language pickers: the header globe dropdown (the current
+ * language gets its checkmark via aria-checked) and the Settings segmented toggle.
  */
 function updateLangToggleLabel() {
-    const headerBtn = document.querySelector('[data-lang-toggle]');
-    if (headerBtn) {
-        headerBtn.textContent = currentLanguage === 'ru' ? 'EN' : 'RU';
-    }
+    document.querySelectorAll('#lang-menu .lang-menu-item').forEach(item => {
+        item.setAttribute('aria-checked', String(item.dataset.langOption === currentLanguage));
+    });
 
     document.querySelectorAll('[data-lang-toggle-settings] [data-lang-option]').forEach(btn => {
         btn.classList.toggle('is-active', btn.dataset.langOption === currentLanguage);
