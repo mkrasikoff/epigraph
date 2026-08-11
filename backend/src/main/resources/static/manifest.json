@@ -1,7 +1,10 @@
 {
+  "id": "/",
   "name": "Epigraph",
   "short_name": "Epigraph",
   "description": "Ваши цитаты. Каждый день.",
+  "lang": "ru",
+  "categories": ["books", "lifestyle", "productivity"],
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,15 +12,22 @@
   "theme_color": "#f5f2ec",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icon.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
