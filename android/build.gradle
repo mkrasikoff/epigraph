@@ -1,0 +1,7 @@
+// Root build for the Epigraph Android TWA wrapper.
+// This is an INDEPENDENT Gradle project — it is intentionally NOT a subproject of the
+// repository-root Spring Boot build (Android Gradle Plugin and Spring Boot don't share a
+// root build cleanly). Build it from inside android/ via ./gradlew or Android Studio.
+plugins {
+    id 'com.android.application' version '8.6.0' apply false
+}
