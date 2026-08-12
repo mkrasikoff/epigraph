@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/webhooks/**").permitAll()
                         .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/*.js", "/*.css", "/*.png", "/*.ico").permitAll()
                         .requestMatchers("/robots.txt", "/sitemap.xml").permitAll()
+                        // Digital Asset Links — lets the Android TWA verify domain ownership and run without a URL bar.
+                        .requestMatchers("/.well-known/**").permitAll()
                         .requestMatchers("/manifest.json", "/api/push/vapid-public-key").permitAll()
                         .requestMatchers("/s/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/shared/*").permitAll()
