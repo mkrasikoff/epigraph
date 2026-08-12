@@ -1,0 +1,35 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.mkrasikoff.epigraph'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.mkrasikoff.epigraph"
+        minSdk 21          // Trusted Web Activity requires API 21+
+        targetSdk 34       // Android 14 — required floor for new Play Store submissions
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // NOTE: signing config is added in Phase 4 once the upload keystore exists.
+            // Until then, build the debug variant (./gradlew assembleDebug).
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Google's TWA support library — provides LauncherActivity, splash handling,
+    // Digital Asset Links verification, and notification delegation.
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

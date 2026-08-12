@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appName">Epigraph</string>
+    <string name="launcherName">Epigraph</string>
+    <string name="launchUrl">https://epigraph.me/</string>
+    <string name="hostName">epigraph.me</string>
+    <string name="assetStatements">[{ \"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://epigraph.me\"}}]</string>
+</resources>
