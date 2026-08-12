@@ -120,6 +120,29 @@ cd backend && ./gradlew test
 
 ---
 
+### Android (TWA wrapper)
+
+The `android/` directory is a **Trusted Web Activity** wrapper that ships the existing PWA as a
+native-installable Android app — no separate mobile codebase. It is an **independent Gradle
+project**, not a subproject of the backend build; open `android/` directly in Android Studio or
+build from inside it:
+
+```bash
+cd android && ./gradlew assembleDebug
+```
+
+- `applicationId` / package: `com.mkrasikoff.epigraph`; launch URL: `https://epigraph.me/`.
+- Fullscreen (no browser URL bar) depends on Digital Asset Links: the app's signing SHA-256 must
+  be listed in [`assetlinks.json`](backend/src/main/resources/static/.well-known/assetlinks.json),
+  served at `https://epigraph.me/.well-known/assetlinks.json`.
+- A release build needs an upload keystore and a matching `signingConfig` (added later); until
+  then use the `debug` variant.
+
+Requirements: JDK 17 and the Android SDK (Android Studio installs both). The Gradle wrapper is
+vendored, so no separate Gradle install is needed.
+
+---
+
 ## License
 
 © 2026 Mikhail Krasikov. Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
