@@ -2,6 +2,16 @@ plugins {
     id 'com.android.application'
 }
 
+// Signing material is kept out of git. Copy keystore.properties.template to
+// keystore.properties (gitignored) and fill it in after generating the upload keystore.
+// Without that file, debug builds still work and `assembleRelease` produces an unsigned APK.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasKeystore = keystorePropertiesFile.exists()
+if (hasKeystore) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.mkrasikoff.epigraph'
     compileSdk 34
@@ -14,11 +24,25 @@ android {
         versionName "1.0.0"
     }
 
+    signingConfigs {
+        release {
+            if (hasKeystore) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
-            // NOTE: signing config is added in Phase 4 once the upload keystore exists.
-            // Until then, build the debug variant (./gradlew assembleDebug).
+            // Signed only when keystore.properties is present (see above); otherwise the
+            // release APK is unsigned. Debug builds are always signed with the debug key.
+            if (hasKeystore) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
